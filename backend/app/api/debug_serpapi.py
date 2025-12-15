@@ -988,7 +988,8 @@ async def analyze_shopping_json(
                     else:
                         status = "FAILED"
                         action = "no_progress"
-                        block_failure_reason = f"Bloco travou: nenhum produto processável restante. Produtos no bloco: {len(block)}, já processados: {len([p for p in block if f\"{p['title']}_{p['extracted_price']}\" in failed_product_keys])}"
+                        already_processed = len([p for p in block if f"{p['title']}_{p['extracted_price']}" in failed_product_keys])
+                        block_failure_reason = f"Bloco travou: nenhum produto processável restante. Produtos no bloco: {len(block)}, já processados: {already_processed}"
 
                     block_iterations.append(BlockIteration(
                         iteration=iteration,

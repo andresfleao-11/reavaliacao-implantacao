@@ -3,7 +3,7 @@ API endpoints para cotacao em lote.
 Suporta 3 metodos de entrada: texto, imagens e arquivo CSV/XLSX.
 """
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Form, HTTPException, Request
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, load_only
 from sqlalchemy import func
 from typing import List, Optional
 from slowapi import Limiter
@@ -544,8 +544,11 @@ def list_batches(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Lista todos os lotes com paginacao."""
-    query = db.query(BatchQuoteJob).options(joinedload(BatchQuoteJob.project))
+    """Lista todos os lotes com paginacao otimizada."""
+    # Query base com joinedload otimizado para evitar N+1
+    query = db.query(BatchQuoteJob).options(
+        joinedload(BatchQuoteJob.project).load_only("id", "nome")
+    )
 
     # Filtrar por projeto se especificado
     if project_id:
@@ -562,12 +565,24 @@ def list_batches(
     # Ordenar por data de criacao (mais recente primeiro)
     query = query.order_by(BatchQuoteJob.created_at.desc())
 
-    total = query.count()
+    # Otimização: Usar subquery para contagem total evitando carregamento duplo
+    from sqlalchemy import func as sql_func
+    count_query = db.query(sql_func.count(BatchQuoteJob.id))
+    if project_id:
+        count_query = count_query.filter(BatchQuoteJob.project_id == project_id)
+    if status:
+        try:
+            status_enum = BatchJobStatus(status)
+            count_query = count_query.filter(BatchQuoteJob.status == status_enum)
+        except ValueError:
+            pass
+    total = count_query.scalar()
+
+    # Buscar apenas os campos necessários com paginação
     batches = query.offset((page - 1) * per_page).limit(per_page).all()
 
-    items = []
-    for b in batches:
-        items.append(BatchListItem(
+    items = [
+        BatchListItem(
             id=b.id,
             status=b.status.value,
             input_type=b.input_type,
@@ -578,7 +593,9 @@ def list_batches(
             progress_percentage=_calculate_progress(b),
             project_id=b.project_id,
             project_nome=b.project.nome if b.project else None,
-        ))
+        )
+        for b in batches
+    ]
 
     return BatchListResponse(
         items=items,
