@@ -248,10 +248,16 @@ Quando bloco falha:
 
 ### RN04 - Incremento de Variação
 Quando não é possível formar blocos válidos:
-1. Aumentar variação: `atual + variation_increment`
+1. Aumentar variação: `nova = atual × (1 + variation_increment)`
+   - Exemplo: 25% × 1.20 = 30%
 2. Verificar se `nova_variação <= max_variation_limit`
 3. Reformar blocos (sem revalidar produtos)
 4. Se exceder limite → **FALHA FINAL**
+
+**Sequência de incremento (variação inicial 25%):**
+```
+25% → 30% → 36% → 43.2% → 51.8% (excede 50%, FALHA)
+```
 
 ### RN05 - Fórmula de Variação
 ```python

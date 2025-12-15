@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 MAX_RETRIES = 3
 INITIAL_BACKOFF = 2  # seconds
 
+# Variation increment configuration (RN04)
+VARIATION_INCREMENT = 0.20  # 20% increment when blocks fail
+MAX_VARIATION_LIMIT = 0.50  # 50% maximum variation allowed
+
 # Domains with anti-bot protection that cause timeouts/failures
 # These are skipped during search to avoid wasting API calls
 BLOCKED_DOMAINS = {
@@ -243,16 +247,36 @@ class SerpApiProvider(SearchProvider):
             logger.info(f"Step 4: {len(products_with_valid_prices)} products (under limit of {self.MAX_VALID_PRODUCTS})")
             products_limited = products_with_valid_prices
 
-        # Step 5: Create variation blocks (sliding window approach)
-        # Each block starts from a different product and includes all products within variation limit
-        # Only blocks with at least 'limit' products are valid (to ensure enough quotes per block)
-        variation_blocks, total_blocks = self._create_variation_blocks(products_limited, variacao_maxima, min_block_size=limit)
-        search_log.total_blocks_created = total_blocks
-        search_log.valid_blocks = len(variation_blocks)
+        # Step 5: Create variation blocks with increment loop (RN04)
+        # If no valid blocks, increment variation by 20% up to max 50%
+        current_variation = variacao_maxima
+        variation_blocks = []
+        total_blocks = 0
 
-        if not variation_blocks:
-            logger.warning("No variation blocks could be created")
-            return [], search_log
+        while not variation_blocks and current_variation <= MAX_VARIATION_LIMIT:
+            variation_blocks, total_blocks = self._create_variation_blocks(
+                products_limited, current_variation, min_block_size=limit
+            )
+            search_log.total_blocks_created = total_blocks
+            search_log.valid_blocks = len(variation_blocks)
+
+            if not variation_blocks:
+                # Incremento de 20% sobre o valor atual (não +20 pontos percentuais)
+                new_variation = current_variation * (1 + VARIATION_INCREMENT)
+                if new_variation <= MAX_VARIATION_LIMIT:
+                    logger.warning(
+                        f"No blocks with variation {current_variation*100:.1f}%. "
+                        f"Incrementing to {new_variation*100:.1f}%"
+                    )
+                    current_variation = new_variation
+                else:
+                    logger.error(
+                        f"VARIATION_EXCEEDED: No blocks possible even at max {MAX_VARIATION_LIMIT*100:.0f}%"
+                    )
+                    return [], search_log
+
+        # Update search log with final variation used
+        search_log.variacao_maxima = current_variation
 
         # Step 6: Sort blocks by priority:
         # 1. More products first (higher chance of getting N quotes)
@@ -262,7 +286,7 @@ class SerpApiProvider(SearchProvider):
             key=lambda block: (-len(block), block[0].extracted_price)
         )
 
-        logger.info(f"Step 5-6: Created {total_blocks} blocks, {len(sorted_blocks)} valid (min size: {limit})")
+        logger.info(f"Step 5-6: Created {total_blocks} blocks, {len(sorted_blocks)} valid (min size: {limit}, variation: {current_variation*100:.0f}%)")
         for i, block in enumerate(sorted_blocks[:5]):  # Show top 5 blocks
             prices = [p.extracted_price for p in block]
             logger.info(
@@ -313,14 +337,32 @@ class SerpApiProvider(SearchProvider):
                 logger.info(f"  No products remaining after iteration {iteration}")
                 break
 
-            # Recalculate blocks
+            # Recalculate blocks with current variation
             current_blocks, total_blocks = self._create_variation_blocks(
-                products_for_blocks, variacao_maxima, min_block_size=1
+                products_for_blocks, current_variation, min_block_size=1
             )
 
+            # If no blocks, try incrementing variation (RN04)
+            # Incremento de 20% sobre o valor atual (não +20 pontos percentuais)
             if not current_blocks:
-                logger.info(f"  No valid blocks remaining after iteration {iteration}")
-                break
+                new_variation = current_variation * (1 + VARIATION_INCREMENT)
+                if new_variation <= MAX_VARIATION_LIMIT:
+                    logger.warning(
+                        f"  No blocks at {current_variation*100:.1f}%. "
+                        f"Incrementing to {new_variation*100:.1f}%"
+                    )
+                    current_variation = new_variation
+                    search_log.variacao_maxima = current_variation
+                    # Recalculate with new variation
+                    current_blocks, total_blocks = self._create_variation_blocks(
+                        products_for_blocks, current_variation, min_block_size=1
+                    )
+                    if not current_blocks:
+                        logger.info(f"  Still no blocks after variation increment")
+                        break
+                else:
+                    logger.error(f"  VARIATION_EXCEEDED: Cannot increment beyond {MAX_VARIATION_LIMIT*100:.0f}%")
+                    break
 
             # Get valid product keys
             valid_keys = set(results_by_key.keys())
