@@ -1,0 +1,34 @@
+Revisando o fluxo de obtenção de cotações pelo serpapi:
+Etapa Google Shopping
+1 Recebimento dos dados via json;
+2 extrair dados os produtos, extrair "position", "title", "serpapi_immersive_product_api", "source" e "extracted_price";
+3 aplicar filtros aos produtos pela lista de domínios bloqueados cadastrados no sistema verificando a variável  "source";
+4 aplicar filtro por preço invalido olhando "extracted_price", caso seja none ou zero ou Preço não pode ser convertido para número;
+5 ordenação de produtos por preço ("extracted_price") na ordem crescente: products.sort(key=lambda x: x.extracted_price)
+6 Em seguida, a lista é limitada a MAX_VALID_PRODUCTS (150 produtos) para evitar processamento excessivo.
+7 Formação de blocos segundo o parâmetro de sistema daquela cotação "Variação Máxima (%)" e "Número de Cotações por Pesquisa". Supondo que "Variação Máxima (%)"=25% e "Número de Cotações por Pesquisa"=3, o sistema irá formar blocos de no mínimo 3 produtos onde a variação dentro desse bloco entre o de menor preço e de maior preço é menor ou igual a 25%;
+Etapa Google Immersive
+A partir de agora o sistema começa fazer a validação dos produtos, um a um, começando pelo primeiro bloco. Se no primeiro bloco atingir os 3 produtos validos, finaliza o processo. Segue como funcionam as validações, cada um dos produtos retornados devem atender a TODAS aos requisitos abaixo senão o produto "falha". para iniciar a validação do produto ele chama api do google immersive para achar o link do produto e iniciar as validações e verificação de "fala" do produto:
+
+- Sem link de loja - no_store_link - API Immersive não retornou link válido
+- Domínio bloqueado - blocked_domain - Loja está na lista de bloqueio
+- Domínio estrangeiro - foreign_domain - Loja não é brasileira
+- Domínio duplicado - duplicate_domain - Já existe cotação desta loja
+- URL de listagem-listing_url - URL é página de busca, não produto. URLs que representam páginas de busca/categoria são rejeitadas:
+•	Padrão: /busca/
+•	Padrão: /search/
+•	Padrão: ?q=
+•	Padrão: /categoria/
+•	Padrão: /colecao/
+•	Padrão: buscape.com.br
+•	Padrão: zoom.com.br
+
+- Divergência de preço - price_mismatch - Preço do site difere do "extracted_price" daquele produto;
+- Erro de extração - extraction_error - Não foi possível extrair preço do site;
+
+Quando um produto falha o sistema verifica se ainda é possível formar as 3 (usados neste exemplo) cotações neste bloco, caso sim ele continua a verificação do proximo produto, caso não o bloco "Falha". Quando o bloco "falha" repete-se o processo de criação de blocos porém com os produtos validados e os produtos que ainda não foram verificados. os produtos que não foram validados são descartados e dai produtos validados + produto não verificados ordenam em ordem crescente e formam blocos de no mínimo 3 produtos onde a variação dentro desse bloco entre o de menor preço e de maior preço é menor ou igual a 25%. Caso haja blocos com variação de 25% porem com 2 produtos ou 1 produto somente este bloco será invalidado e descartado. os produtos que já haviam sido validados não repetem a validação e já estão "prontos" para serem utilizados na cotação se for o caso.
+
+O processo se repete até que se obtenham 3 cotações com uma variação máxima de 25%. Caso Não se obtenha as 3 cotações. refazer todo o processo aumentando a tolerância da variação em 20% ou seja de 25% para 30# de variação. Lembrando que como provavelmente todos os produtos já foram validados não será necessário processo de revalidação de produtos, somente de blocos.
+
+
+

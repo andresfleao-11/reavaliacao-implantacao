@@ -1,0 +1,1276 @@
+{
+  "search_metadata": {
+    "id": "693f17faecf5eda42aab8fcd",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/d783fb41dd7e2f78/693f17faecf5eda42aab8fcd.json",
+    "created_at": "2025-12-14 20:03:06 UTC",
+    "processed_at": "2025-12-14 20:03:06 UTC",
+    "google_shopping_url": "https://www.google.com.br/search?udm=28&q=cama+hospitalar+manual+el%C3%A9trica+grades&uule=w+CAIQICIGQnJhemls&num=100&hl=pt-br&gl=br",
+    "raw_html_file": "https://serpapi.com/searches/d783fb41dd7e2f78/693f17faecf5eda42aab8fcd.html",
+    "total_time_taken": 3.03
+  },
+  "search_parameters": {
+    "engine": "google_shopping",
+    "q": "cama hospitalar manual elétrica grades",
+    "location_requested": "Brazil",
+    "location_used": "Brazil",
+    "google_domain": "google.com.br",
+    "hl": "pt-br",
+    "gl": "br",
+    "num": "100",
+    "device": "desktop"
+  },
+  "search_information": {
+    "query_displayed": "cama hospitalar manual elétrica grades",
+    "total_results": 40,
+    "time_taken_displayed": 0.4,
+    "shopping_results_state": "Results for exact spelling"
+  },
+  "shopping_results": [
+    {
+      "position": 1,
+      "title": "Cama Hospitalar Manual 2 Movimentos DX2 Dellamed",
+      "product_id": "6341883890473626059",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:6341883890473626059,headlineOfferDocid:17732322699731373832,imageDocid:6534962627044123080,rds:PC_14554895861130836819|PROD_PC_14554895861130836819,gpcid:14554895861130836819,mid:576462865171112287,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNjM0MTg4Mzg5MDQ3MzYyNjA1OSIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE3NzMyMzIyNjk5NzMxMzczODMyIiwiaW1hZ2VEb2NpZCI6IjY1MzQ5NjI2MjcwNDQxMjMwODAiLCJyZHMiOiJQQ18xNDU1NDg5NTg2MTEzMDgzNjgxOXxQUk9EX1BDXzE0NTU0ODk1ODYxMTMwODM2ODE5IiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNDU1NDg5NTg2MTEzMDgzNjgxOSIsIm1pZCI6IjU3NjQ2Mjg2NTE3MTExMjI4NyIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNjM0MTg4Mzg5MDQ3MzYyNjA1OSIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE3NzMyMzIyNjk5NzMxMzczODMyIiwiaW1hZ2VEb2NpZCI6IjY1MzQ5NjI2MjcwNDQxMjMwODAiLCJyZHMiOiJQQ18xNDU1NDg5NTg2MTEzMDgzNjgxOXxQUk9EX1BDXzE0NTU0ODk1ODYxMTMwODM2ODE5IiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNDU1NDg5NTg2MTEzMDgzNjgxOSIsIm1pZCI6IjU3NjQ2Mjg2NTE3MTExMjI4NyIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Magazine Luiza",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d3587284182c8291af9a5e6fc35845a90f2aee.png",
+      "multiple_sources": true,
+      "price": "R$ 1.676,76 agora",
+      "extracted_price": 1676.76,
+      "installment": {
+        "price": "R$ 176,50/mês",
+        "extracted_price": 176.5,
+        "period": 10
+      },
+      "rating": 4.7,
+      "reviews": 79,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSZR_JNVNnwkwJODmom98RIwk-bVBFZ8T3y6-n1ihE13cQIAAeo4bsKTjpy5HB54IxUoqcuRBQL2BUgOZKiKZ5Gx19-GhTcla8kaH4R3YmnlXnYm6LLKQzVYQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/L5uXbXicDcnrDkJQAADgJ0JyGbbWWOU65oTFn8ZhiHOR09BT9Tq9TX1_v--nY4zOhiA0GD43ypqaYxXe8e3MStZDHhIkzB2htMftcTr8zzDDWrfhtQB3L8xCvAyLF50QQboG3GXgqsy6FFoibSqHxb47ixKMXdNsiFzNfvKgm-JYiuyuKZngC1hxsLfSNir83i8UexV1zu4SOJbaUDoykHKExxvOkRoEfvzO8vgHYxI9kA",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSZR_JNVNnwkwJODmom98RIwk-bVBFZ8T3y6-n1ihE13cQIAAeo4bsKTjpy5HB54IxUoqcuRBQL2BUgOZKiKZ5Gx19-GhTcla8kaH4R3YmnlXnYm6LLKQzVYQ",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR6CVdheOsUjc4ChUzFTkQXFmBnOOLpTdKFVwiqBJJM3WrLqw7o0uNSbuIozV2ER8UwyPb8aJaSx3TX8JPcBC1ppv5g5uLX479asqF_1_KtuQlkp4r-28bz",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRHZy6amuXTQ1egBDX3QyEH5pk9yCoQ9DUaiXdjOxs6VU6eAEJxvGjHOmIb-L_IlMHfSjTVz2idgd9tHPdTsc9A-KcWU6Wj1_3tssMYqmw",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQk9mbYqYK1W02wkd8s1zz488ZcDU4o9DvIhod16eHi7G2CdDyyHThIH5rYei-AxdA6dyFSPbi29WFplmP7cjDcEnBvRfjTqcH5QGwHXNMifA2RmDQFh4uK",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS6mEjmj1e5Aez7XXX0tjWj_JnNUWq50p0usldkEgVSIDeXEveRh6Yv3CWVhyG05D59nzkO2RmV7H5tdMmQV4PNX_nnl9Uuq7oof96DPKYRPWa1TdyXzUrhgw"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/L5uXbXicDcnrDkJQAADgJ0JyGbbWWOU65oTFn8ZhiHOR09BT9Tq9TX1_v--nY4zOhiA0GD43ypqaYxXe8e3MStZDHhIkzB2htMftcTr8zzDDWrfhtQB3L8xCvAyLF50QQboG3GXgqsy6FFoibSqHxb47ixKMXdNsiFzNfvKgm-JYiuyuKZngC1hxsLfSNir83i8UexV1zu4SOJbaUDoykHKExxvOkRoEfvzO8vgHYxI9kA",
+        "https://serpapi.com/images/url/HuEoD3icDcnbEkJAAADQL0Juucw0TUyakDt5M2sZJCy7Eh_V__Q3dV7P91MTgrDKMGUPpxWRsqBI3rN0hQkgDaTh0DG4HhBq-uo4Hv6nnpxCucBgrydFXbo4fkBBr-PNiFo_NTqtd10bRYVlJEszaqZ54--TPS7SsJudMJ-vw5Zw50COl9XLZWCC8M1HqWx6UNNZhF5iJc52KkgKwKORsZlFZv_ZImGiODnffj2ePhY",
+        "https://serpapi.com/images/url/4bqQR3icDclJDoIwAADAFwFBYpOSGINCKCoiyqYXAi0WUKDYutTf-Cx_o3Od76cWgnFT06oe3yQTFVFE2esq5aIQDVbx0Gm8HhhrejofZ_8zrS2BLt6jkwRFd8-iUK_ows6MUDpoyi5QLocQ2nHRZKQNXhwkMagsZ_V6uC0KOq9UNrl39dH50EbJe9IQSqBAOxJxDC1ljdMYpK2eG4Jz_zh2zx8RFznR",
+        "https://serpapi.com/images/url/1eS-l3icDclJDoIwFADQEymWMCfGVCvUGAk4BHEnv2irAgXqUA_lfbyNvu37frhSsg8Mo6yh01KVbKCKGg3PvToqAUNoKqPnjZSiPk_a8f8CHDM_gvTqV0Xe5kuUjcznlXk9er8tzzsA2VmNTx4L3jDklFS4kTljRGu65Qtqd3kpBvjFsMN0uEkKYfpZKG9V4sKFwLyePtany7YFaqfRk-7jlThhc12RNOTWffkD7HQ9Kg",
+        "https://serpapi.com/images/url/gl7yjHicDcn_EkIwAADgJypS47jrOhfXr0tSZv5ysmVhM4yOp-p1epv6_v2-Hyql6CxFITxrRyEJnskH1-Z5J1P5yuZZzZSO1kK8eL5p1v-zbA-bu-ymM7dgxYIAm0wGQkiVRVQkR-6FUQNUofZdhUs3h7eDQ5A7kIDq8bDcRpCOOxU4wORTedECBo09kPjMrnDleyjhvDLDvjHq-mnqjn-KAz9KF3c8oilsaf7-AaQ6Pv8"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "Cama Hospitalar Fawler 3 Manivelas Com Elevação Bond Hospitalar",
+      "product_id": "13101806534916550088",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:13101806534916550088,headlineOfferDocid:2353806514684177544,imageDocid:3766345292660736869,gpcid:1723595154949310263,mid:576462803870418570,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMxMDE4MDY1MzQ5MTY1NTAwODgiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyMzUzODA2NTE0Njg0MTc3NTQ0IiwiaW1hZ2VEb2NpZCI6IjM3NjYzNDUyOTI2NjA3MzY4NjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE3MjM1OTUxNTQ5NDkzMTAyNjMiLCJtaWQiOiI1NzY0NjI4MDM4NzA0MTg1NzAiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMxMDE4MDY1MzQ5MTY1NTAwODgiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyMzUzODA2NTE0Njg0MTc3NTQ0IiwiaW1hZ2VEb2NpZCI6IjM3NjYzNDUyOTI2NjA3MzY4NjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE3MjM1OTUxNTQ5NDkzMTAyNjMiLCJtaWQiOiI1NzY0NjI4MDM4NzA0MTg1NzAiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "mercadolivre.com.br",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358725fd0d4f5074f4f29b206d58354dd4fce.png",
+      "price": "R$ 3.841,68",
+      "extracted_price": 3841.68,
+      "old_price": "Preço normal: R$ 3.860",
+      "extracted_old_price": 3860,
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTZmZRsASgM9ixzXsmQqTLX8LuCt2w6doa5apdll8gAZPpQRWBI9FHE9t5ONmWrB3WbBXdzjdDC40Vz7mXd99qXNy3LhAi9Q_xYYTkOQ6RxZugiSEfiJYRfzA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/NuTWSXicDcltDoIgAADQE5WVZeHWGtr3TJNcon-aSSElioLLPFXX6Tb1_r7vJ1NKSFPTbkVav4W6kZ66FsM-lSpRLO2nJddkVgrBCrqo5v8zoUvAJg1iHiMJT_QAWNthyf0qcPDMaWw1ehmkTCaJIHk-ozA-Ch-F1g6styugJp7Lw9rSw6uFSfcgS3s8OHdTjgkAFXbfupNBBvxLG0XB0_MN1MYNZafVne0jdO_gD8xwPyQ",
+      "tag": "PREÇO BAIXO",
+      "extensions": [
+        "PREÇO BAIXO"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Cama motorizada Com Elevação Comfort Bivolt Sem Colchão",
+      "product_id": "11302533413062162740",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:11302533413062162740,headlineOfferDocid:9713731544366832603,imageDocid:13699893724283248798,gpcid:8599839991023643135,mid:576462777187366191,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTEzMDI1MzM0MTMwNjIxNjI3NDAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI5NzEzNzMxNTQ0MzY2ODMyNjAzIiwiaW1hZ2VEb2NpZCI6IjEzNjk5ODkzNzI0MjgzMjQ4Nzk4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI4NTk5ODM5OTkxMDIzNjQzMTM1IiwibWlkIjoiNTc2NDYyNzc3MTg3MzY2MTkxIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTEzMDI1MzM0MTMwNjIxNjI3NDAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI5NzEzNzMxNTQ0MzY2ODMyNjAzIiwiaW1hZ2VEb2NpZCI6IjEzNjk5ODkzNzI0MjgzMjQ4Nzk4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI4NTk5ODM5OTkxMDIzNjQzMTM1IiwibWlkIjoiNTc2NDYyNzc3MTg3MzY2MTkxIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Amazon",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358725ac3306a5d778366639fe80785e95081.png",
+      "price": "R$ 9.867,00",
+      "extracted_price": 9867.0,
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQQMUuWzIFEAkD0tWNaXPhFBO8zgfPMBxLSFXdtayrKX45Pr-j1N7jIwaApNdVpUXDRkw0RCf0FWAXm9iPZ_COJnVz3KLvgOxkV5KlLuDDplxD6XswNvGEP",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/q31eYHicDcnbEoFAAADQL0q5hJoxZtkyVNti1I4Xk7abtK12KX2U__E3nNfz_eRScmGqasLi5s1lQhV5ZaNBJmQki3gQ15Uq8przgmXLx-J_JkDU2MT7vXd6hv3WtkAJNRmiiODcXvnzPkuxt-rco02ojN6NQyY6bpTbEM1u2zYCHNGAnwg8lK12WKeaHQJSGQU-X9b-jgX92HFfmd-Vge7c3SeE_N7BKREtem0s_AMXvz4H",
+      "thumbnails": [
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQQMUuWzIFEAkD0tWNaXPhFBO8zgfPMBxLSFXdtayrKX45Pr-j1N7jIwaApNdVpUXDRkw0RCf0FWAXm9iPZ_COJnVz3KLvgOxkV5KlLuDDplxD6XswNvGEP",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRkR8iI1L0oCR7Ym7gmlR-C-HxZNB4UmJbnZ88ks0S-kCj9EFTAdSUd-ctzUy6CVw0u7JIXrroQ39kLw_BuF7bY9BFKbxl0myhqB29Q85Wn7Gi5bGJRPMbs",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTjDKVtnM2MsJ2WOWX0aZj-KgQz2mHPaYNdNMwf-NpWmIdi6rXf44cV7R3iWu8YfAiNhn7b9WE1QgZ4nCjPFDR4nM661YTay7fHQlDZ-b5YsMTK4OXbV6Ub",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRVuxpcJjmw0RobwwSc2YlM_3QA_4UcbBLRaKHDUuJ5z6Tow5uGTvAdytge1br4GjLfiqTHDrVZhV1XMrbbjZKGaReB7JyyMxKAqpvH9YA_7Erjq3wnYYZY",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRFT4GUXsvgPsW2bE40PqbFOpsNayZJgzLelGMcbWUyI-mvSdBfp5bbZsyFzakT6yGjr7ZISUoba4XN5raZKXHCg92PEZ_lK8kVvmgaFTW80fnrUQb9GUjn5qE"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/q31eYHicDcnbEoFAAADQL0q5hJoxZtkyVNti1I4Xk7abtK12KX2U__E3nNfz_eRScmGqasLi5s1lQhV5ZaNBJmQki3gQ15Uq8przgmXLx-J_JkDU2MT7vXd6hv3WtkAJNRmiiODcXvnzPkuxt-rco02ojN6NQyY6bpTbEM1u2zYCHNGAnwg8lK12WKeaHQJSGQU-X9b-jgX92HFfmd-Vge7c3SeE_N7BKREtem0s_AMXvz4H",
+        "https://serpapi.com/images/url/aIPCLHicDclJDoIwAADAFxXqWmpiDBBBcIkUUfFibCGA2LK0RPFR_sff6Fzn-8mVquVM11PB2r5WaQIUFVDLpLqpgmms4rrMq7ouRLZo5v-bmbsEu4yUxCi8wQZWNkExRxl_EGCD1euys8YR96m4GEYpYQhK-46XzsFMwigBTL2jfmofn7BDvndu2yoY4XLzvFqdg2iMLWdNXw_I-7yxhjgwJieB3GJCXZ_st1T-ALBLPE0",
+        "https://serpapi.com/images/url/6mHTyHicDcltDoIgAADQE5llpNnWmss-HaTNRPwHmIpLIqE1O1T36Tb1_r7vpzFG6YVtXyXvB2WupWWYdEa1NtQIPuL3ztbNXSkh69Vj-b9FgEp_x9M2jDIjoQP10cEnnI9p0VpRnbydbh9TgkoEX5WFFO4OpXD7vAKAZ955KvBzTqpAoEZ6zMebSVIXQK7beBuegYSuOyEpHbxqn9zCwmIzomEagVPOMvfCfuIZPFI",
+        "https://serpapi.com/images/url/MtOGpHicDcnbCoIwAADQL8pLaqIQMTEUL0Fm0nwRN80LqXNOp31U_9Pf1Hk930_NGJlMUSx7TDfCymLHUC8J1cRy1mABD5041QMhTV-dxuP_THApDAdHybwS7LUdl6IBcX7De_gKM-UKMvWOkRVEue_a99nT3od44NrsxAsoNlaVMqKq0wbPZoxdmyZpnciPkCLUpr6TR6Wle9sWrj4YyeIaEGT6mbajwnsIU_gDgkU_YQ",
+        "https://serpapi.com/images/url/7_ZyH3icDcnbCoIwAADQL_KCaGkQUaHralYuZS-xTVulzumGMP-qz-lv6rye7-eplJAzyyo57bVQZWEowh2TSYXVi5q0bSz5bIV4cbbo5v-bLeMiAPQSpS6AuRxYIjOHhK6ddCQ6CRljjXZsPJQ1OFKSQb01muFarB7CIwRJHY24SicavPsp2l5hS7Cbx16P0T7frFngJCG613u_ug0Nw1Ga-faD9_BMAgDf3OvCHyApP7g"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Cama Hospitalar 2 Movimentos Manual Com Respiro - Medcombo",
+      "product_id": "14537263453675272519",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:14537263453675272519,headlineOfferDocid:14357367093127932789,imageDocid:4543476950153928635,gpcid:6249795982969394568,mid:576462769164336626,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTQ1MzcyNjM0NTM2NzUyNzI1MTkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDM1NzM2NzA5MzEyNzkzMjc4OSIsImltYWdlRG9jaWQiOiI0NTQzNDc2OTUwMTUzOTI4NjM1IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI2MjQ5Nzk1OTgyOTY5Mzk0NTY4IiwibWlkIjoiNTc2NDYyNzY5MTY0MzM2NjI2IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTQ1MzcyNjM0NTM2NzUyNzI1MTkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDM1NzM2NzA5MzEyNzkzMjc4OSIsImltYWdlRG9jaWQiOiI0NTQzNDc2OTUwMTUzOTI4NjM1IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI2MjQ5Nzk1OTgyOTY5Mzk0NTY4IiwibWlkIjoiNTc2NDYyNzY5MTY0MzM2NjI2IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Loja Hospitel",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872b61fee6fdada9f73736e43465423a91d.png",
+      "price": "R$ 5.644,00",
+      "extracted_price": 5644.0,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRbSTrsZBfZbTwsjHLbKBAfybpqKy4tjYlMup3_tfnAZuHSyNYX9Om5M1zF87E4gvpvqXiDTzrGEHRcqGFokkmw3L9gDLOt15lY13MzdjGOpFazR5N9-zUQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Q04ZgnicDclZCoJAGADgE6WISRlEGG7gRmqQvoQz7uuM86s4h-o-3aa-1-_7qQEIu4hiMeJ5J1DkB0CjLFQMMmiwgKdBZPVESDNWN3r930Xzc9XCIYrimaX3MkXxxlrbRc5dK3dEqLMfoU16byHyG8pRSxc72v3kpQaD4kncPJ-MY7WSlb4aPeazZdghppY5dd2wya5a6W4AktInkuzxvLUCYmY8VHz1wJ-PH6PuPw4",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRbSTrsZBfZbTwsjHLbKBAfybpqKy4tjYlMup3_tfnAZuHSyNYX9Om5M1zF87E4gvpvqXiDTzrGEHRcqGFokkmw3L9gDLOt15lY13MzdjGOpFazR5N9-zUQ",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSLS6U2wln1_YnVuFBFzTpdpF61aKs0ITflNUEVuzQmKMaMATO2bRDKGj5c_OMnXvkytAQ9zNvr5fS48WWVVCC0GeJolvu7xpk9S0yhUHd6Kq4zH3NuF3K_",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTiLKLQJchsTMZ3im9CewaaUJnE8IhyWW1YcfRYk-MtNmUWqRTO-ug8Xn8Z5TPT6RzBNjBbL9UXGD1HJ9sYBQgszb4zEaeU_o2IXiv2BsxBdwPVY5rYRoCBYg",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSZ0O5dqZ5ii3KNJs5dJKdHGCwRtn4ruES1iJbHmJkg4cmhNujliv3wO0qyUqSAbIlcqDD4unmc6tMHKN7g4Z4ZTS-iluN-FrLvuQUXmjrq4-UB-I6cyYb6EQ",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSEKJe5M_AMccUiYd_tc93QhdsyNMIPrPH0jHyO7qdPCCqvEMFUdI21XplIdegc75z2oSX-ir7vjoYZ5-oSanjp6lqcjFACWkA94SiawZdePoDbJZvyXKSbsg"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/Q04ZgnicDclZCoJAGADgE6WISRlEGG7gRmqQvoQz7uuM86s4h-o-3aa-1-_7qQEIu4hiMeJ5J1DkB0CjLFQMMmiwgKdBZPVESDNWN3r930Xzc9XCIYrimaX3MkXxxlrbRc5dK3dEqLMfoU16byHyG8pRSxc72v3kpQaD4kncPJ-MY7WSlb4aPeazZdghppY5dd2wya5a6W4AktInkuzxvLUCYmY8VHz1wJ-PH6PuPw4",
+        "https://serpapi.com/images/url/KmKJE3icDcnbEoFAAADQL9IFRc0Yk0vFag3V4qmp3S7Itmk36qP8j7_hvJ7vp-CcNaYspxQ_O8ZTMuAJVaW84TG_YglXD7kpKsauNJ_Xs_-ZFiSGg_2dr4fDV0nV6EKRsBd2HzDCbF2NQaNsgqyE4RqJ_vAAXuxZwX6YHFfAuWk42nv03N47bh2MHrZPLfPH09MJoeVScdJtVbZi8mZ3w1e6InSJDupx746gsEcg-gEhgz2-",
+        "https://serpapi.com/images/url/cVl-I3icDcltEkJAAADQE6GUhmaappVRkmRWrD8NS2trrI_dEqfqOt2m3t_3_ZRCNHypKAXD3dCIIpdExiYy4SIVFMu4rhRe1k1DGVm3q_8tN15u2BhS9-CeHVxyeExmtDLMok_T0GGWvi-HKJoifAvQQzoKrwqjNoAn6Un0mOmJBn24CEbg3UHmGmFsb6c7x-AInAkfs_lopUV4rdV9TF8q4G-Q9_4FaR0KahMg8gOX1T6G",
+        "https://serpapi.com/images/url/mMR9h3icDcnbDoIgAADQL8LLRFturXUxFYtW5la-JTjFBEUh51_1O_1Nndfz_dRK9aNvmqUgw9yrkgJVCNuoRvVUjBik4-ZYd33PRLWWq__5G0yXIUlz6-xSmbuMOQlGo0tRQqNwN12VgIMOUpuhIuLoVUHCa6yblr2d6WzJOZPppohbIvd7qAUnnjpFCV5UMIf5LQWs1RgchuNbX7I7bwYJQbYFsUfmR-EFlx-txD6k",
+        "https://serpapi.com/images/url/wiFUtnicDclhCoIwGADQE5llmRhEDNOysBYjUv-Ifhs6KzfdMNapuk63qff3fT-N1lKtbJt1MBipGbV01TmTWulSc5iAeNqqEVLyrt706_-t0In6OyDh8cDcpEAJwJVntNDgzy8NVeaUxHjA-2m7N2evpzgI-jFMoiuNnVkqHzFlNXju2xEktfjgja3IctcSpOxauXz00EYouN2RvyC8fOWUYbGtDvlo0iOpVP0DpAQ_Tg"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Cama Hospitalar Motorizada c/ grades Injetadas Sta Luzia",
+      "product_id": "4936954785745963568",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:4936954785745963568,headlineOfferDocid:4936954785745963568,imageDocid:4664347091157077095,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNDkzNjk1NDc4NTc0NTk2MzU2OCIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjQ5MzY5NTQ3ODU3NDU5NjM1NjgiLCJpbWFnZURvY2lkIjoiNDY2NDM0NzA5MTE1NzA3NzA5NSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNDkzNjk1NDc4NTc0NTk2MzU2OCIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjQ5MzY5NTQ3ODU3NDU5NjM1NjgiLCJpbWFnZURvY2lkIjoiNDY2NDM0NzA5MTE1NzA3NzA5NSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "CampMedical",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872a226f868ecd60764e72674d223f1e6a9.png",
+      "price": "R$ 5.999,00",
+      "extracted_price": 5999.0,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQQ7HdNeexyh5110OmPp81kHTDrGO7Yqt0cH6MpQV0m7k9H6Eg6BKw4_zpn6F6jCBKOu7GaPq4pEPccNZobjFdhAkMJoO1djAgZHNFRIBI8e6oNzoM_syf5YQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Ubl-qHicDcltCoIwAADQE6WOarMgQkudhZtGBPZHdFt-oZu5KDtV1-k29f6-76fSWo1r0xQ9u09KCz7TRT83ylHnumYGk505VlKpui-3w-Z_a4fwVcCSBGFOhHhN1RIAi3axskGLz_t7QFE6aIthGKnkYnWoXWHoldA9PhfZW_XQh83OPdIHCvJ4WCgvZoxcZdH4vHLa6CAp4I1TXjHxT6Eb2gJK8pZRNk63ZZr8ADYbPW0"
+    },
+    {
+      "position": 6,
+      "title": "Cama Hospitalar Elétrica de 3 Movimentos Cabeceira e Grade de Correr em Aço",
+      "product_id": "17245172954345313635",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:17245172954345313635,headlineOfferDocid:17245172954345313635,imageDocid:303576586422566081,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTcyNDUxNzI5NTQzNDUzMTM2MzUiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzI0NTE3Mjk1NDM0NTMxMzYzNSIsImltYWdlRG9jaWQiOiIzMDM1NzY1ODY0MjI1NjYwODEiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTcyNDUxNzI5NTQzNDUzMTM2MzUiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzI0NTE3Mjk1NDM0NTMxMzYzNSIsImltYWdlRG9jaWQiOiIzMDM1NzY1ODY0MjI1NjYwODEiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Cirúrgica Mg",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358722a36aba0c15714bfdd3d5d632bf1baa8.png",
+      "price": "R$ 4.749,99 agora",
+      "extracted_price": 4749.99,
+      "installment": {
+        "price": "R$ 416,67/mês",
+        "extracted_price": 416.67,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSDP5OYPDeqaXR8Y6ej1ihfM7F9FXv1YH6hAKX9AtcmaKYDGHaBoaEyGgm8hBF8niZOnJJ9vHWJ8tK81L5ayEp2dNn9QocaBjwXF90hWsPS82uTMBZXkMkf7g",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/2v5yMnicDcnbCoIwAADQL0pTUDchQvGG5qUMnL6teZmKc-Yy_Kt-p7-p83q-HyoEX01Zbhh57lw09UE8mCJ1q8CiJxKZJ3mlM-c9687L6X-mldTQJ7mTaWmZOc2C0Q2UejMoPW1jw4Me2pQy0KkVIWgJMuGodPwA2zN2d7-bALU9wPoqZWEIt6AIgYiActHw7nK1Thi8zgTbwxt58EiLNcuB-rrHdoXGeGyN7gc4YT0-",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSDP5OYPDeqaXR8Y6ej1ihfM7F9FXv1YH6hAKX9AtcmaKYDGHaBoaEyGgm8hBF8niZOnJJ9vHWJ8tK81L5ayEp2dNn9QocaBjwXF90hWsPS82uTMBZXkMkf7g",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRlB7tP61vyCz0n-wOzVnXxxvGkROuRo2PPdMkT0a988_pLUqwQBknvfrJ57OxAb01I6J-iuWZZoa8_NR8HOxqTy8WA7DT_3ctyzIZiOQXsyXx4Th0_ePYY"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/2v5yMnicDcnbCoIwAADQL0pTUDchQvGG5qUMnL6teZmKc-Yy_Kt-p7-p83q-HyoEX01Zbhh57lw09UE8mCJ1q8CiJxKZJ3mlM-c9687L6X-mldTQJ7mTaWmZOc2C0Q2UejMoPW1jw4Me2pQy0KkVIWgJMuGodPwA2zN2d7-bALU9wPoqZWEIt6AIgYiActHw7nK1Thi8zgTbwxt58EiLNcuB-rrHdoXGeGyN7gc4YT0-",
+        "https://serpapi.com/images/url/_nriAnicDclJDoIwAADAF7G5UUmMAU0QoxQIynIhWBAIWgoUaHmU__E3Otf5fkpKSa9JUo5RxwnNM4E-sCIWPU1phUTUvKW-bAipcLFvd__TdDvbmsh7GSp1NsrID7OMhQnOdxwyNpq1BwevWThOdq19Od0CkJDLrZ1co8bjszuvVcj0h6xYm7NQDUEcNylIbA-cIGt9DgJdPfrJElE-W3EF3bDnIVv5pZzkThT9AEGwPmQ"
+      ]
+    },
+    {
+      "position": 7,
+      "title": "Cama Hospitalar Fowler Com Elevação 3 Manivelas",
+      "product_id": "8594413221442982504",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:8594413221442982504,headlineOfferDocid:8939795288767495853,imageDocid:5827739134765116539,gpcid:13017877152859210858,mid:576462901172972034,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiODU5NDQxMzIyMTQ0Mjk4MjUwNCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6Ijg5Mzk3OTUyODg3Njc0OTU4NTMiLCJpbWFnZURvY2lkIjoiNTgyNzczOTEzNDc2NTExNjUzOSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMTMwMTc4NzcxNTI4NTkyMTA4NTgiLCJtaWQiOiI1NzY0NjI5MDExNzI5NzIwMzQiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiODU5NDQxMzIyMTQ0Mjk4MjUwNCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6Ijg5Mzk3OTUyODg3Njc0OTU4NTMiLCJpbWFnZURvY2lkIjoiNTgyNzczOTEzNDc2NTExNjUzOSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMTMwMTc4NzcxNTI4NTkyMTA4NTgiLCJtaWQiOiI1NzY0NjI5MDExNzI5NzIwMzQiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Constamed",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872e4b4ce2c8a1deabc03fbbca10b357bec.png",
+      "price": "R$ 3.388,89 agora",
+      "extracted_price": 3388.89,
+      "installment": {
+        "price": "R$ 282,41/mês",
+        "extracted_price": 282.41,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRTtq_mJZSm3DzdW5Z7gCXJzKLu4isuBiA7c8YLCg2RDbkuXV9RcqpW7hlMIlkGQjZ7y4qe8CuwXTuRUquZ6SmMHzBi07JVaa5pMKowHpyRPmHspqbRMSgw",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/TZ9qUHicDclRCoIwAADQE5WR2VKIMIPMNGpa2X5Cp8yl061tiB6q-3Sber_v-6mU4tIxjLLF74GrspiovDWnRKpMUTzFHTNk1XFOW7IR6_857qmw9xgmSjxZgGJm7sbibiFAvDQYj6FeUKm31AV49Qg9Moe7vNbpzYZY8DuomujQ1PvLC4FhIcqVp_s00fAqNFrGLPLHLZ2B4JZlFo-OXe_zAZ6ZL7nIYRST_gdTYT89",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRTtq_mJZSm3DzdW5Z7gCXJzKLu4isuBiA7c8YLCg2RDbkuXV9RcqpW7hlMIlkGQjZ7y4qe8CuwXTuRUquZ6SmMHzBi07JVaa5pMKowHpyRPmHspqbRMSgw",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSRjbnQ99Kqa7J4OUNCzdNC1_KxEKw2Gmo_QUbXwEZsM1T3GuEryn5AerYvTr0nCiZz0W3JBr_cnZ6Hs7_9Lfh3QKV6_3yrvBg_dFLu_TKAvdIQvJy-AKxGhg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRZj4S80V-hxZDZvB84z6Z8_S3fkueCCaQ2OdyOtIW54r0M6uuzgu4UsDsy0qKULuIPeRcW2F-rZrVV7sWk2gG1ywA9kFjM1yZj-MHDY76XdL5nBJNjET62gg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQd0umQoSADs4JeF6ojyULfM8Gd7mWZESMYDEFORElnNyern06N8XpjcVh0P-M4Gz6acm-RR3OmYE3gECGX8qzmlRmnkSuR9oJeaZyHo9xDb1ya0fVJjZPOLw"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/TZ9qUHicDclRCoIwAADQE5WR2VKIMIPMNGpa2X5Cp8yl061tiB6q-3Sber_v-6mU4tIxjLLF74GrspiovDWnRKpMUTzFHTNk1XFOW7IR6_857qmw9xgmSjxZgGJm7sbibiFAvDQYj6FeUKm31AV49Qg9Moe7vNbpzYZY8DuomujQ1PvLC4FhIcqVp_s00fAqNFrGLPLHLZ2B4JZlFo-OXe_zAZ6ZL7nIYRST_gdTYT89",
+        "https://serpapi.com/images/url/QLaxo3icDclJDoIwAADAF7GJQjAxBgiiFDEouHBpoEXAhIJtWV_ld_yNznW-n5Lzlq0lKSeITi3PscAzIosF4ymvkIiaWmJl07YVKbbvzf_WZoANF13Or4yEhgHeqe4tT3FgzziwFQhGBwwLt25gGGf3wUnYUYlUt3PoRFZmTh99RGViV8ks31TPohCRRNszHRr-s1RDcNWgOtHeKiDe-R2MgNnjQ9h7k2CC0S2LH41PPqQ",
+        "https://serpapi.com/images/url/cfLPUnicDcnbEoFAAADQL-pipduMMSoRFaJiXwxbtstItbtYX-V3_A3n9Xw_BaUtMSUpb1DPW5pnAr00QMSEnmmJRHS_SaS4t23Z4Ek3_p85DTNjjiJYKTtdToTiBR34sHTlrUL9tBtea5bb9nkL1hlfUy8dKb0cqIy9MVNi4hAud6vYZ94mj1AKXKGHfZJoJK0Bng_4c2rUbhUMOKyEYOEcNfWQ-aPGWobVbK8CjH9ffj1T",
+        "https://serpapi.com/images/url/j1KMOXicDclJDoIwAADAF7EoBoHEGCMVQ1hLROCGpYJoF6FEy6v8jr_Ruc730wnBR0fTMEWD5AI3irjQpdqOohY3pCJGtLFjnN9ou31u_ufsosb2UNroE0lZtnPHlY8PJuvlKbiGltesybkCWVi64BBD8KCRxAPVzcgqeI_yTk-UcOXNZo2IAqERkxIYLdh7hfWcyQMSes8maDMf15U8MvvtXhay1q-531dJHLx-fT0-cg"
+      ]
+    },
+    {
+      "position": 8,
+      "title": "Cama Hospitalar 2 Movimentos Com Grade Especial Berço Branco",
+      "product_id": "15255599215804079936",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:15255599215804079936,headlineOfferDocid:15255599215804079936,imageDocid:12105821530645063035,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTUyNTU1OTkyMTU4MDQwNzk5MzYiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNTI1NTU5OTIxNTgwNDA3OTkzNiIsImltYWdlRG9jaWQiOiIxMjEwNTgyMTUzMDY0NTA2MzAzNSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTUyNTU1OTkyMTU4MDQwNzk5MzYiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNTI1NTU5OTIxNTgwNDA3OTkzNiIsImltYWdlRG9jaWQiOiIxMjEwNTgyMTUzMDY0NTA2MzAzNSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "mercadolivre.com.br",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358726b04d6fbe9dcc437451ce8b636efa108.png",
+      "price": "R$ 5.240,00",
+      "extracted_price": 5240.0,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQZUv0HsR_8SjkG00HQVb9HMHv6J_mwBgLx78uRRwHoMFU2Yn-I11bkjhvpx-Y6ljJ_aBXqkIorMzTzPnsOsHsycvBebpioP0eaNi7EHY1aRI_C6SRKZQm0Jg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/BtMuPXicDcltDoIgAADQE6lYm5Vba9kqtCylbOkfp-T8SkAh1E7VdbpNvb_v-ymEYNzUtIzgbmQieygiJVM15yIRJVYxbTReUMZKkq_a5f_M9emx2GM_CiSAHMXzS1XvAYD-LV1AF0rDiZveyo_DbP5CqIfU3QWTkCi2rqd1VUg2KKHxrJw4se5tbdPOfV_fHuFnDvmIpZWlrKQeyJJTOdvCUE-QHW-MCzpEfgOc_AefQz7l",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQZUv0HsR_8SjkG00HQVb9HMHv6J_mwBgLx78uRRwHoMFU2Yn-I11bkjhvpx-Y6ljJ_aBXqkIorMzTzPnsOsHsycvBebpioP0eaNi7EHY1aRI_C6SRKZQm0Jg",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQGjrUX7LahkngeI9Pb5VacIzr_-5H7H1rtyMQv5JQ7RHSRAz3JgDq-33fg2YbnWJyB1e6IWFAtmzdLxNWXXQCF0D0mKEc1zaQMrI65SkSqq-P2y48WB4-m"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/BtMuPXicDcltDoIgAADQE6lYm5Vba9kqtCylbOkfp-T8SkAh1E7VdbpNvb_v-ymEYNzUtIzgbmQieygiJVM15yIRJVYxbTReUMZKkq_a5f_M9emx2GM_CiSAHMXzS1XvAYD-LV1AF0rDiZveyo_DbP5CqIfU3QWTkCi2rqd1VUg2KKHxrJw4se5tbdPOfV_fHuFnDvmIpZWlrKQeyJJTOdvCUE-QHW-MCzpEfgOc_AefQz7l",
+        "https://serpapi.com/images/url/1EXfxHicDcltDoIgAADQE5GakeXWmn2KlYtcYb8aImE5UJG19FDdp9vU-_u-n8KYuvUtiyumu9rwHJhM2QPRGmoebMAqabVFVdcPJebN7H9-EOfTLcPbpz6n3p4WpRIcTY8ZvFCGen0DMPRCR5vugF8wwt4pTE5B70Zi1QDXvYvhNVMk6hYOHyOyCYzs8_07JmmKlxt7Zcvdmjk9xQeNxjApk6YBx2E3mpDFCMgf5008Mg"
+      ]
+    },
+    {
+      "position": 9,
+      "title": "Cama de Recuperação C/ Grades Inox",
+      "product_id": "13208607382352598199",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:13208607382352598199,headlineOfferDocid:17568403045388175110,imageDocid:15585946101568674563,gpcid:14085846545032293318,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMyMDg2MDczODIzNTI1OTgxOTkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzU2ODQwMzA0NTM4ODE3NTExMCIsImltYWdlRG9jaWQiOiIxNTU4NTk0NjEwMTU2ODY3NDU2MyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMTQwODU4NDY1NDUwMzIyOTMzMTgiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMyMDg2MDczODIzNTI1OTgxOTkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzU2ODQwMzA0NTM4ODE3NTExMCIsImltYWdlRG9jaWQiOiIxNTU4NTk0NjEwMTU2ODY3NDU2MyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMTQwODU4NDY1NDUwMzIyOTMzMTgiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Salutem Móveis Hospitalares",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358729f2284e1f5c19f674aec10fc6d55129a.png",
+      "price": "R$ 3.676,50 agora",
+      "extracted_price": 3676.5,
+      "installment": {
+        "price": "R$ 645/mês",
+        "extracted_price": 645,
+        "period": 6
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQhJQHWpWZfaR7XHq3TMpkDn7yfkaB1HiBX-aVGL0fk75kWuFBJ_6yuIxABduJg7uyFWNkp0oQLeJXuvRUjCH_UEQ-EJMooNdyANFzXiQkz",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Wpbs53icDcnbCoIwAADQL_ISUiMhQstLQ4VJttGL2Lw2cjO3aH5Of9Xf1Hk9308vpZhdy2pG-tRCNrUhb6NjdrOs5EBNyh_W3HMhhrHbT7v_uV5WbyOKeohiLPC1rXJA4sk5p4IdR6BbVvmrePCJUV2ixG4ZWDOsQh-WG61Ob8-vFeyA0iHOmLA5ShpI1Csv7oe4LAJkBDDlPKu1l4ULGRBbfkRvOiY"
+    },
+    {
+      "position": 10,
+      "title": "Cama Hospitalar Manual Fowler com elevação de leito 03 manivelas",
+      "product_id": "15466891209671027406",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:15466891209671027406,headlineOfferDocid:5138932601367578593,imageDocid:11568561255179665099,gpcid:848621798168108509,mid:576462524014861430,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTU0NjY4OTEyMDk2NzEwMjc0MDYiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI1MTM4OTMyNjAxMzY3NTc4NTkzIiwiaW1hZ2VEb2NpZCI6IjExNTY4NTYxMjU1MTc5NjY1MDk5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI4NDg2MjE3OTgxNjgxMDg1MDkiLCJtaWQiOiI1NzY0NjI1MjQwMTQ4NjE0MzAiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTU0NjY4OTEyMDk2NzEwMjc0MDYiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI1MTM4OTMyNjAxMzY3NTc4NTkzIiwiaW1hZ2VEb2NpZCI6IjExNTY4NTYxMjU1MTc5NjY1MDk5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI4NDg2MjE3OTgxNjgxMDg1MDkiLCJtaWQiOiI1NzY0NjI1MjQwMTQ4NjE0MzAiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Magazine Luiza",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872fb74966fba50301afc551e84a5902d0b.png",
+      "multiple_sources": true,
+      "price": "R$ 3.295,55 agora",
+      "extracted_price": 3295.55,
+      "installment": {
+        "price": "R$ 346,90/mês",
+        "extracted_price": 346.9,
+        "period": 10
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRnufW5Tdse85vVB0UIdoMrWLsEhU8Ogfhlo85ZdzXg_B6AIMzt3zq1wrKQ3S02D21GIRSsW1PiVWcOQcXiHQdMSCS5sWa-jm36HGJCwL8QGytDCDnrcJOo",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/yK2I6HicDclJDoIwAADAF7EHgiTGsBgWQUSEEi8GWzYjLdAqgUf5H3-jc53vp2VsoIYgVBhOy8AqxLE7VviGspJ1kIekF2hLhqHDzW7c_s8wj2jjwjN-1UC9IFrp6ju3xMxHJJpASPdtpsdN3T6Jrl7RWjQ3SzP9aGXKOkrzdEiUVJQdWXL9c0qBdOpyAOMEFp2XoCi1U5WCknv0iua5gT2HeuIuzLEdPMEgJj8Wsj06",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRnufW5Tdse85vVB0UIdoMrWLsEhU8Ogfhlo85ZdzXg_B6AIMzt3zq1wrKQ3S02D21GIRSsW1PiVWcOQcXiHQdMSCS5sWa-jm36HGJCwL8QGytDCDnrcJOo",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTNJDDLK06_XUnUjBnggtJulf8KDGvIqPGErEztzOX_v55JRyq_VDbzpbhSK0a1rZK-NTxowIaoCbcGskciGqwjaOJQ_Dywdz23fjEfGhzqw6g3grPq5hOA",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSNDO_FtD0oLdGd3tjbtKobJxvaaigw0uU9oNPe0uo2K6oz4p4HtcXuJjNOyBh4TWcxb8YJ6Viymytw1XUAzxBcVE3vDPFTWFxNmVS621c_2zbweYjaVPSY",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcRCKLJOEVQlM3lMmdU_Iy53KLxf6aheJtK6p8o0ROkYuGdSQVtCLwrxZTg0_qFcFqpdAXIu3qFA_5xuQaiPL_XACapqt3zt_gJ_aDcBYEpju3cuDR5uKb40uQ",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTTd5E4dTh3FU-WMtoKW4QryDE5LZANk2wcN-6JRAorG9GOqqWsQNgBc3fBp9slaZCtE02QqFOtErvJ4DvRWxvV2HcTsmKDYnZa41B3FBXrFV4Dii29MLNs"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/yK2I6HicDclJDoIwAADAF7EHgiTGsBgWQUSEEi8GWzYjLdAqgUf5H3-jc53vp2VsoIYgVBhOy8AqxLE7VviGspJ1kIekF2hLhqHDzW7c_s8wj2jjwjN-1UC9IFrp6ju3xMxHJJpASPdtpsdN3T6Jrl7RWjQ3SzP9aGXKOkrzdEiUVJQdWXL9c0qBdOpyAOMEFp2XoCi1U5WCknv0iua5gT2HeuIuzLEdPMEgJj8Wsj06",
+        "https://serpapi.com/images/url/Kg5FFHicDcnbCoIwAADQL_JSopQQYU2GGmoXQ3oRnbppNTddmvuo_qe_qfN6vh8iBBtsTaso6mcmqlIRBTVUPIhcNEhF3VMbSMdYQ_GWb_5nO2G5hugS-gAcAt3K0oQm7Y5iLPzXo14FAI4ej6Hbu1LIKM1G0_RPM8-uoJCsIOdAzxf9LVDCy7ubvLzbFwgOd9RAPrV55B8zME-lXBp169aQSD5Z2MB9zE0SOT9lCT-b",
+        "https://serpapi.com/images/url/R7VszXicDclZCoJAGADgE-WOpBCRmIbGKLg_iTOKC-hM-buMh-o-3aa-1-_76QDYbIpiM5E3Z9DUJ8CTKrQzVNATgdBRnDvKWD-119flf-YN1YZLImQHpQO2RJ-1W6swYPAp9va1qvp2k5bEoChspIUqvk4PjWkPIPniDSjgVqfFGdnxufD0tOcjh03Ok9uxWyS9q6sdOnHm7GhMI12RSakceGuKoUrDqPgBcdA_FQ",
+        "https://serpapi.com/images/url/UNyMa3icDclJDoIwFADQEynEClETY5ApAorFIeKmKS0CDtDCb0RP5XW8jb7t-35KANHNNC2vWfsSkPMBZPVoWHRAoWJD1jy0rmyEqOpiIef_m1kbPvVZYodRELtHfF-j-_rBD2T1MlAY9ReTlnkAoSkmjZ7Et1T5fIePYEfPtj_vC51Ij3lScOu0Ukh6FjF6hWm1jcjJsqmQgN5AioBQhy1TV1wVYspJDBVmY13hH7InP0w",
+        "https://serpapi.com/images/url/WT_fYnicDclJDoIwFADQEzEIxQQSY0AGw1CCqaDssCAQBUr7g3Ip7-Nt9G3f99MBMGEpSjNSvjJoagluoyq3AiroqUynQRHdxFg_tvt59z_LxrUZUEJqw0M16XT_LBUJTFGBMr66nhGXNn5oL4qlbXiyJx6YQTrPhchw61D97jBTPKvyAJ6qZbOfgseXELnLqXgvuXakRAyRex3LCm0c3Xcu3M-R2_eamcRY_ADDZTxq"
+      ]
+    },
+    {
+      "position": 11,
+      "title": "Cama Hospitalar 3 Movimentos DX3 Dellamed",
+      "product_id": "2805887038308912978",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:2805887038308912978,headlineOfferDocid:16131381198447823048,imageDocid:5859049917056724924,rds:PC_5510317479788032294|PROD_PC_5510317479788032294,gpcid:5510317479788032294,mid:576462872255246965,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMjgwNTg4NzAzODMwODkxMjk3OCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE2MTMxMzgxMTk4NDQ3ODIzMDQ4IiwiaW1hZ2VEb2NpZCI6IjU4NTkwNDk5MTcwNTY3MjQ5MjQiLCJyZHMiOiJQQ181NTEwMzE3NDc5Nzg4MDMyMjk0fFBST0RfUENfNTUxMDMxNzQ3OTc4ODAzMjI5NCIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiNTUxMDMxNzQ3OTc4ODAzMjI5NCIsIm1pZCI6IjU3NjQ2Mjg3MjI1NTI0Njk2NSIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMjgwNTg4NzAzODMwODkxMjk3OCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE2MTMxMzgxMTk4NDQ3ODIzMDQ4IiwiaW1hZ2VEb2NpZCI6IjU4NTkwNDk5MTcwNTY3MjQ5MjQiLCJyZHMiOiJQQ181NTEwMzE3NDc5Nzg4MDMyMjk0fFBST0RfUENfNTUxMDMxNzQ3OTc4ODAzMjI5NCIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiNTUxMDMxNzQ3OTc4ODAzMjI5NCIsIm1pZCI6IjU3NjQ2Mjg3MjI1NTI0Njk2NSIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Dermomed",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358720430058714c1fe2d3c64ee21abca8bd1.png",
+      "multiple_sources": true,
+      "price": "R$ 3.149,91 agora",
+      "extracted_price": 3149.91,
+      "installment": {
+        "price": "R$ 291,65/mês",
+        "extracted_price": 291.65,
+        "period": 12
+      },
+      "rating": 4.5,
+      "reviews": 17,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSW_3hg2hJBvS3nyTGSsUAphgOyhjvtH5U761NqAD-bxQ0BIO6zuzupZtIgtTuhlFhoXJkzaRBW6bLuYRhV8OkdCWTgLoG0vgoL0nnKWUcBqq5y0tLIDwwMjg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/80S14HicDcndEoFAGADQJ1KLkZ8ZY0ojEQ2VcGNqa_Yr7G76KvVUXsfbcG7P9wOIspypasrpq5WYJj2MOVFYiRFmVKHiqZYgpMw4WxTz_830fTK1qBfehsAGsDFqb8hb3_LKQJfA3BbyGtejYKz194Vu9uL3gRi2q3VVV8kr2gz9Ch4rEOfNvYuORqjFTnU5wmni3pNl6DNHWKRmwiGcb8OAGkUxagk6ttk0u5z9AONCQAU",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSW_3hg2hJBvS3nyTGSsUAphgOyhjvtH5U761NqAD-bxQ0BIO6zuzupZtIgtTuhlFhoXJkzaRBW6bLuYRhV8OkdCWTgLoG0vgoL0nnKWUcBqq5y0tLIDwwMjg",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQCU9CIgG34FgytiJDmwGCPGWiEJGWuc1EQJcCz6zoUy4e-XrsVReooltP9pWK5dr7kRWX3YLahFd-R44JcrK3aXiIspis3wphmhY6q4oQ",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTf551dQkY7enMbLAuUrAMJMyd63VeRrEH2anXl1s_S4adcfUq4rA4zuzoay08KMMBmMf4PoVRBqnXUHamUr42hh5lxRza8pP1zGgr4h4ef",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTFS0hjIRmtmyh3A1aO3NoB0NFZiynWVPt8HeoYd8h-X7Kt6w25HRr_rNQetgQ-5GU1hCJ1PFLtfhuc2LZpQUzzlGeolBDZ9Gr-p5E6-FiOFfCdQp1zo7HZ",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRiRk9lLugd8PH7SmygortJcHW6PitF9RZFcdZjHSOJev5_kDEi-DCHrfHqTRqaBOBiaMlel8-fv4GLXgG3-o7f-KQC5hBj3lvMvJHSrpRcA6JAu2m7jzp-"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/80S14HicDcndEoFAGADQJ1KLkZ8ZY0ojEQ2VcGNqa_Yr7G76KvVUXsfbcG7P9wOIspypasrpq5WYJj2MOVFYiRFmVKHiqZYgpMw4WxTz_830fTK1qBfehsAGsDFqb8hb3_LKQJfA3BbyGtejYKz194Vu9uL3gRi2q3VVV8kr2gz9Ch4rEOfNvYuORqjFTnU5wmni3pNl6DNHWKRmwiGcb8OAGkUxagk6ttk0u5z9AONCQAU",
+        "https://serpapi.com/images/url/onxUkHicDclhCoIwGADQE6mIy1CIiKXDGaFCTX_aFDdKN7cvRG_TsbpNvb_v-xEA2sae10_crBr6zoHH5LuDhRYkd7kaPSuU1nIajvPhf_Hp2kWEl_gW4WwgAUqHFSQ9jwvBBWEyoYS9uZ-UlOMt3NRtRb1TG3uveqVeUESa5bvO7J8Vq4Pm0oq0cyqEKDd50NYys1raYNFiFE04I1X-APkbOa8",
+        "https://serpapi.com/images/url/oNcjlHicDclRCoIwAADQE6Vps0yIUAilWpil2FfMbTpJtzkn5I7TrbpNvd_3_TCt5RjYNuVYzVJTstAVd61m1Ei32MKit0cmpGx5sx92_wvCC9nG-F57nkOur8eGclidwylXITzCmaxXBc3UIXERLztnfN4AIrjOB6BCYCYj0Lz0TxBGPaxBKoosGniZJ6jPFXAZ87p3ZpAvU8fEjQIM0PoHQms6IA",
+        "https://serpapi.com/images/url/MAfUf3icDclLDoIwFADAExWoBgQSYwQtqAStih82BkulGKEVnjFwKO_jbXS28_0IANW6us5r1nQKeI7gWmOtaCGDkmlMVnorpFJlXUye4_-50zh3ArYnO0PcF9sKqk4MpzhbD2PpGTFJy64-HjZgh1yec1ug02gF1ntghtvm0sSUQ0GRGSRY-Eu8IRHcxIsNolTRpO8fAZcPb5Y6QYOUObcQKdfk5udU4V6OwvQH9qQ9CA",
+        "https://serpapi.com/images/url/a5-Gg3icDcnbCoIwAADQL5pG5hUivKTDNGsGhS9hU-e8Tp2CfVT_09_UeT3fT8k5mwxRzDs8roznGeCvbiOQiaecYgH3rTiVPWO0I4dh_z_DPGe6hxFFtd4EM8m0C1TjdiX9yH0M78qFcldHiYuzpIJx5OeL_KydIwWODccCDjc0pFZk0TRs8kYDxbLzggfxJNCrBThdbbm0KqlZwsWH8cgQNhXfnLetWr0Z-AEyoD2R"
+      ]
+    },
+    {
+      "position": 12,
+      "title": "Cama Hospitalar Motorizada Comfort Sem Colchao Com Grade Basculante E Rodizios Madeira Pilati Até 150kg",
+      "product_id": "838736920894020692",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:838736920894020692,headlineOfferDocid:5183489758256324965,imageDocid:8472706263471247039,gpcid:5668713508706730850,mid:576462821501809635,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiODM4NzM2OTIwODk0MDIwNjkyIiwiaGVhZGxpbmVPZmZlckRvY2lkIjoiNTE4MzQ4OTc1ODI1NjMyNDk2NSIsImltYWdlRG9jaWQiOiI4NDcyNzA2MjYzNDcxMjQ3MDM5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI1NjY4NzEzNTA4NzA2NzMwODUwIiwibWlkIjoiNTc2NDYyODIxNTAxODA5NjM1IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiODM4NzM2OTIwODk0MDIwNjkyIiwiaGVhZGxpbmVPZmZlckRvY2lkIjoiNTE4MzQ4OTc1ODI1NjMyNDk2NSIsImltYWdlRG9jaWQiOiI4NDcyNzA2MjYzNDcxMjQ3MDM5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI1NjY4NzEzNTA4NzA2NzMwODUwIiwibWlkIjoiNTc2NDYyODIxNTAxODA5NjM1IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Rede Santa Apolônia",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358727f9bcfccb6a7aa2baa497ea2e74e4112.png",
+      "price": "R$ 8.159,93",
+      "extracted_price": 8159.93,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSiyijVR0iINoqkqMhFPkhSMxqpO96wF6oxIKk6fVabYcf1SQM5uayqMj2eVy8Nh9aFPf4HmX5iKty9erTM3JU0vsVFaDlPpcQMItYT8QBXjMWNz9l3U3sN",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/2nd1lnicDcnhEoEwAADgJ6JInblzjnORblNK6udaZSvVZkPzUN7H2_D9_b4fqhSXC8MoO3LXXJXFSOWdNb5KhRUjY9K3hqQ956y7rsTyf4s1KsCOREyzOjmZzEO9aASkbtDQCA6CH4Hzcp1-8PzGqRKcZ6SaRCG0H1gLWE_LRM8RBdgNqtm-TW3mKw3Kewytw9l8ysTF21vASQg9lcXzcJPW8ILe4GadLYl-ftk-pQ"
+    },
+    {
+      "position": 13,
+      "title": "Cama Hospitalar Grade Berço 2 Mov + Colchão + Frete Grátis Branco",
+      "product_id": "16884865475314199615",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:16884865475314199615,headlineOfferDocid:16884865475314199615,imageDocid:15520730778211576513,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTY4ODQ4NjU0NzUzMTQxOTk2MTUiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNjg4NDg2NTQ3NTMxNDE5OTYxNSIsImltYWdlRG9jaWQiOiIxNTUyMDczMDc3ODIxMTU3NjUxMyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTY4ODQ4NjU0NzUzMTQxOTk2MTUiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNjg4NDg2NTQ3NTMxNDE5OTYxNSIsImltYWdlRG9jaWQiOiIxNTUyMDczMDc3ODIxMTU3NjUxMyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "mercadolivre.com.br",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872f7fe9a9d13a1712e3ec4fca1252f5f48.png",
+      "price": "R$ 3.747,04",
+      "extracted_price": 3747.04,
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT54PtN9B9FdKnmKNlJQDhDHUhnrFXpzfrXthdsyRGRbQ6oiODeM3zNiDt9bEFHzRsaw4L1nF6qluc8RzDzIWL5-0nLxrmBl_dpB5Mf0xZbqtqsvRdRN-Cv",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/UiyEaXicDcndCoIwGADQJ1KLVFKIyJZW2spRJN1EbuoEndN9_e2hep_eps7t-X44gFS-ZRWCDm8JBTMgF2OzUnCDmpq0ay3FOylrUc372f_8BWZeRI-OfQDsBV7IYtHGuNmmiKP1iYshzKQuhww4U28SkTx1u3qPit1E4xqBl6_CtSbq9rSTsQjdvrnTKdFIb86JY4xE8hraoLkyGTi7cvS65D306kEYwcby8QNEBD7u",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT54PtN9B9FdKnmKNlJQDhDHUhnrFXpzfrXthdsyRGRbQ6oiODeM3zNiDt9bEFHzRsaw4L1nF6qluc8RzDzIWL5-0nLxrmBl_dpB5Mf0xZbqtqsvRdRN-Cv",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRddN9sPoPpmgmGlCX9dC7K6-7u40n-HTbkced-8-z-kc1Gqi1lZCUFEwsdHfA_K5A1YHJJnzTrTt7tTHEMXeUbHbq6MtwGgLxbx71VscdfQ35bSmVMEBNm"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/UiyEaXicDcndCoIwGADQJ1KLVFKIyJZW2spRJN1EbuoEndN9_e2hep_eps7t-X44gFS-ZRWCDm8JBTMgF2OzUnCDmpq0ay3FOylrUc372f_8BWZeRI-OfQDsBV7IYtHGuNmmiKP1iYshzKQuhww4U28SkTx1u3qPit1E4xqBl6_CtSbq9rSTsQjdvrnTKdFIb86JY4xE8hraoLkyGTi7cvS65D306kEYwcby8QNEBD7u",
+        "https://serpapi.com/images/url/g4oyo3icDczdCoIwGADQJ5omlmYQYWIOTenHorqJtvmHbk73hdZD9T69TV0fON9PCSDVQtczQfuXhIwhIMLUCgUPqKhGW66rspWyEsWqW_5t4SbMCeiBscRRu3YnecGDxrs4zLMjC9nP6UQgnJKa_q85eqOaGkFXGc3NO238QTGcu_do5hpXHIbinfYp2JBiP75kJ4JJZ8UwBMV2JKNtnBVl-d6ckSM_x_464T_ltj06"
+      ]
+    },
+    {
+      "position": 14,
+      "title": "Cama Hospitalar Tipo Berço 2 Movimentos Manual Com Grade - Medcombo",
+      "product_id": "7841207668997524306",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:7841207668997524306,headlineOfferDocid:14968255048940948876,imageDocid:8898275572219528424,gpcid:15584487317602530040,mid:576462741357154539,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNzg0MTIwNzY2ODk5NzUyNDMwNiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE0OTY4MjU1MDQ4OTQwOTQ4ODc2IiwiaW1hZ2VEb2NpZCI6Ijg4OTgyNzU1NzIyMTk1Mjg0MjQiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE1NTg0NDg3MzE3NjAyNTMwMDQwIiwibWlkIjoiNTc2NDYyNzQxMzU3MTU0NTM5IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNzg0MTIwNzY2ODk5NzUyNDMwNiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE0OTY4MjU1MDQ4OTQwOTQ4ODc2IiwiaW1hZ2VEb2NpZCI6Ijg4OTgyNzU1NzIyMTk1Mjg0MjQiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE1NTg0NDg3MzE3NjAyNTMwMDQwIiwibWlkIjoiNTc2NDYyNzQxMzU3MTU0NTM5IiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Loja Hospitel",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872f4385f899af937a195cdeaef9e1cd726.png",
+      "multiple_sources": true,
+      "price": "R$ 3.789,00",
+      "extracted_price": 3789.0,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRZ5NNT6VbdmCfJ5rYvABXFIoRytcdV8Vjja2NqrUlFplvSRDRQ4U8wSidKN1zMzBoYMU25omNWUlvBQ7QXA3hMxvMtwP0YbtpyfY2mXIl_7rHYLgGq-e7o",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/MI-G5nicDcndEoFAGADQJyIiYcaYYkpoR7Fp3Rjtpp9p262-iXoo7-NtOLfn-0kBZLNUlLikdSchZgOIytEwaeABGR1SwZUmFVJmZbKuVv9bGogtbOrfNIQusyBifPPcazVpDTO0HOF3QFkwD_L8oaKqxoUli_bsb31viuevc8YOaNy7vSmIi1VNcHTFRWt6uhcak9R9ty68TiMSgeyeROWhU9z1ekeOiV0NYl38AD7kPpw",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRZ5NNT6VbdmCfJ5rYvABXFIoRytcdV8Vjja2NqrUlFplvSRDRQ4U8wSidKN1zMzBoYMU25omNWUlvBQ7QXA3hMxvMtwP0YbtpyfY2mXIl_7rHYLgGq-e7o",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcS_6DA_9HdR1va7XRZPGU_ghuoqU8NuJR-HGiwqgWQXV9AnNk2A8yNrk1yu00vBAY0xmc0yi_R8i6a7b0HnUJO_YuSHs_Z-woapMtDF11yHeasB_2-03iV0",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTWm9Id2_k-tmyeak33zVlfNIAcT5XtLGbG89GPgT2Pk0LEuM8laKectS1kV3bOAgQl8bvWr3mHiPlOqJuyzwA8ITO61Hgi6CSmu_zZ0XR-8ETIaPpB5Qagbw",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSwmB-z8BcFI5L23_JrXJ1RZzsU0ZJ3yAt8Apxr3JIE3_IrxGMEIizrj-DYQDsr5Ds6aTvWiZrRww_SLMDhmmgZmjujkPY0XC7nc_XqdnDLrTa0Nw_wMbL3Wg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTEZrEqBCTOe-yRtFOn_i1aLHv_qwD8Iyi8Mx-5xndLDb--AJacPETa3bltHiidm5tXGzqpzPVeDbv2FuHo4msh3T-S3Z-1g26-D8WsUUMQ7t6CTDsxTiF8fw"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/MI-G5nicDcndEoFAGADQJyIiYcaYYkpoR7Fp3Rjtpp9p262-iXoo7-NtOLfn-0kBZLNUlLikdSchZgOIytEwaeABGR1SwZUmFVJmZbKuVv9bGogtbOrfNIQusyBifPPcazVpDTO0HOF3QFkwD_L8oaKqxoUli_bsb31viuevc8YOaNy7vSmIi1VNcHTFRWt6uhcak9R9ty68TiMSgeyeROWhU9z1ekeOiV0NYl38AD7kPpw",
+        "https://serpapi.com/images/url/GuU9fHicDcltCoIwAADQE6lbgR9BxERyCFkZlvpnzCk6xDndrHap7tNt6v1930-vtVQ7x2kFW4zUbWPpWkC7U5pqzmw2jY7qJym56A7z_n87lDZBzG7EjRAJcJPBJ_WKrLrEOen6dZpzP12TzMIxf83d41rcAyTSYYN8ky4DNCsAzxCV4D0yYDjJfO5SrwZY5MmZlOsNK1JZr4nKk46OEBrcUhWSjQW2_A5-_H09Ag",
+        "https://serpapi.com/images/url/nl2wenicDcndCoIwGADQJzI1UaYQYRFmP_7UUOkmtmlLdDrzM9Gn6nV6mzq35_t5AsjeUdWiYa9JQpErQBt9wXsgULIFa4XaP1spy4avu9X_HDfIbY_hVNh-vrxXCoipIJVhzEn9CHyXYTODk0c9ZHsRx8uo0k674YxqciwYXPUqMWjo8rhG9J2-DLEvozrsDsM0jy7ycWjpe15a26sY7vNNyy4K2mGfRHJjxoTT8QeK1D45",
+        "https://serpapi.com/images/url/91rsS3icDcnbCoIwAADQLzLNYTeI0GahqJQWXl6GzvASm3Nbrfyqfqe_qfN6vp9WSiY2un6jmL-ZvNWarKg5a4QsZYdneCC6aAfGOtrsxu3_NnZUr484UcTRppWDD54VmAD5PPPncTGJq1H44G3Llc1eHPieC5DHX8fQ9bqJ9xrMz1BwC4pFeXmmXcFjpVAShLAlpClI_-jvp9zI9kuKUTbWFAb8UhqRQiqsApA2P4NIPyM",
+        "https://serpapi.com/images/url/Vckie3icDclLDoIwFADAE1UiiCKJMUhBNCKo9RM2BgpCEymFPvl4Kq_jbXS28_0UAEKaipJx2gwCshRBwtVRLiEGRke0KhVZVEIwni_rxf9Ma5_O15Q4UePUK5sEGRqO4Ab8zsbxzmvvdYeNzcAMv0d6z9MdThCytjENHRJryRM8xtJSh9v6XYt3eMlw0qruy6smpSw0gk5ahMa5OkXYuMrz2T_MYGoTLHvCXOPR_QChvT4e"
+      ]
+    },
+    {
+      "position": 15,
+      "title": "Cama Hospitalar Motorizada Bett Care Ortobras - MDF Azul",
+      "product_id": "12556008809591493812",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:12556008809591493812,headlineOfferDocid:12556008809591493812,imageDocid:5714199080852853333,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTI1NTYwMDg4MDk1OTE0OTM4MTIiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjU1NjAwODgwOTU5MTQ5MzgxMiIsImltYWdlRG9jaWQiOiI1NzE0MTk5MDgwODUyODUzMzMzIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTI1NTYwMDg4MDk1OTE0OTM4MTIiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjU1NjAwODgwOTU5MTQ5MzgxMiIsImltYWdlRG9jaWQiOiI1NzE0MTk5MDgwODUyODUzMzMzIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Ortoponto",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d3587289ff39d68e4521419ddf049930b456cc.png",
+      "price": "R$ 8.699,90 agora",
+      "extracted_price": 8699.9,
+      "installment": {
+        "price": "R$ 724,99/mês",
+        "extracted_price": 724.99,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcS_5AvZ5xcCerm7Mx5J5bQAgHkfTOEk1GmwxbGpjDdKjcsz9-spDxgPx80RFinWZ8DwvqiGM0V1tWUj-TddFqU4LFbDbcUQJQhVQ-aubSKb5tXNZxfcimcU",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/qA73enicDcndCoIwGADQJzIVGmUQIZmGZWU6DW-iffNnhjrb0tVD9T69TZ3b8_1UUnKx0PW8hceLy5xqkrTmpBTyJhlMoGt0UXWcs7Zc9cv_LewDtTyIrsgeMqRgnT-aWaCQj0hol9t7ER83d9NrRkU8Xjt0V4N4W5rgjipPam6cXdam2dwZh555gZGYMsW1FlPq9ni6d4lDAId-WCWhdnuSaEeQvBwyVQBrAP8AROU-tg",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcS_5AvZ5xcCerm7Mx5J5bQAgHkfTOEk1GmwxbGpjDdKjcsz9-spDxgPx80RFinWZ8DwvqiGM0V1tWUj-TddFqU4LFbDbcUQJQhVQ-aubSKb5tXNZxfcimcU",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS2H0otOFGjKwcpcPzxhmdqiW2iAEqxpwfSW4lHjLRT_ar7DkeUwuR0qSV7rtWSSWLTRG9TIlx9pV6haXw1g9Kv57BfktIDm3C7uSk7546t6fQrGzJ6WbFyZQ",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSerZgGyHYmmNx6dej3cNdQaPerixYGfRpbDQc4EBkNKY0pNOkNxb40HiQjxMINBqkSYazFrJC0te6Rdc5lwcskaoZsbYz9EpXPtftlun9FM8zePIM95LqYwg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSXKRfD9WgavMPM0Bf89HHh1rYzZUpJaduqe3ekUcxoU7WrOSJR9dOh4EVIavw0DpMqLRJySBt0E24YJGxoiDByK-dOQCAHKi2stNeCXyOFNDCWO53UknAypGI"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/qA73enicDcndCoIwGADQJzIVGmUQIZmGZWU6DW-iffNnhjrb0tVD9T69TZ3b8_1UUnKx0PW8hceLy5xqkrTmpBTyJhlMoGt0UXWcs7Zc9cv_LewDtTyIrsgeMqRgnT-aWaCQj0hol9t7ER83d9NrRkU8Xjt0V4N4W5rgjipPam6cXdam2dwZh555gZGYMsW1FlPq9ni6d4lDAId-WCWhdnuSaEeQvBwyVQBrAP8AROU-tg",
+        "https://serpapi.com/images/url/3UVbJ3icDclJDoIwFADQEymKQIOJMSiCU1QoUuPGQJnHAl8LnsrreBt92_f9JACsmwtCWNF2YBAGI_ArcRx34EFKx7QuhS6pGUureNks_jfXToFqUixuJzWcDTM7cMro5d0nZdCkREy1TdMzHmEiFdvsaDsPr0V6Hl7505402EUtEIzJ0bFN1dkVvcpcJfFufBqrh5eMVlEOO72crdET50iWFFAiqzXfe4X4xnC3fv2JPy4",
+        "https://serpapi.com/images/url/FBEkoHicDclJDoIwFADQEwkkIhETYxwQUamgG8uu_S2DTIV-I3Iqr-Nt9G3f95MjKr0wTdlA_1YoxQR5MzUyjQwLMKCtTZ23ShVNtuqW_1usiXB9uMk-yfz3gdY1GRwhH1MgImaR7IuB-ulV8V0MtrcpyYlailxKMnDbOhTxYwgDsunKG2Xjvj9uLZTOVcCseoEuWZtoTkfXU_cIU6yejbsP56OMgtCdnTv6yn4XvUCB",
+        "https://serpapi.com/images/url/1dUgaXicDcnbEkJAAADQLwqhKWaaxi232GKE3rS7LmNiscn2V31Of1Pn9Xw_NaVkUnked3BkhGK0ovdO5KqJFrSBHOwf_FT3hDRddRj2_1O1ECk2jDM_Kk0lrYo5OAeCXu4Ux6nXY_6-JcQr0HPAEm4TuPTJNh1B7EUKArVsXd1ifgkmCYZT5LFYp4IlyrlnL31j6sxfIXAxNMdvxImG2MgYOIamkYKNlLSdxojt_gDMaD5O"
+      ]
+    },
+    {
+      "position": 16,
+      "title": "Cama Hospitalar Manual 3 Manivelas 7 Posições com Colchão D28 e Elevaç",
+      "product_id": "1580393263133344723",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:1580393263133344723,headlineOfferDocid:1580393263133344723,imageDocid:13009515246200012774,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTU4MDM5MzI2MzEzMzM0NDcyMyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE1ODAzOTMyNjMxMzMzNDQ3MjMiLCJpbWFnZURvY2lkIjoiMTMwMDk1MTUyNDYyMDAwMTI3NzQiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTU4MDM5MzI2MzEzMzM0NDcyMyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE1ODAzOTMyNjMxMzMzNDQ3MjMiLCJpbWFnZURvY2lkIjoiMTMwMDk1MTUyNDYyMDAwMTI3NzQiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Magazine Luiza",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872f011dff21edb68e172f525618903779a.png",
+      "price": "R$ 5.174,10 agora",
+      "extracted_price": 5174.1,
+      "installment": {
+        "price": "R$ 574,90/mês",
+        "extracted_price": 574.9,
+        "period": 10
+      },
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR7TzTkSu7gQlU0cnrT0XmYmUUGUhJlb5zaNCdr9-8QXMXX_qSIWbubMSFs601ZtlwRxp4K5bw6qrawq7-6NI26JDF4CtxLelu1S-JEFeZp6xGanvdB9nR7Rg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/j7HRCXicDcnbCoIwAADQL_JKbilElKVoKXgj8yW2KSrpnDrT_Kp-p7-p83q-n4pzNhqSVFAyvBkvcoFjqorlyBGviUi6VhqrjrGalvt-9z_j4Oe6TUIYr_EzmmAZNIlM6BDLaXtvk8ROKrfB2op8Mx90YRukXpo--si54Ql7kTUCWcl4M4cL21w0PIN-QHMPBeA7KnBP1sbky7VoJiUS3LNVZAwsNqKv_KjTEIblD62bPl8",
+      "thumbnails": [
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR7TzTkSu7gQlU0cnrT0XmYmUUGUhJlb5zaNCdr9-8QXMXX_qSIWbubMSFs601ZtlwRxp4K5bw6qrawq7-6NI26JDF4CtxLelu1S-JEFeZp6xGanvdB9nR7Rg",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRthA34yF4uZp7P1MOMyxx0-SvpjQ_La9qrARJbZzKuIguwVMJyI8ML_mqTl8tFJJCzKMCY_6JSUfIF5T3qmPwvP_fS3tAHp4Ch2t-kklwxLgwHirlx_sA4Mg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQ65kPbvAcfX-8qzgPmGwj0DOd6PYaxd5aJYyTnV-StK0W8_hQcpZTUnjA6BHBeMLME-3s-4kAJkCwn_kgqphlLh3dRGgIbP97foAgQowHAxsYInlLM-Wuj",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQHHgpKwuIbFVlR5PdJLWleeJg-wUccl9LS2TnVM2GTk9LLmUz35KE6N4I-grUAnO3svt2Axcqt3dfOmyzorztarcW-d6qILuPpWB76JJtIa0Vx-qLoQN0z",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTnP58uJ5GqugORXe1M8wqzMebdx0EzF2Lb1QJMreamqOWym4PxBrLNHU08YDwlrqKUthqTELQI0KHQhh_PZZ_gLZvCIySap7UIdrPwAXnpIcZR_3tcP_DlsQ"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/j7HRCXicDcnbCoIwAADQL_JKbilElKVoKXgj8yW2KSrpnDrT_Kp-p7-p83q-n4pzNhqSVFAyvBkvcoFjqorlyBGviUi6VhqrjrGalvt-9z_j4Oe6TUIYr_EzmmAZNIlM6BDLaXtvk8ROKrfB2op8Mx90YRukXpo--si54Ql7kTUCWcl4M4cL21w0PIN-QHMPBeA7KnBP1sbky7VoJiUS3LNVZAwsNqKv_KjTEIblD62bPl8",
+        "https://serpapi.com/images/url/q9YTZnicDcndEkJAGADQJ5JEf2aaZseMWLaUaiY3OyWW_LT4WDxVr9Pb1Lk9308CwBtdlqMyrAcO0VOCR6lMWAN3SMNJ-C7kJnlznpZsW23-p6P9c70LT5AgVRtMrQ340lPIgQx9P5X8jr-O1L2vqxqd8CMYndZmrbgSPNgr4tKiOucrMDE2RocYN7rA_iW2zflZrQpPdB6NfRWQxTUjmYGUZbnoXSastM572iCNsB-6cz9_",
+        "https://serpapi.com/images/url/S8FDHHicDclJDoIwAADAFxWIKCqJMXUJqKDghngh0GIrSym2Cvgo_-NvdK7z_VApuTBVNWXo0XGZYiAT1lOIkLG8IwVVpSpoxfmdkWk9-Z8Jt3hsId8Y5F7yguh2AaP6TbzSajJtscOGF8YtHsTrsDuyMzjIjRaMIuojfj2eWAaNmT1LXcddAl2Afg7X-bxhUU5qTguH6nhvkVXijYe3ChK_amzYinDFCscFwTP7ARTWPhA",
+        "https://serpapi.com/images/url/xBTYEHicDclLDoIwFADAExUICAYTYzDxA1YQ5bOGFosRSkufoj2U9_E2Otv5floAoRam2XAyvgU0FEHNLYMpqOBGDDL0pmoHIW6creTyf4sgpv6OpPs9E4fpEdbboju7JxrhsmuaiKEpJ6Tz8cXOeHG0d9ndx7jPteMeNl48CxEb84AnjnqCHbyIBIdek_6th1FDNZISUU-G-HES5XruRRGElVW8kMRDGlv6ByeMPis",
+        "https://serpapi.com/images/url/Yua6pnicDclJDoIwAADAF8niEpHEGBUFZLFFiMiFQGkoidS2VBFe5Xf8jc51vh8iJetMVcUUiYFJXE1kSXWl7mQhG6SgR6t25MFYQ-sNX__P3IbVykYxBQvjeVrY_FmfoxTrgdHzMcBl9dYO43Hqlzo8BQIXLT9fh3YO3jvhh06iGTervwvuJZLw-OBDV_McSEgOsiyv_ey1d4dLwZaJWwnQb1PKXJRF-UwikFv3Dv4AxeM_oQ"
+      ]
+    },
+    {
+      "position": 17,
+      "title": "Cama Dobrável 02 manivelas Com Grade Steel Pilati",
+      "product_id": "12528174008980307913",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:12528174008980307913,headlineOfferDocid:6632976924423335414,imageDocid:3151773317629618969,gpcid:5689772231888682002,mid:576462755409450522,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTI1MjgxNzQwMDg5ODAzMDc5MTMiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI2NjMyOTc2OTI0NDIzMzM1NDE0IiwiaW1hZ2VEb2NpZCI6IjMxNTE3NzMzMTc2Mjk2MTg5NjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjU2ODk3NzIyMzE4ODg2ODIwMDIiLCJtaWQiOiI1NzY0NjI3NTU0MDk0NTA1MjIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTI1MjgxNzQwMDg5ODAzMDc5MTMiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI2NjMyOTc2OTI0NDIzMzM1NDE0IiwiaW1hZ2VEb2NpZCI6IjMxNTE3NzMzMTc2Mjk2MTg5NjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjU2ODk3NzIyMzE4ODg2ODIwMDIiLCJtaWQiOiI1NzY0NjI3NTU0MDk0NTA1MjIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "orthohouse.com.br",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d3587250602656a991bdf7fad37bfa5326ea4b.png",
+      "price": "R$ 3.690,00 agora",
+      "extracted_price": 3690.0,
+      "installment": {
+        "price": "R$ 527,14/mês",
+        "extracted_price": 527.14,
+        "period": 7
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ3KqXZLYQ_a9dgeYTMjbNvGHbJtGtZkSxr1oKuHTBDciiNdGzEoB2nFrs4SjcQeaSeOfhWwYbcU_JNYLk7q2oXWAPT05NjWwT5MfL3Wr3dzJ0iynyBAkNa",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/oHfbynicDclJDoIwAADAF8kqMZAYA1EhLFUChuVCoC1QiC1LFfFR_sff6Fzn-2k5H2ZDFDGF0zpwjDa8orLQzLzkBAqQ3cW5ZcNAaHMY9_8zTIB0G4aqN6a5n4VFqaMGZ3HQVeBpO5XLbZ730WuSmfdwYusICQHIfp-YpdDzNG-jDoa4jPClbpMlq-CtcEHm97tRYWliXmNJA12yxFpQ-2oyqejtSmSlq2X2oPwBaHE-3A",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ3KqXZLYQ_a9dgeYTMjbNvGHbJtGtZkSxr1oKuHTBDciiNdGzEoB2nFrs4SjcQeaSeOfhWwYbcU_JNYLk7q2oXWAPT05NjWwT5MfL3Wr3dzJ0iynyBAkNa",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcT_DerVx4bIOlepntmOU1sxkzhVHe4S68ATr1QBQDVAFL2bTLxSqvecWKNWhyTxN4TErL_JX0wUFlGh1z7XRxe-K52aEaihGHUhvhC6j0Ptxc_3HA0_0FCGqA",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTLymoZVk19xrMwr9QSHBHz2iKNdNeNUJ93IGSF4v12OZhEGZG3iRYvOE-nM_mbrbg8yx2Sx95vSEB6IbNiobgWDSCL2yQWddExyp7jLH1GRtrpCEXWM9eddQ",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQf6rY5Lks3h5BHesRZQEvbxni8mzuVC9aXvjnQ0idHLk-q8LCgh0T7CS4_xiyV1IzopVy2jlW7mDW8RxXOhaHroBpEl6oTYwbNj75wX2ymhs8ItqNd0q7dgw",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRbPTDeAH8nDzaqzwDmks-sEXQdeM3VWRVpap5xk11k44I0D4ZT6A5tTVEpTHKENzcdReMbTz4FRWzrRa4Ahu1uBYc795_cPUTH3bPYUSP53AB2dmdyc-na"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/oHfbynicDclJDoIwAADAF8kqMZAYA1EhLFUChuVCoC1QiC1LFfFR_sff6Fzn-2k5H2ZDFDGF0zpwjDa8orLQzLzkBAqQ3cW5ZcNAaHMY9_8zTIB0G4aqN6a5n4VFqaMGZ3HQVeBpO5XLbZ730WuSmfdwYusICQHIfp-YpdDzNG-jDoa4jPClbpMlq-CtcEHm97tRYWliXmNJA12yxFpQ-2oyqejtSmSlq2X2oPwBaHE-3A",
+        "https://serpapi.com/images/url/DJVFo3icDclJDoIwAADAFyGLiEpiTF0oCgGVAt4IlMaiAqU0WHmV3_E3Otf5fqgQrLdVlTSYv5kgpSKKxpjcepGLCk9wW6s9bRmrmtu6W_3PBkG5hBhlO8ITaRaH8ElYI-ow1nv5GGniEjOyFgBx_bw57xLg-EaBfBl1A8GpF6T0jWRgoj33s-NVe8XOE1J9nF8vkijezMj3eUWhG9OBbq27dhISZ1MXaJnmbGEHfsb3PkE",
+        "https://serpapi.com/images/url/AFbiaHicDcnbDoIgAADQL0rTrri11oXQUppSWb60EKfUVEJm0lf1O_1Nndfz_RRKicYxzaxKpRYqYz1Fq76RN-qmeGqkdWk2RS0Er_L5c_Y_Z4EZQOnB12WdnB4W6GTwkiAk7tJ923yHGc7wcQsGHiKbYWvZ-6SAKEEDHl3aPexVwbWkkuZT3dmkA6OWwOXYo5jXNI_XZOXbOowZg50Wk7vvWihSUqzgOQ5Axlj4A3ytPiU",
+        "https://serpapi.com/images/url/I174tHicDclJDoIwAADAF7EqAibGCBohIRiQIHgxQJGWpS20yvIqv-NvdK7z_UDOKdtKUomLYaa8BALPsSJWjGccFWJBOolBQinC1b7f_W978IF5LoLnZkg1r2ErqFlOycJ7cHrnE0ZGt7xi28ySd40DGQHHa4Te8OwKypFuX9ePCc2x4i6ExrNatze9O96McEouMHMGYtFTuyFROuZ-rWtjos4dZIbLex_IvQ6q8QfYSz_c",
+        "https://serpapi.com/images/url/03avn3icDclRDoIgAADQE5maWNnWGk3L1nJEqNVPQ2DanIhBqzhU9-k29X7f99MYo_TcdYVk97cygjumkt6o1oaaGxuxvnN10yt1k_VyWPxvDjMebRiuEIkFTGcytnSwz7hrtaOT04GLfVCUuFBUha_W91sAtl4MLmQCQ0OKRJF0l2SWcSz2FbFgjUt7xxTA5uE_Vmc2jcIrQzlJgwqd8yMKA7ga846_mSPpDwSBPOs"
+      ]
+    },
+    {
+      "position": 18,
+      "title": "procirurgica Cama Fowler em Chapa com Rodizios PRO2",
+      "product_id": "9201393753773515617",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:9201393753773515617,headlineOfferDocid:15935187890079198732,imageDocid:2144831236736343784,rds:PC_9765016923625091540|PROD_PC_9765016923625091540,gpcid:9765016923625091540,mid:576462861374301672,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiOTIwMTM5Mzc1Mzc3MzUxNTYxNyIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE1OTM1MTg3ODkwMDc5MTk4NzMyIiwiaW1hZ2VEb2NpZCI6IjIxNDQ4MzEyMzY3MzYzNDM3ODQiLCJyZHMiOiJQQ185NzY1MDE2OTIzNjI1MDkxNTQwfFBST0RfUENfOTc2NTAxNjkyMzYyNTA5MTU0MCIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiOTc2NTAxNjkyMzYyNTA5MTU0MCIsIm1pZCI6IjU3NjQ2Mjg2MTM3NDMwMTY3MiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiOTIwMTM5Mzc1Mzc3MzUxNTYxNyIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE1OTM1MTg3ODkwMDc5MTk4NzMyIiwiaW1hZ2VEb2NpZCI6IjIxNDQ4MzEyMzY3MzYzNDM3ODQiLCJyZHMiOiJQQ185NzY1MDE2OTIzNjI1MDkxNTQwfFBST0RfUENfOTc2NTAxNjkyMzYyNTA5MTU0MCIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiOTc2NTAxNjkyMzYyNTA5MTU0MCIsIm1pZCI6IjU3NjQ2Mjg2MTM3NDMwMTY3MiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Mercado Livre",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d358728fc518128d19d946de78c5b43d5b31d6.png",
+      "multiple_sources": true,
+      "price": "R$ 1.618,96 agora",
+      "extracted_price": 1618.96,
+      "installment": {
+        "price": "R$ 77,09/mês",
+        "extracted_price": 77.09,
+        "period": 21
+      },
+      "rating": 4.0,
+      "reviews": 5,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQ13pGaoGqthJfLGIr-6WAgdftE6oIgq9yw9xzIAvw2f45LUVJ249h28Ak8kRYuzOPD8hmvWeahp9ibC_8kdvwwk6SkH2C0Dw2_iF2VFqQBfmfGCFRGOllTFg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/ZVXjBHicDcnhDkJAAADgJxJdMmdrTcrFLFGxfplwd3bhcLnqqXqd3qa-v9_3Q4Xgo6WqVVsMLy6qUhG3VpuRUeSiLmZF16gj7TivW7LuV_-z7EMJURHNFxzlHeoF9XGAvEExUpuUWOyMziM9fEn4fHv2JAHWl8El8YEOKTBtZrL4-niHx61JmymtcsphfXMyk5WTlMw4sT1wtK0EWe2CxO2jDW4wctwYhff72SU_kc8-VQ",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQ13pGaoGqthJfLGIr-6WAgdftE6oIgq9yw9xzIAvw2f45LUVJ249h28Ak8kRYuzOPD8hmvWeahp9ibC_8kdvwwk6SkH2C0Dw2_iF2VFqQBfmfGCFRGOllTFg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQAo2nP85V3rqzJuJxnsbfQZZiYynDBoeZ3LQuEJVyvbosV1hOoq3LljF4BE3gs4alVy8bMakOxqeI5B5Se44bpPAZyLeML0p1wJb2_tlVvcKBcz4UOGCbG",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcT-GA_WDRxPDARAwNay3P23U5p0Zj6Qu4HV3r-ecrSedO0PPQ0V4j38chBq55O4jVdv8Mb_OZ7Ysa2xGqpqcDFPS5ovfGgoCHZEZD5kL46ntLX2SDfJOJwDiA",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTyen0iPvGd6uTLd6Sp-gv7YxQINIFWiZxNOZoQS2y3OC2V0Z71-wQ6Owh7qogiaH6-3b_j-MV51DnjPmOae05XGNyUe8T0SyMJnTidd7KILP2qzwuw2KY2_Q",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcS7QMIG4EBuiwEH9Wqkrt8qzJzsurRtcZqIfFOg4BCyu4pABLLgbhX9rgi03SBAiUR3zRp85yQjHIcjtYx11EKJMZ-Jy8WQj2ADe4YnYuI6Bt9EeFkqq82J"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/ZVXjBHicDcnhDkJAAADgJxJdMmdrTcrFLFGxfplwd3bhcLnqqXqd3qa-v9_3Q4Xgo6WqVVsMLy6qUhG3VpuRUeSiLmZF16gj7TivW7LuV_-z7EMJURHNFxzlHeoF9XGAvEExUpuUWOyMziM9fEn4fHv2JAHWl8El8YEOKTBtZrL4-niHx61JmymtcsphfXMyk5WTlMw4sT1wtK0EWe2CxO2jDW4wctwYhff72SU_kc8-VQ",
+        "https://serpapi.com/images/url/Wo5Kw3icDcltDoIgAADQE5WluJlba1LmIs1ciy3-NEFSywCDPuhQ3afb1Pv7vp_GGKVDx-GC3awyvBoYKtxhrU1pWjZk8uroRirVinrWT_8XRptqkrAikq7YBj72bv0b3dFLaHoqCGkPViyg5MRLi3uMsH1QqfG4yWXvpd15CWDs1RqUHbYBzcpL_ur5yof-jgNA1TYiNuVZOlLjJ6Lu0XT4wdaQvcE-T-Y0-QFrZz6S",
+        "https://serpapi.com/images/url/lK8vp3icDclJDoIwAADAF7EEKCKJMdUqhCAUUVQuBMpuhAKV5Vd-x9_oXOf7KRmjgy4IWUP6hbIs5VjSiHwxsJhVhCftSxjKltKqKbbd5n86dNK1QS6cAaMbOs8YwTOcnHiRsSRfARXDWvXeihnIPZeR3s9SV8TYEwOlljVS7joAXKUO0lE7JZEbrh5DLM1GRzuCjtgH7ZgbRbs3w0OIwNNW1IbZd8lHueVaE6rgDwwgPKg",
+        "https://serpapi.com/images/url/yziFBHicDclRCoIwAADQE03nIi0hIorMLHVoVv6EuaETnDNna52q63Sber_v-6mlFINrmpSXDy0kJUDeuWVUgywkK42ya82h7oRgvFr2i_-5q5DMvTLVlEMWPz1ij-mB2IkA1dO5vrAf-tszy19hlHc4QXoSrVEGc8cCCtuRqp2-q1ixs8HkfmvAMZtaG97EbVRQOL14oT7RWQoTfdzzlBHiBP4hRv1bjQoFV3TDP2yhPYw",
+        "https://serpapi.com/images/url/Os8NtXicDcndDoIgGADQJ0qtqKStNSgz6W_qmuldkSG2DPRjpQ_V-_Q2dW7P91MAqGZq23nF61ZBfu3BpXIs0cAZJLf482E3xVMpWYm5nv1vSvZX7PN4Eu4CH3nUyJe3xom-1-DqjnWNqSPgmQ5uq4NAdNEapAjdbsWlOOFaSGcYUyKP0bCLlDtqw3Id8BLSd7_vbdgu67HWTcJyQJY5SqvUBGMK2MtXd63dAfsBMjc9cg"
+      ]
+    },
+    {
+      "position": 19,
+      "title": "Cama Hospitalar Motorizada Elétrica C/ Colchão Com Rodízios E Grades",
+      "product_id": "3808668067884354513",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:3808668067884354513,headlineOfferDocid:3808668067884354513,imageDocid:9905457322925320643,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMzgwODY2ODA2Nzg4NDM1NDUxMyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjM4MDg2NjgwNjc4ODQzNTQ1MTMiLCJpbWFnZURvY2lkIjoiOTkwNTQ1NzMyMjkyNTMyMDY0MyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMzgwODY2ODA2Nzg4NDM1NDUxMyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjM4MDg2NjgwNjc4ODQzNTQ1MTMiLCJpbWFnZURvY2lkIjoiOTkwNTQ1NzMyMjkyNTMyMDY0MyIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Colchões MM",
+      "source_icon": "https://encrypted-tbn3.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQwkRMtPX-pTg-ITbJyFcuJ7yfjSRCjejd85Z2--paY5GJ_5VpMwi6R2eIjE-toOSTROkXzAHNvCsw0R5qTe0t0K5HiCdxUp-5wrw4j5q8",
+      "price": "R$ 6.070,50 agora",
+      "extracted_price": 6070.5,
+      "installment": {
+        "price": "R$ 639/mês",
+        "extracted_price": 639,
+        "period": 10
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ1Elhn4acd2txZxWelSANDTjXNHyrOkKd9fDyMxsTu3vlcgaWPFyL8eW4S8LpCXnpnZWT1NWgK04d0JeW75kedE8Tzo8q4bva2a0XwB6JxYQFraULGuI7q",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/ewExUHicDcnhEoEwAADgJ1JJlO6cixRJdHJL_2abRVmrFs1DeR9vw_f3-35yIXhrqyphqJFcEDwQFzZSaCuguCEFVQ-1zSvOb4zO69n_bCfCUx_Fw1WZMwMirIs-6wEpj07kJvc0WstmX2zx9OrKXd8m3ehZIgrBwZOhRYBxtEK-TBlnGUiGEaBbzcBaQIA5LgheWcm7smrj8oQ61NLXYhL059hr4Cn0u41Z_wBf5D5H",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ1Elhn4acd2txZxWelSANDTjXNHyrOkKd9fDyMxsTu3vlcgaWPFyL8eW4S8LpCXnpnZWT1NWgK04d0JeW75kedE8Tzo8q4bva2a0XwB6JxYQFraULGuI7q",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQg-2tirx6yDMMg5Te10h1oqI3ZAU3ykSPn9jrUsj98t87cnak47KI2JtmgESdCeqvt_g1wxkowT3988Hk9-D9e6xUeyp8qqWQOwNdOqavNRQnW4CzQV0bHPA"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/ewExUHicDcnhEoEwAADgJ1JJlO6cixRJdHJL_2abRVmrFs1DeR9vw_f3-35yIXhrqyphqJFcEDwQFzZSaCuguCEFVQ-1zSvOb4zO69n_bCfCUx_Fw1WZMwMirIs-6wEpj07kJvc0WstmX2zx9OrKXd8m3ehZIgrBwZOhRYBxtEK-TBlnGUiGEaBbzcBaQIA5LgheWcm7smrj8oQ61NLXYhL059hr4Cn0u41Z_wBf5D5H",
+        "https://serpapi.com/images/url/pxifkHicDcnbCoIwGADgJ_KUpZsQIRZpkYfMhG7C5pgHmpv-pPZUvU5vU9_t9_1UAGJwNI1y0s8CaKnAg-sqG6CAmqike2pD1QlRc7aR6_85bljiPUmYsoC6n6x5ezqx1YUaemV0MjBvbmbObRpz3PTZ0GAEyCa8aJf2MVgc4Ml2aelR-YI7M8ap7caLiRHyW6xsMbWmjM4CSZkn0RiWkSxe4Tnh-dJ7J1f94cfuD5HePos"
+      ]
+    },
+    {
+      "position": 20,
+      "title": "Cama Hospitalar Ajuste Altura Manual - Frete Colchão Grátis Branco",
+      "product_id": "11116044753644693960",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:11116044753644693960,headlineOfferDocid:11116044753644693960,imageDocid:17145384630151324774,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTExMTYwNDQ3NTM2NDQ2OTM5NjAiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMTExNjA0NDc1MzY0NDY5Mzk2MCIsImltYWdlRG9jaWQiOiIxNzE0NTM4NDYzMDE1MTMyNDc3NCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTExMTYwNDQ3NTM2NDQ2OTM5NjAiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMTExNjA0NDc1MzY0NDY5Mzk2MCIsImltYWdlRG9jaWQiOiIxNzE0NTM4NDYzMDE1MTMyNDc3NCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Reabilité medical",
+      "source_icon": "https://serpapi.com/searches/693f17faecf5eda42aab8fcd/images/d157c956b5a869a0a101ffe781d35872ac16c11d4da7a87e142d04cd69105ad8.png",
+      "price": "R$ 5.319,90 agora",
+      "extracted_price": 5319.9,
+      "installment": {
+        "price": "R$ 295,55/mês",
+        "extracted_price": 295.55,
+        "period": 18
+      },
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcS5iZb7O65yRZdeoOliOI8AoXx9kl87CSoK8yKkMqSZxi-aahAjA9Ug57Jg4GWxXw8Mbg53SI29edA-CXzDx9IPo-7-HqPyHXfHLjkfVlzCfDP3y_lid_6L",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/mJfzA3icDcltDkMwAADQE5WE-ahkWRoSDCOTbeKPoFQxZZpMHWr32W229_d9Px3n82rJcjPVLzHzBgNeTYpEVl5yWks1e8prx-aZTuS0HP9noQuGbp1qNK-MWNfENccNi0ca-yZi2QaH0TTslAWmCIZoSfONgrLsUI_gjWjGmRzcx5a9zagimpr6CmwwAna2Oxv0EwYM4C2J8LLWC_uhvY-73TqJKoqR4kIPf-mnPRE"
+    },
+    {
+      "position": 21,
+      "title": "Cama Fawler Elétrica Basic 2 Movimentos",
+      "product_id": "13375176980227743588",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:13375176980227743588,headlineOfferDocid:2097747295805535284,imageDocid:10535255378835324791,gpcid:16048295354055514290,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMzNzUxNzY5ODAyMjc3NDM1ODgiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyMDk3NzQ3Mjk1ODA1NTM1Mjg0IiwiaW1hZ2VEb2NpZCI6IjEwNTM1MjU1Mzc4ODM1MzI0NzkxIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNjA0ODI5NTM1NDA1NTUxNDI5MCIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTMzNzUxNzY5ODAyMjc3NDM1ODgiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyMDk3NzQ3Mjk1ODA1NTM1Mjg0IiwiaW1hZ2VEb2NpZCI6IjEwNTM1MjU1Mzc4ODM1MzI0NzkxIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNjA0ODI5NTM1NDA1NTUxNDI5MCIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "portalhospitalar.com",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcSne3b7gq-6hj5gbx7utURI0pEPfvyUnHXbu3NggKwkfxEGab3w0eDpJkN9j7WSlF5UM901qXm3Mrw-Sp3qKmav1Dkk2cz8iAPqlbaQeSB9gFU",
+      "price": "R$ 3.464,00",
+      "extracted_price": 3464.0,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcR1HrsGGPBqeGoS--X06LAf7mY4UA5zHoge2Ty83sBFbkv-D0isfw7iaFoitIxtVLnrGJL5srGwtf7xZ4RGP0xVvbY1xf3iiGpsu-CshyE94ybCa0IJkTp0",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/0iMbD3icDclJDoIwFADQE1WqoAiJMThQJMQQRCLuABkaAq38L4OH8j7eRt_2fT8VogRTUfI26yaJ-YNg2qqzEjBBns0y0ShQCSl5W26fm_-Z1vlhsCyYOx0w5u-eORMXQm505VmF3sTa1Vq-HVHmi3Baq7Cz07onB8qhGHSe2ILjacTIazvmekvo2ICFPt61gPl0jPo0no-FyjmT8CJ7qKajoU3pPqEntw4l_QH2ED3U"
+    },
+    {
+      "position": 22,
+      "title": "Cama Hospitalar Eletrica Motorizada Super Luxo 8 Movimentos com Elevaç",
+      "product_id": "11355855543793156384",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:11355855543793156384,headlineOfferDocid:13917403669734724848,imageDocid:8808711703319632840,gpcid:440100962714709520,mid:576462491125283431,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTEzNTU4NTU1NDM3OTMxNTYzODQiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMzkxNzQwMzY2OTczNDcyNDg0OCIsImltYWdlRG9jaWQiOiI4ODA4NzExNzAzMzE5NjMyODQwIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI0NDAxMDA5NjI3MTQ3MDk1MjAiLCJtaWQiOiI1NzY0NjI0OTExMjUyODM0MzEiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTEzNTU4NTU1NDM3OTMxNTYzODQiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMzkxNzQwMzY2OTczNDcyNDg0OCIsImltYWdlRG9jaWQiOiI4ODA4NzExNzAzMzE5NjMyODQwIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI0NDAxMDA5NjI3MTQ3MDk1MjAiLCJtaWQiOiI1NzY0NjI0OTExMjUyODM0MzEiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Magazine Luiza",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcSih4OGBy6I-8Y9rmBGElnUsUhVO1JLH53Avf5IoQXrpam9uACsH98TwZdKX_88JkDMUD3r_hipiIPT3Ys2KALlduNLoW0i2TV7_N45ClWS5ZY",
+      "price": "R$ 7.919,68 agora",
+      "extracted_price": 7919.68,
+      "installment": {
+        "price": "R$ 833,65/mês",
+        "extracted_price": 833.65,
+        "period": 10
+      },
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRKjUz1GimL1sPNi0eB9245Jwqmj-EdOM1cmRUvuWGV_XeqaafZrup0IRjKCSaaKNd0SmM6j2SHZ4YduB687sv-aEGqV2Xf5Bd30Gt6_08UZENZa2rI955LZw",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/u4GumXicDclRCoIwAADQE6nT0lKIyJBl1gpFq_3I2rQczKabRp2q63Sber_v-7lrLVVgWVVL-5fUFTP0tQXmTWmiG2rSh7DU_SFl096W3eJ_wQoxH9I04fnbho3Y2eqIGlCFvjN1t89OcCNih71NRZqPwwkW5bnqCKlxP0gQpzxZZ4QkiIFM7D3uZBs8vbAh9OYzNRokgl3hnGs3ZBMAtVeCeY4jhInTx77r7vDzB2jLPNQ",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRKjUz1GimL1sPNi0eB9245Jwqmj-EdOM1cmRUvuWGV_XeqaafZrup0IRjKCSaaKNd0SmM6j2SHZ4YduB687sv-aEGqV2Xf5Bd30Gt6_08UZENZa2rI955LZw",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRibWS1YGbkNq6DKR0owECXxPJU1FUaRPy9Cvv69NxkRyupZu9Qv5T7cXhgV2rIPW6nNdMXEMpUChGf6oZyJllVe0GGfB9dGVEeJMhuvx9rBS2bIOJEAFvenQ",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR0gN3J7Vatz_gleKkFrB0EeUrNSemWhfLIM9F-8NnEH8p5ApTQ3pxH0uSjOu19dMh_4RQlsa7BRu8wC9y0rA2QO9SshOe-Z1Ez-zpyPCXS1sNec6QgeWvt",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR3eO7v-TH1q3w3-Lw-Zw-QAFOTAhNcYAVT-9ellbBbZR8_-dAzuMscc3jk7POvUKrXAsQdhUhYLIkhuR6LuaQWTzF3dKlb8mU1h4YmUASpriq4VJw_VE9y",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcReHgVxrO6bjSUhIVI-5JB-dcx4ITBh8_HsNAT6L-hOcrsuGdAY6RdQ4AWxfu2WbISXpKGiGSYd2ZbAByxnBYyzumoW3ytMyaSHnWLvZ1VkqrSj0q-5OVBb"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/u4GumXicDclRCoIwAADQE6nT0lKIyJBl1gpFq_3I2rQczKabRp2q63Sber_v-7lrLVVgWVVL-5fUFTP0tQXmTWmiG2rSh7DU_SFl096W3eJ_wQoxH9I04fnbho3Y2eqIGlCFvjN1t89OcCNih71NRZqPwwkW5bnqCKlxP0gQpzxZZ4QkiIFM7D3uZBs8vbAh9OYzNRokgl3hnGs3ZBMAtVeCeY4jhInTx77r7vDzB2jLPNQ",
+        "https://serpapi.com/images/url/4U0MlXicDcnbDoIgAADQL8pLWzbcWjMzJk1Sy0u9JZI4DUmR9K_6nf6mzuv5fpiUYrB1nXLSz0LSciELbmjVIO-yJhrpnvrAOiFqXm1fm__ZDi4BJHFdZGfzCosGv6z9MTa6t-fmU4gS85Dc43AGrlIWwFMTz6O4jSBSq8ua5KxKl70fZhbHZZB7gUhcBh9Wd5tR26bUgPCxAyVMPYoCNqoJ9LvzsvBPyHMOivLoB5nqPog",
+        "https://serpapi.com/images/url/zIw-b3icDclZEoIgAADQE5HaKs00jTWabZjaNv00hgSWIgFWeqju023q_b7vh2kt1NAwCMeyFpqkQF-41aJKJzrDLVwWhmKlEBmn48fof0MHpXCGI5OizmKwT3RzpjlZ3j05MV2ykygmxYFdV_M19ICNuOvboueIbdgRb9-s4ltQWTBds3M3CnOVDCZRZb-msDal0w4DGCsWEHCy3AY0ot5Mj7GlEMH9kJLDU_8A6eg9QA",
+        "https://serpapi.com/images/url/6RdF4HicDclJDoIwAADAFxWCJSokxtREXEARBBQuxC6xyGKhRSKP8j_-Ruc63w9XSkhb11lDurdQjAKFm4l2l-qmCqKRZ61L_hSiaO7LdvE_Gx2ptSEhZP7sBaKt0cIBAm8A2QAC5PgR4keSoiQCFqsqvMJZOM8BRWN_kITARzk7-a_Y7a5IBpTHPPV2Je_Dqdffgks0OpC6FZ7XscHNtI7RWXRFayb7IU_W1vsHygs9fA",
+        "https://serpapi.com/images/url/50NuxHicDclRDoIgAADQE5Fl6qqtNfhRy3JJafrTAkysiSjYpEN1n25T7_d9P1xrqVaWVQraG6lLBjQR00ml9E3XdELbxlK8lbIW1aZb_28FD2zp06QMqnTsY4888JmHaQjcLQKMjk54QnxxDdQBnrwI8Jj2avAZzL2EHR2YjffBzkiIL3Ln1z7OmV0QiMwoUG7eQ9Nmc6P35oYDkUWvYpY-ux4_ph1w4xSRHwuGPik"
+      ]
+    },
+    {
+      "position": 23,
+      "title": "Cama Hospitalar 2 Movimentos Manual Casal Bond Hospitalar",
+      "product_id": "12523614740728677560",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:12523614740728677560,headlineOfferDocid:12641408789480320317,imageDocid:13244096645909256721,gpcid:3686051406849393533,mid:576462899906587238,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTI1MjM2MTQ3NDA3Mjg2Nzc1NjAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjY0MTQwODc4OTQ4MDMyMDMxNyIsImltYWdlRG9jaWQiOiIxMzI0NDA5NjY0NTkwOTI1NjcyMSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMzY4NjA1MTQwNjg0OTM5MzUzMyIsIm1pZCI6IjU3NjQ2Mjg5OTkwNjU4NzIzOCIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTI1MjM2MTQ3NDA3Mjg2Nzc1NjAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjY0MTQwODc4OTQ4MDMyMDMxNyIsImltYWdlRG9jaWQiOiIxMzI0NDA5NjY0NTkwOTI1NjcyMSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiMzY4NjA1MTQwNjg0OTM5MzUzMyIsIm1pZCI6IjU3NjQ2Mjg5OTkwNjU4NzIzOCIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "mercadolivre.com.br",
+      "source_icon": "https://encrypted-tbn3.gstatic.com/favicon-tbn?q=tbn%3AANd9GcSBVGRqm58J9OJX3IxIyEgaTrGIXvmEaBTLCMDFyeY_ZzPlvxqD9Jc3IoGF3TbIIYsFBPBNUUleUhVLk5y1Ehzul9ptIAXWKXBkOwVS",
+      "price": "R$ 2.820,00",
+      "extracted_price": 2820.0,
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT4bbEth56SiB1YMO1SpzWACVQm9pCzaXZWtSy3cx27yEmGacd7pPIiUSzdPcCvM-6VDXK4Wly5zKlF-QwQP-A4meYiOCWxMPMoqGjAi_RYfJCQMbDhMhgD",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/eSXgg3icDclJDoIwAADAFwFBWQKJMViQKKmAKIsXAy3SGpYijUof5X_8jc51vh_COZtsRal79JgZr7HEq16Vm4mXnCIZDZ0ykYEx2jfrcfU_2zlgy0cnrao8TnQjoRu1gKGaMJE5II07iwFR5peMJ_MSvRfm7HV-ibDJoh09JwJHCDyhZKRuHmhZO-siaLdS_IojydG6uqAhyN4wgsPo3x16PRa3PYhh5RJIGvcHBgs9ng",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcT4bbEth56SiB1YMO1SpzWACVQm9pCzaXZWtSy3cx27yEmGacd7pPIiUSzdPcCvM-6VDXK4Wly5zKlF-QwQP-A4meYiOCWxMPMoqGjAi_RYfJCQMbDhMhgD",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTWDs-gc9RIEfGXiiGHdLUqe7e1Ei3LPUJMJaLhZaxYk9qro6I3w6lm4YtsTMxJOJHpLfE1AJ1zUdzMe2ssekY8wFh8xtIxW8uzMhJhbY9uDeThXmI-J5un",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTY22ILopaPpaiZyQ6bciqoLVVLDmScUFPlNKxCvDtsoVWc4zMHo3SZqI10cQjdcZxdvwmIzzB_Rc1SEmlR9UBEV_c5Q3tmgkOfbeI9WgSwSmS6uOeqN0576Q"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/eSXgg3icDclJDoIwAADAFwFBWQKJMViQKKmAKIsXAy3SGpYijUof5X_8jc51vh_COZtsRal79JgZr7HEq16Vm4mXnCIZDZ0ykYEx2jfrcfU_2zlgy0cnrao8TnQjoRu1gKGaMJE5II07iwFR5peMJ_MSvRfm7HV-ibDJoh09JwJHCDyhZKRuHmhZO-siaLdS_IojydG6uqAhyN4wgsPo3x16PRa3PYhh5RJIGvcHBgs9ng",
+        "https://serpapi.com/images/url/3wYTW3icDclRDkMwAADQEyHYDMmySBht2JaF0P1RpY2htDJzqN1nt9ne7_t-qJRcuJpGBjy_uSS1IqvBUFshS8mwisdeE3TknA3taTr-z_UutRPiNPeF0mLnDoImLBgLozrOJnIgesDM-JbBBJYxfZQr6pxpHi1gvqxnv0NSpMkKrzDicRPoHtS3rN4SYghBOmS_ztReJVhze9kSCmmFnMUnKS16oMD9MvwAG3Q-Zg",
+        "https://serpapi.com/images/url/8sS_JnicDclJDoIwFADQE8kgisHEGGcbEcRKiWwMfLBUKS1SJ07ldbyNvu37fgqlZDPU9byC21uqPOuotLI02qhEMdBAcL0phJSsouN69L_hxMucFRyO3S5yhUx2MmHxO7BTYLVwCXHnHEO43JXe5jV7zFUjSAS9drsWFo5rZBoQXDKIX9njyVHbTk97MPGCl3snnC7ICfqBpTi9-uc0R05E8RNzbN_9vPaM_sAOfv3MP5M"
+      ]
+    },
+    {
+      "position": 24,
+      "title": "Cama Hospitalar Simples Com Cabeceira Móvel e Grades S-0221",
+      "product_id": "16885543806292400570",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:16885543806292400570,headlineOfferDocid:2714227762671635170,imageDocid:6041756186515603329,gpcid:15016702646451264759,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTY4ODU1NDM4MDYyOTI0MDA1NzAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyNzE0MjI3NzYyNjcxNjM1MTcwIiwiaW1hZ2VEb2NpZCI6IjYwNDE3NTYxODY1MTU2MDMzMjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE1MDE2NzAyNjQ2NDUxMjY0NzU5IiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTY4ODU1NDM4MDYyOTI0MDA1NzAiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIyNzE0MjI3NzYyNjcxNjM1MTcwIiwiaW1hZ2VEb2NpZCI6IjYwNDE3NTYxODY1MTU2MDMzMjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjE1MDE2NzAyNjQ2NDUxMjY0NzU5IiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Cirúrgica Salutar",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQCqTZp-k0HvlQLP67Q_4Say5AYNIWcv0tqUhYMmpWEGMBe5w7MMIYtaf6no3Soi0akij1MsPZVr2FSj6Xt2-Y5cWgFXCFhjxcvMULMSxvWIKViJUw",
+      "multiple_sources": true,
+      "price": "R$ 1.273,00 agora",
+      "extracted_price": 1273.0,
+      "installment": {
+        "price": "R$ 223,33/mês",
+        "extracted_price": 223.33,
+        "period": 6
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSQuQBW5afCth_MRj89FP0PN4omHU18q6I0hnmCDk9-86aGH9azDtBu8l6AoDfeBQJUB2DOn_OhoFDzH0bfEuNYZVm2EW8oCwbqW0lrN7__ACPOSrGSFq1D",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Eh3zv3icDclXDoIwAADQEzGjWEiMAcrQRIYEif40ZRaFllFi5FDex9vo-33fD-F8mA1JqmgxvQdelQLPqSI2M8e8LcSC9dJM2DC0tDmM-_8ZZlDqXpHES2xlW1zbnKDz5QF0N5KjYMN6P1XAqB1lQnsbPnUBaNjzdbxCbi2g00wG68qKT6mlwpCikDAXrr6c184S3O7XXnUywOxXPmZyNwU7hEw7CpPJS9xRgT-ksDwR"
+    },
+    {
+      "position": 25,
+      "title": "Cama Hospitalar Motorizada 3 Movimentos + Colchão - Zimedical",
+      "product_id": "15572187895501126757",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:15572187895501126757,headlineOfferDocid:14615429548823971044,imageDocid:12419091561913699099,gpcid:9638824146298023501,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTU1NzIxODc4OTU1MDExMjY3NTciLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDYxNTQyOTU0ODgyMzk3MTA0NCIsImltYWdlRG9jaWQiOiIxMjQxOTA5MTU2MTkxMzY5OTA5OSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiOTYzODgyNDE0NjI5ODAyMzUwMSIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTU1NzIxODc4OTU1MDExMjY3NTciLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDYxNTQyOTU0ODgyMzk3MTA0NCIsImltYWdlRG9jaWQiOiIxMjQxOTA5MTU2MTkxMzY5OTA5OSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiOTYzODgyNDE0NjI5ODAyMzUwMSIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Zimedical",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcSvY7Wp8wy85u_eqBSRAanDt_T7LAKH7BL9dyfbhvLNLc7p7RR5X9XsyE85UCluVFbJ9xGDtLtuAYj3A7rqB2E1GZ4HpOEqPzINzNPh3A",
+      "price": "R$ 5.710,00",
+      "extracted_price": 5710.0,
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS6pksC_DWPZxXc3lcbfRWbmyscOfMw74r7bxEQAbgeROWvQgR1tmgjRodiYaqAOqOw0-WIHUT5cDusLfKL0RgCcBBp-egbdJpRgoGgam9sg5WgeXezr_QigA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/uQrWrnicDcndEoFAGADQJ0oZ0tSMMZHJf1rMxk3Tfm2fUG3tIp7K63gbzu35fs5KCenoOi-heQnFU02xstdBqRKVQweqQpfnSoi8xFE9_J_jblLbh91AXOUk9uj21EbQuwHLCGXFS0KQrZ9Wv7FYOw1dhpwE9BEi6aoCL6RK82NSu0EdPA2NzmeHvQneXa6y5cogOIHxWGgcWboQBCsfk8KWaFLkEX83cZij-wMPhEBi",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcS6pksC_DWPZxXc3lcbfRWbmyscOfMw74r7bxEQAbgeROWvQgR1tmgjRodiYaqAOqOw0-WIHUT5cDusLfKL0RgCcBBp-egbdJpRgoGgam9sg5WgeXezr_QigA",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTmWwyaMnIrO_eHgoHwe-vXqTzFoyQLUiixDfkdAhzXU-QVSZvzq-PjmLx_DLVoAu-ZcoP1vVg61ZunVA_mnMNh38fj_3HLEk5aLpSVsoGi_Art4xS1zUAZ1A",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQD21SOvmh1ebwVEgL2PZvSw6_AoK9-4aGUM5HcM8iQmtFmRyjj9YawCF79YUG3ImUY7tNQkEkZUl-NORE1s9UFMBP1kRnwNWJTUIffJmQRJ_RbL6Q8kCjjdw",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQSq6ShRAU-VYb929gc2B5-0yUYhttwKQgT3sUyz7n2PbU_2GXDyNRf-h6VzmQN5EOJJHX7XKqMUZOJVfjy3gBtLEFOMzbVcu1y8xtlcop7MnwUn0Q4Dlje",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRrHdqHVN47yPOK-GKS9qySj4H9iDF0rpRSm-WRexWP1a7JXwAJpgLnFhD2pNECHw7uWhCDySsva8FkSlpgYibtQmfyH9KlD0GLTM_jd7JxKtoIjuK0eoqAnw"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/uQrWrnicDcndEoFAGADQJ0oZ0tSMMZHJf1rMxk3Tfm2fUG3tIp7K63gbzu35fs5KCenoOi-heQnFU02xstdBqRKVQweqQpfnSoi8xFE9_J_jblLbh91AXOUk9uj21EbQuwHLCGXFS0KQrZ9Wv7FYOw1dhpwE9BEi6aoCL6RK82NSu0EdPA2NzmeHvQneXa6y5cogOIHxWGgcWboQBCsfk8KWaFLkEX83cZij-wMPhEBi",
+        "https://serpapi.com/images/url/OSEchHicDcltCoIwAADQEy0RKyqIGFQaTEvUJf4ZNk2nuE2dXztV1-k29f6-76dUSvYHw8g57Rap8gyoF7dWRa9SxeiKisboSyEl48WpPf7vAL1sb9OweU5L6vJbdye5UwhnysEYt6G-isVHEWPz-V1nsNRxBHwcJKNuwaNq0EzOCAs4gISKhzniYmsmA8eQNNz1Smv3rojloEu9SZEMcC9sRmCn1nNg6ggmJvwBVaFAYw",
+        "https://serpapi.com/images/url/uSFlAHicDclJDoIwAADAFyGpC1gSYxQBRRZbrQYvBspeCygNDb_yO_5G5zrfTylE1xuqmjX0PXYiSxWRNGBS9CIWFZ3Qlqt92XZd1RTr1-p_xiZIoUPRbgrO4cBLkCXyahXe9HQfzlJ7bNojVOaxQ_zFnvrLCnFhczzWNYxiado6jIgzO3AS6SJAzGJ38lSCEFugh8T2tyfAcCODm3shhzx3OcLuAyeehpbMrOtU_gBIJT1x",
+        "https://serpapi.com/images/url/I909EnicDcxRCoIwAADQE01tZmYQYWiGpWY2sX6iLZ2KzZmLmofqPt0mvx-837cUgvcLVc0ZeUou8jsQmOkK7cVNVEQh7UPty5bzitFVtxxtYYd3yyNx0s2S8mgjkJ6xBS1K4NoAmkTncXzvYnrSeyQHk8EDRlfoZY4MjwUoZ-nwiEPDjXx_m5nZrgvQJfLTopY6XYu9u4mCAafkNZHzj2hIy82AvRHT4qnT1Pkf2HU9lw",
+        "https://serpapi.com/images/url/p9A1AnicDcn_DkJAAADgJ_KjZhNba0ZcTpJrqb8aTpw4hxP3Vr1Ob1Pfv9_3U3HORlNRCpoPgvECSzyjqlyOPOUkl_OuVcaqY4zQctdv_2daITa8PB4A7sE11HQRnaDkQWT0AtUaMIjjqgOLUSslcbEk0SrV_dts-awMqFs5axbubTDrU1LZjkDjO924L9Sw8k4yfm6fAhiwcVQvuBwfNdb9BfLuUE9QLbreovMPfI4-_g"
+      ]
+    },
+    {
+      "position": 26,
+      "title": "Cama Hospitalar Fawler Manual Com 3 Movimentos - Desematec",
+      "product_id": "6508340472669167378",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:6508340472669167378,headlineOfferDocid:16193176404816891080,imageDocid:38074483413270474,gpcid:17665686409832584660,mid:576462762295193499,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNjUwODM0MDQ3MjY2OTE2NzM3OCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE2MTkzMTc2NDA0ODE2ODkxMDgwIiwiaW1hZ2VEb2NpZCI6IjM4MDc0NDgzNDEzMjcwNDc0IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNzY2NTY4NjQwOTgzMjU4NDY2MCIsIm1pZCI6IjU3NjQ2Mjc2MjI5NTE5MzQ5OSIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiNjUwODM0MDQ3MjY2OTE2NzM3OCIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjE2MTkzMTc2NDA0ODE2ODkxMDgwIiwiaW1hZ2VEb2NpZCI6IjM4MDc0NDgzNDEzMjcwNDc0IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIxNzY2NTY4NjQwOTgzMjU4NDY2MCIsIm1pZCI6IjU3NjQ2Mjc2MjI5NTE5MzQ5OSIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Cf Care Material Hospitalar",
+      "source_icon": "https://encrypted-tbn3.gstatic.com/favicon-tbn?q=tbn%3AANd9GcRI33qcb5GDJHAMe0hA27zOiid8hr4abUqqLpDzvwXRbtVHsVPyv8h_WJPcW3btVvrTcsdtDMJ9Em-_Kt7CvSWiBzbHbHFybVz-2YESK2_0k5lrzAk",
+      "multiple_sources": true,
+      "price": "R$ 4.180,00",
+      "extracted_price": 4180.0,
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR8P5CG3NCPEcm3ibqpKXwCyPV8d0JR38DOfM_S2Ry26IqAE11_YmIDQvzSqg6mfehydXTB3adFLgdFw0crWKUrHN7ZQ4kHmy_HCOKfrQtt7Fq4tLmUTC9aFg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/_FjqPXicDclLDoIwFADAEwlK_aCJMVhFFEVA8Lch0EIhptDCi6aeyut4G53tfD8lgOhmup7XpFUCctqDrDY01kEKFdFIw_WubISoaraQ8__NLI9ONyQ0_RHeIA_7a8JRlUnhXl9Y-WeT9nchMlfH4pCcjFAZ46201oNBcuPbVfB8nyQb8yIvFb1GS5RSe8-o_eqT9uLGreNN7sHw4XCVOPjoFm0AMLHlEPY8jvA0tdkPOA89sg",
+      "thumbnails": [
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcR8P5CG3NCPEcm3ibqpKXwCyPV8d0JR38DOfM_S2Ry26IqAE11_YmIDQvzSqg6mfehydXTB3adFLgdFw0crWKUrHN7ZQ4kHmy_HCOKfrQtt7Fq4tLmUTC9aFg",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ-VLb4ApLpLHb8YZf-0QDGTTSrmmmW8Pu0sqVaSnLtWfePc1CuDMoLKvIsAYG84jwycNsPcyfOdIg7kVZDmeJ3I8uCws5yDSKBL184pCt78eUE5moWwB2l1g"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/_FjqPXicDclLDoIwFADAEwlK_aCJMVhFFEVA8Lch0EIhptDCi6aeyut4G53tfD8lgOhmup7XpFUCctqDrDY01kEKFdFIw_WubISoaraQ8__NLI9ONyQ0_RHeIA_7a8JRlUnhXl9Y-WeT9nchMlfH4pCcjFAZ46201oNBcuPbVfB8nyQb8yIvFb1GS5RSe8-o_eqT9uLGreNN7sHw4XCVOPjoFm0AMLHlEPY8jvA0tdkPOA89sg",
+        "https://serpapi.com/images/url/11-Rr3icDcnbDoIgAADQL1IzdVJba16aWWQ6TVdvikg3hARz_FW_09_UeT3fz1VKLpaGgXs0KC5xq8mmt3QiZC1vSEeMGuLKOL_1ZP1a_W_pJe0iQplWwsb2OORw24DzpdNmWRgVRT5QSiuQjjPxKuu8h7LqcIrMYAwPDO7fsfDOEbDvk0KJSJHqjm1M3Ed5CSneWTEYg0k4Ksz3PjSBzQPpAnzaOJRVkz9_muQHibg-Fg"
+      ]
+    },
+    {
+      "position": 27,
+      "title": "Cama Hospitalar Manual 3 Movimentos com Elevação do Leito 1006 AR",
+      "product_id": "9733285408361558355",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:9733285408361558355,headlineOfferDocid:9733285408361558355,imageDocid:1443671595578201768,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiOTczMzI4NTQwODM2MTU1ODM1NSIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6Ijk3MzMyODU0MDgzNjE1NTgzNTUiLCJpbWFnZURvY2lkIjoiMTQ0MzY3MTU5NTU3ODIwMTc2OCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiOTczMzI4NTQwODM2MTU1ODM1NSIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6Ijk3MzMyODU0MDgzNjE1NTgzNTUiLCJpbWFnZURvY2lkIjoiMTQ0MzY3MTU5NTU3ODIwMTc2OCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "orthohouse.com.br",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcTHZYiiA8CroiUaGTEYLakpJrF780TV7Wy32ZJruWNGVRMUvhqWc659nTyW1bbpBiuJEUIHYqFAXxd2eulY1fh6Ckbxsu5ECJXKGwey7A",
+      "price": "R$ 5.490,00 agora",
+      "extracted_price": 5490.0,
+      "installment": {
+        "price": "R$ 784,28/mês",
+        "extracted_price": 784.28,
+        "period": 7
+      },
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTbjiGtHMFUhmsIgELK8M9L5pv4JKAf_EyjznS3WHMxM2xkW4JJDRL31wDkwQ6XN_mydhe6eeu-BgsIaJFghPCq0GzdekW4U6_tqXZ74nw_V6rHkVnHnQdqFg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/7zHtp3icDcpJDoIwFADQEymoiENijMpQEYw4QdwQoLVFQm3tV4RTeR1vo-v3vh8GINRU0wjPH40AgjuQcb1LFaRQ5N38XmmK3YUoOJ3L2d-miy2euPkxuxUuoMA5sUqtqe1vxsHEH4qX4W0W18Rubi0_DCIUvIP-u4wMz7P2_qBXW2UdmvE2qRrMiEnIs7Okap16DmW7ldTdFpP_PpkJyPgyMnidnM0HKs8c8RBLh_4AoPo_DA"
+    },
+    {
+      "position": 28,
+      "title": "Cama Poltrona Elétrica Articulada Com Grades E Colchão Bond",
+      "product_id": "10779288353103934789",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:10779288353103934789,headlineOfferDocid:10779288353103934789,imageDocid:9097293779552558949,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTA3NzkyODgzNTMxMDM5MzQ3ODkiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMDc3OTI4ODM1MzEwMzkzNDc4OSIsImltYWdlRG9jaWQiOiI5MDk3MjkzNzc5NTUyNTU4OTQ5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTA3NzkyODgzNTMxMDM5MzQ3ODkiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMDc3OTI4ODM1MzEwMzkzNDc4OSIsImltYWdlRG9jaWQiOiI5MDk3MjkzNzc5NTUyNTU4OTQ5IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Mercado Livre",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQ0RRqqTB_7YORA1kitJggPy-Wr-UPmTC5nrR2yEMS4byF4NVe7xB5jyJj1cDZy10QnZ_MJBDVxKu9Z0P4BKcNYG_rCyS7Mjdr_2HnDJM_CpQ",
+      "price": "R$ 12.490,00 agora",
+      "extracted_price": 12490.0,
+      "installment": {
+        "price": "R$ 1.040,83/mês",
+        "extracted_price": 1040.83,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQTQ7uJDsGrmFMgTo3HHu0qn7fUajgEBTMgzlTkLVug-9kx3pxc_q4EI2d_3Xe86dX_8vsajZxSLXWyechL5GRAwYbEZ4ikf6qcC9UBIWYo0RDrVp_RDnoI",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/ozHIynicDcnbEkJAAADQL4qKcplpGiI0NJMQvRgt1iW7y65SH9X_9Dd1Xs_3UzFGqMrzBQLDi7Ain7EbWnCQsozVgAO442mFCakR3Pab_6naMVcscApO0ngwqDV0ew8GWLDtcd4jqQyzBpp64MH3PWjdaIQzpZ0EMoG0F01nmadCXMjrPE7lB82a63R248urAJW7snztmdzMq1i35boHOyXUnUuC574xRCT1DYSdH0mQPnw",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQTQ7uJDsGrmFMgTo3HHu0qn7fUajgEBTMgzlTkLVug-9kx3pxc_q4EI2d_3Xe86dX_8vsajZxSLXWyechL5GRAwYbEZ4ikf6qcC9UBIWYo0RDrVp_RDnoI",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQL-0RKvPYv9HeGCAD6B1F3rS4HyfAiGavsJsLsJygiQOEjDeHPZl_HgzcoByFLTGFXjMZDNlI3Vhi7yDzKv-BYSmnWIFJEj4m8N7H1QoMF5cksE2lNa9KFNA",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSKoFqE9-1wdPZeZXk9CHQmUkzkJm1oUw9vfQ_iWm7grAvGsNpWAOFE7xuBMkbQgxbYgX1lTpyeCrCYUj7o3WVmzu2GM6y8yIWeJVQg2uyGyDe3fMdS9N_6KQ",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRpd-L5eS-HQSGgHL8kpDvI9uDJLlnha1RGzqKumkVQs6ZFEDijp80ZXiZFZlAIhFQCF4YQXLXTDMdKBraIGPQNUTJwjXz6T7M8yEa6zb4193iU9OnlsfQMgg",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRqvGnILTye_kPizzCzAaU-RDTy7cFYUT1o3zT0n6x65RJrShiWRUq1ATF9YCCj3ZK1PIeK1MpBNghH5d7EkOsLup52xuPzHBSsHYMs5BJg7xEtXo0-LE22bGM"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/ozHIynicDcnbEkJAAADQL4qKcplpGiI0NJMQvRgt1iW7y65SH9X_9Dd1Xs_3UzFGqMrzBQLDi7Ain7EbWnCQsozVgAO442mFCakR3Pab_6naMVcscApO0ngwqDV0ew8GWLDtcd4jqQyzBpp64MH3PWjdaIQzpZ0EMoG0F01nmadCXMjrPE7lB82a63R248urAJW7snztmdzMq1i35boHOyXUnUuC574xRCT1DYSdH0mQPnw",
+        "https://serpapi.com/images/url/bjE-ynicDcn_EkIwAADgJ0KhH7rrOmIWWqmu4p9OS0zYsp27eapep7ep79_v-ymFYHyhaXmLO8lE_lDEvdXVgotMEKxi2mi8pIyRtli9l_9b2Ohh-TiOlNEh7PdJb8HcX9vu1BkDozuaUD5t4mc9D3jEA1mQeOdVbg73aX2DxYCpI0F08sG12qYuqjfGuSQz6Q5hrzjJsWkvGxB4ldnM0QyOY7oFE_zinl6jzAoBsn9Z7T1M",
+        "https://serpapi.com/images/url/fkm_Z3icDcn_DkJAAADgJ8KwpbO1Jklp1K3kxz8WzpHOHU51PVWv09vU9-_3_dScs9FUFNQVg2AclRLPO13GI7_yppALSpSxpow1HV72i_-ZVlACtzjt6aZ3gKQ-y2OK0rgF9haSsH23HlFp-ASPCmZNRAw8WA93DFhkHTaO8ZpWfptD_MoTHKv3MxPIHuwkvBlUjy7kPWmuPxNzsYuQd4FYm4Qr1kiv_PIEgmy2hz_lTD95",
+        "https://serpapi.com/images/url/jCOvC3icDcnbDsEwAADQL9pGMKtEBLtaN8rI9G03bZmu1iLbV_kdf8N5Pd8PVUrImWFUvGg7oapSUzkf6ESqTLFCL5q7IWkjBONk8Zj_b7aMS-AVe1FqcFIdNB8dPOJD6ybsVwCe9gbWnGbDvdc_wuf9dkLSxK5js6uwBjhl2MX1MqAuWrvjM0phmthRGa7aLPB2KD4mm_c17c1kGlmdk5l9Ph6CETuCLa_lBUWE_ABjVz2n",
+        "https://serpapi.com/images/url/kGUwunicDcnbCoIwAADQL_IyQ6UgQs00LyU6KXsJm7KZNGdbofurPqe_qfN6vh8iBOMrTWspes5MtI0ibhSomItadEhFw0PjZGCso3gzrv-3cg7NMkD5-A7oPoFze-2zTkpPOnWp5Fs422hXlRAMCwl1ak2WmUfPgnSnvByBA3fLyvPui0sMsn0bg5S5B0xCs7H9_siTFzON6ZXJ0C14WKXcdCNsT744D7qS-IZxC9If1jU9yQ"
+      ]
+    },
+    {
+      "position": 29,
+      "title": "Cama Hospitalar Manual C/ Regulagem De Altura + Colchão- Bege, , COLOR Bege",
+      "product_id": "14105617922439159600",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:14105617922439159600,headlineOfferDocid:14105617922439159600,imageDocid:6238698145853127684,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTQxMDU2MTc5MjI0MzkxNTk2MDAiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDEwNTYxNzkyMjQzOTE1OTYwMCIsImltYWdlRG9jaWQiOiI2MjM4Njk4MTQ1ODUzMTI3Njg0IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTQxMDU2MTc5MjI0MzkxNTk2MDAiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNDEwNTYxNzkyMjQzOTE1OTYwMCIsImltYWdlRG9jaWQiOiI2MjM4Njk4MTQ1ODUzMTI3Njg0IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Reabilité medical",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcR1rM8d89OLxJNkPaQTtstej_qmKKJg5s-rpo8qItnQkZOPRgUNsmePyfMKEq3VmrHelTA5bJQfhOAZF0OIokHuu2jJqC9MwMfnv49N42PRe6Zc5ew",
+      "price": "R$ 4.653,10 agora",
+      "extracted_price": 4653.1,
+      "installment": {
+        "price": "R$ 258,51/mês",
+        "extracted_price": 258.51,
+        "period": 18
+      },
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcR2ktEvoJC7Jd7K2vfE3HJ369JV2nw1ARB-QL6AK3EqkOXoe7JQrVsB2VNka06eRaDmy-eCnHUYy1XYYvcmJrED_XDJ3s5o2fwuAqqxBwc6cQgSGyvmWYlz",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/H56_AHicDcnbCoIwAADQL_K2kaIQ4Q1lhqGR6VPYnBfMTd3S7KP6n_6mzuv5flohRm4pCqF43kZBKkncqSo3XJSiwzJmg8JbNo4dbQ7T_n-WHVdmgFPQC39hyDVQZURgqX0YIqibKAN01ezUkZKjbkfQn_pTzoiBkjnjDsjivlR1kpbesEnEpeGl2LS8KBY8oNn3brmHIN8xUK9Pe5pezop1nDTnYFuGa_F4_wCQLD0v"
+    },
+    {
+      "position": 30,
+      "title": "Cama Hospitalar Manual 7 Posições com Subida e Descida do Leito em Aço",
+      "product_id": "4371440549467816960",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:4371440549467816960,headlineOfferDocid:4371440549467816960,imageDocid:15659080837433071169,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNDM3MTQ0MDU0OTQ2NzgxNjk2MCIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjQzNzE0NDA1NDk0Njc4MTY5NjAiLCJpbWFnZURvY2lkIjoiMTU2NTkwODA4Mzc0MzMwNzExNjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNDM3MTQ0MDU0OTQ2NzgxNjk2MCIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjQzNzE0NDA1NDk0Njc4MTY5NjAiLCJpbWFnZURvY2lkIjoiMTU2NTkwODA4Mzc0MzMwNzExNjkiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Magazine Luiza",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcRrOwWTz5FV1hmG4eaPZDKuNJfAfLl_20rKl7yKY7E7YtnOk_cbmo9sPAYGmxCeTNciqqMI5Mrahj8Q9Evg3n-ORNR8cVfd2yi9A7PfZw_5Vw",
+      "price": "R$ 4.724,10 agora",
+      "extracted_price": 4724.1,
+      "installment": {
+        "price": "R$ 524,90/mês",
+        "extracted_price": 524.9,
+        "period": 10
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQLuQdN_43SzUNZpSRKhzHOR2k1rI90VaNtQrJeygUJLYGvu8lzXH7otLYZQwxOI2XoZtyq-w4U1SQQ1NPYFtIkHlgpVrgsDWnonIApV0-9q0AHu9o_UvpKUA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Wuw2M3icDclvD0JAHADgTyR_shVba7ZWxE7HTnhjhR2ju8MP8an6On2bet4-308FIAZTlkuW94uAspDgydQNHeABdb7J-UseKi5EzeixO_zPtFBhXHLsjbhAmb4NV4JSEQZutdp-oDVq7xhK9ECA-2u5UHL1kss07ts1tnccvCTF89t3tJinsHTSrBM1xFhFt-QMTmO3VEQ9HU53xpljiUiRjE6x7NHgGZmES6wfw7w_Lg",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQLuQdN_43SzUNZpSRKhzHOR2k1rI90VaNtQrJeygUJLYGvu8lzXH7otLYZQwxOI2XoZtyq-w4U1SQQ1NPYFtIkHlgpVrgsDWnonIApV0-9q0AHu9o_UvpKUA",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQiD1oew-S0YV8lLamQUv65Q2DgXcAJ3zjx9r4c_7_OL4SnaUEn_Wy768ZQyPr7hT_dnVJodmRRMA9QUupN3UiKPPWNyQDrp7DpJ_UagffNE-NNAo9NPTYc",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQwIWYsjB0NU4ecOd0nIm0xxHMyVVQHm-wL8VTqiozO-59s2qPRiCuvLnKJKTCsfAsQyfbuBn3Et8QAkXHaPD6JZk5O8eX7GUbe_HK1WiRw3AGKde7iUvPL"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/Wuw2M3icDclvD0JAHADgTyR_shVba7ZWxE7HTnhjhR2ju8MP8an6On2bet4-308FIAZTlkuW94uAspDgydQNHeABdb7J-UseKi5EzeixO_zPtFBhXHLsjbhAmb4NV4JSEQZutdp-oDVq7xhK9ECA-2u5UHL1kss07ts1tnccvCTF89t3tJinsHTSrBM1xFhFt-QMTmO3VEQ9HU53xpljiUiRjE6x7NHgGZmES6wfw7w_Lg",
+        "https://serpapi.com/images/url/3hDTIXicDclJDoIwAADAF7EoyJYYQwIxQawUKIiXBstqpK1QF3yU__E3Otf5fjoh-OQoSk3JOHNRV5I4U1VuJ1GKnsiEDcrUMc572m5u6_85LqjsLYG9t2D1U0rUIrOuYTlA9DBWcOm1R-IG2vvyskedYBMfQj2hJfIpzmfTsE5wjkazS3FFs4BVQxzvXRuiOwca6ndRlIMZeiM3PR5gVLZNA3wJAJfZIEoL8gP0rT1Y",
+        "https://serpapi.com/images/url/VqbKDnicDcnbEkJAAADQL3IpKcw0DWoQuY1bvTSslc1YtFvoo_qf_qbO6_l-akp7onAcxOAx9xSWDC3wkr0RmlMEWNC1HKm7vkf4thu2_1NUt5QNEIxWeiZ3jXfjFQReyWOr5afJPM1JEpgtMzpSEg2oe3uMKJPl4IdIf74cbB_tSCeVSoK5Kp4aFg5UCtQmM3N_vz5eGtGTYLYx4gJeTXuRonAUVMMu4QbFL9_5ASg_PY8"
+      ]
+    },
+    {
+      "position": 31,
+      "title": "Cama Hospitalar Pro2 Com 2 Movimentos Com Grades E Rodizios - Procirurgica",
+      "product_id": "5328017125987687166",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:5328017125987687166,headlineOfferDocid:5328017125987687166,imageDocid:15949532516250607617,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNTMyODAxNzEyNTk4NzY4NzE2NiIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjUzMjgwMTcxMjU5ODc2ODcxNjYiLCJpbWFnZURvY2lkIjoiMTU5NDk1MzI1MTYyNTA2MDc2MTciLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiNTMyODAxNzEyNTk4NzY4NzE2NiIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjUzMjgwMTcxMjU5ODc2ODcxNjYiLCJpbWFnZURvY2lkIjoiMTU5NDk1MzI1MTYyNTA2MDc2MTciLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "Health Clean",
+      "source_icon": "https://encrypted-tbn3.gstatic.com/favicon-tbn?q=tbn%3AANd9GcR1SWAIo2fjv0U6GSSQS5nBHuExBueXhT-lVTi4Nz67PLW-U4I1m6ehhlh0gR_rGQbFxcYLX8NBbiy1ZM8PtGWNx2O_CoaOID5kOmU",
+      "price": "R$ 1.590,00",
+      "extracted_price": 1590.0,
+      "old_price": "R$ 2.210",
+      "extracted_old_price": 2210,
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR5qbKWh73K5VCm_3CAUKRKFBXAOiy4nCDqzuOCdaUUoqdpqqq6Q_oHxWWRoqqiF8of9kes21OGbXu-iK1Q6oWYpOV687Z_oewb3HyZTH2QDIIai4YG1JrWbA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/vBX683icDclvD0JAHADgT4Qhf7K1Joa6LWNxeGMO5dZy9-Os9Kn6On2bet4-388gBJ8dRenHdlq56DtJkFGVb7NoBG3llj2UeWCc0_G2h93_HPfcbcM2NYAgPFg6MnLvUeuem6EUBYfCjem6GT0f3kvsdU2WMeg4AJhJzaIXxikDoIHNrtt7P2tqHJJikShSE5Phkse5aVtVzfon0aO1ukRa4h-PDd2UoXqaMHF_igo-Fw",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR5qbKWh73K5VCm_3CAUKRKFBXAOiy4nCDqzuOCdaUUoqdpqqq6Q_oHxWWRoqqiF8of9kes21OGbXu-iK1Q6oWYpOV687Z_oewb3HyZTH2QDIIai4YG1JrWbA",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRRSd5AjTqBiw8uAHO2zfY6FN98xwVDLX53JWsJa61f61AeNJgtOAUfu-_32a45Y4NtydkScGwTStzN6ko_jKJpCM9Ir9du-1KfFuZXmbmOk5nbPOy3z9wmZQ",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcT9OQzCCQLHBiIrFbnlUudhvtoI74DHbH4OuC30t2orKMaGk6LrB0vUyMP8e5qqnej76rTO9bXRXA4e_VvatWWLV4pbEFE7_KTbzyrQiRWThs0_dWHaoSOT",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSs5xs4v6Brw0GeUo_xzIyyBi78RTmMQrz8x4uVapazhiorucOY98HZ5xUCPkHMqPh8RgIbxMMlkLp7Akb8FuX3FTwhmTnf-mEATmDJjcepzmakcH_V4wXY",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcQIwevQY0yylCXGMgxxLh83f4JzmXwwntjAMcn6qPBszHkWesMWU6GW9MbNh81pjLnJkR2ILmJTNRM155tZxBUwhBE9fpE1sQ0wVKcGVFt-"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/vBX683icDclvD0JAHADgT4Qhf7K1Joa6LWNxeGMO5dZy9-Os9Kn6On2bet4-388gBJ8dRenHdlq56DtJkFGVb7NoBG3llj2UeWCc0_G2h93_HPfcbcM2NYAgPFg6MnLvUeuem6EUBYfCjem6GT0f3kvsdU2WMeg4AJhJzaIXxikDoIHNrtt7P2tqHJJikShSE5Phkse5aVtVzfon0aO1ukRa4h-PDd2UoXqaMHF_igo-Fw",
+        "https://serpapi.com/images/url/LNn6G3icDcndEkJAGADQJ5L8TttM02w1FLUK_bkx7CIZbHxGPFWv09vUuT3fzwOAt3NRTCraDBwSJkBcTSdZCxHkdELrUmwfNed5lS1fi__NMWHIpK7rMQ0__dcq72cd3jrymN51g6DZu79s9jdNsa6tFelSqks4IVYGDj6nnRAqcqRqd5XAwAqPmr3vwUj0og6ftsXXB7RrEOsEyU6NLriVcekUWhUfnUEZUV8Gpx9G2j31",
+        "https://serpapi.com/images/url/7M_7JnicDclLDoIwFADAEwkEUcTEGER-Aa1oEXeEQgP4aUt5ksChvI-30dnO99MAiH6tqpSVchRAqxkQpit1DwW0pVLyl9o3XIiW1dtu87-1fawsv8QWSibHSeJg14bSI-yZvqtmAB6axj4ggYHezlwDncvoUPiPZSx32pCOh9OKLrqO0bu5lBhZ5Ha-2QbNr0MBWRZfDUFczzXzCJNplEl7znDTa3mVBQW_IPwDEFI-Bg",
+        "https://serpapi.com/images/url/rEwGj3icDcn_EkIwAADgJ5K6yLjrOvpFl5Lkqn8cSybN1jYZD9X79Db1_ft9P0gIyi1VzWvIOirymyKyejQouEhFCQeQYJUjQmlZF7PX9H-WvbuZa3jkuuTae-KwdrjOTySRvdd1TmmAMML-gfVAak2c0rRHJWEN3F9M4F51eZoHleu_AgTCwsuk7z-rLTXsKgOr5jxeRS3CUX1X8NKO8GLzgDntcVpBN4m19nz5AaERP-k",
+        "https://serpapi.com/images/url/IaNPwnicDcndEoFAGADQJ0qFjJoxpkxWaRsZ_XDHWm2ltew3tnocb-VtOLfn-2EAQjq6Tjl59QLoVYMLN0alhDNUZEQerS7ZQ4iKl8vn4n-OG19tRJJA0XdyNPr-vioQLrsuYvPJbRoObaEUh9rFhM-eO08OmyanEufpDOU2vsRsboo64mGzHwdRGx7iPTYtC06dlyrm-fZN-KZMDJVtCcrWoP0AlH86KQ"
+      ],
+      "tag": "REDUÇÃO NO PREÇO",
+      "extensions": [
+        "REDUÇÃO NO PREÇO"
+      ]
+    },
+    {
+      "position": 32,
+      "title": "Cama Hospitalar Motorizada 2 Movimentos Altura Fixa e Grades de Aço",
+      "product_id": "17025657952847584394",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:17025657952847584394,headlineOfferDocid:17025657952847584394,imageDocid:12529152442787478615,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTcwMjU2NTc5NTI4NDc1ODQzOTQiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzAyNTY1Nzk1Mjg0NzU4NDM5NCIsImltYWdlRG9jaWQiOiIxMjUyOTE1MjQ0Mjc4NzQ3ODYxNSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTcwMjU2NTc5NTI4NDc1ODQzOTQiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNzAyNTY1Nzk1Mjg0NzU4NDM5NCIsImltYWdlRG9jaWQiOiIxMjUyOTE1MjQ0Mjc4NzQ3ODYxNSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Metalclin hospitalar",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQBqOQoprYSYTkU0jDg-SK01Dr_-p4yvob2Xnkq2JdYFq9VsiotWA7BeNquoodQmctGK8gyx5nX0SHhrVXv4WT1BG7dkSjvinj46-CVbQ",
+      "price": "R$ 4.047,00 agora",
+      "extracted_price": 4047.0,
+      "installment": {
+        "price": "R$ 355/mês",
+        "extracted_price": 355,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQDxbOQq3E0mwy1Qa-ZoZrI6mvpIJh1X_RNyZRD6UsrrH1QPje0PAG-XPesO8-hBIoIk625wrcpIw3kmoHg6qJMB9UaqZLnpfdqNlkQqP51uiOp0Y3ESy-hBQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/OpQfynicDcvtDkJQAADQJ_KVsdhaY4xrhavZ5E_jEhL3s-Step3eJr_Pzu_bC0G4rSjtjNhKRNtIop51ueOiEgOSEZ4U3mNChrk70sNmthM3VoCg96kTSHVfnZZVg5VU4pIBc3oTEPVaccvitcw8M-eMhRpMH62aOoFUpC1P9lLvAgxGc2csDBGw6OOEw86k0dm18oqWp5ncGxo_R0hTQ3sNCVGvun9Ztwf_luk-aw",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQDxbOQq3E0mwy1Qa-ZoZrI6mvpIJh1X_RNyZRD6UsrrH1QPje0PAG-XPesO8-hBIoIk625wrcpIw3kmoHg6qJMB9UaqZLnpfdqNlkQqP51uiOp0Y3ESy-hBQ",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTzJY1SSEE4GVmP7XX9qOizdwwTG1q19p8zgp--BHeiKKzCH60Zj3HH7OKU7KblG6ErXAs89ccXcQoPiL2iSKTaZOxBRybKdPiwt0c4R_sS",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ9QIGw7ZDYul1XhSLp-NGiiZVqLAI31gUfBxw_MNwDikZRSWf2KcWIirZMIIAKPKLm40bKsCcedNN4gTwxQmh8DM1Y0kwrJMeB9l5WLWo"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/OpQfynicDcvtDkJQAADQJ_KVsdhaY4xrhavZ5E_jEhL3s-Step3eJr_Pzu_bC0G4rSjtjNhKRNtIop51ueOiEgOSEZ4U3mNChrk70sNmthM3VoCg96kTSHVfnZZVg5VU4pIBc3oTEPVaccvitcw8M-eMhRpMH62aOoFUpC1P9lLvAgxGc2csDBGw6OOEw86k0dm18oqWp5ncGxo_R0hTQ3sNCVGvun9Ztwf_luk-aw",
+        "https://serpapi.com/images/url/D9oeZ3icDcndCoIwGADQJ_KvxD-I0BBHizS1MG9Cv4kuUqcbmHuc3qq3qXN7vp9OCMY9TWsGmFcmGqKIetiqLReVoKDC2Gu8GxmjQ7ufdv_z_DNxI8jl8W5kWRia0a1P7KJwp5hKsix5ZEyGyxzZMkUJUEMxlgdk6eVzi5Ad46uN61dkhXPhc8cFKOAyJvS0oRnOqzJ-B-laY5LQRehgpg-e_QD8ljjm",
+        "https://serpapi.com/images/url/FyaJuXicDcnbCoIwAADQL_KWRilEaIIsdWRWpi-Rc87hbbrF7HP6rP6mzuv5fhohGHc0DQ9ofjOBK0WUg6kSLp6CIhWNvcabkTE6kP20-5_jwsoOUGInIJCbws9fnXFv0ogpMKC0uE2RC0yDXGtvkY8YSp-2xTnN6lWIMkDnIgbADU9h1Ft6GfIDwhWEFrnIJembrR8bud7K-Rhjz-7WWZSNP-_sOPE"
+      ]
+    },
+    {
+      "position": 33,
+      "title": "Cama Hospitalar Elétrica Bett Care V6 3 Movimentos Ortobrás",
+      "product_id": "17449123648686266094",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:17449123648686266094,headlineOfferDocid:8401519271928543143,imageDocid:6862861439367411447,gpcid:6826061099982902744,mid:576462900304723158,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTc0NDkxMjM2NDg2ODYyNjYwOTQiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI4NDAxNTE5MjcxOTI4NTQzMTQzIiwiaW1hZ2VEb2NpZCI6IjY4NjI4NjE0MzkzNjc0MTE0NDciLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjY4MjYwNjEwOTk5ODI5MDI3NDQiLCJtaWQiOiI1NzY0NjI5MDAzMDQ3MjMxNTgiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTc0NDkxMjM2NDg2ODYyNjYwOTQiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiI4NDAxNTE5MjcxOTI4NTQzMTQzIiwiaW1hZ2VEb2NpZCI6IjY4NjI4NjE0MzkzNjc0MTE0NDciLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IjY4MjYwNjEwOTk5ODI5MDI3NDQiLCJtaWQiOiI1NzY0NjI5MDAzMDQ3MjMxNTgiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Cirúrgica Mg",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcTpcI9VgtgdXAI0LGIBhaeUlShjFqAsgbLn6NWJP-Dq5b1rUZF7JULu7z0neaPe9htH4F_WM6yM974dziInhHvfLBHQ0Yky_nyt2oEzC-yX",
+      "price": "R$ 7.979,99 agora",
+      "extracted_price": 7979.99,
+      "installment": {
+        "price": "R$ 650/mês",
+        "extracted_price": 650,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSsvUEJG6hUgywqK0eiG6aHrUtb2ymJCOxQJpmhZhI_sGwOGjV1NYqwS7IxSNo0hBiuqcXoGoq_jSNKDpm7hH_S6WvYGQXuc5GdX_vb9svBIYLFah2G6x_8Ig",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/NDulcnicDcndCoIwGADQJyqtaGYQkf18aWHEsLSboVOcwtzmlj9v1ev0NnVuz_fDjJF6bVlFQ9tRmiKfmKxZTEttUlPRKRXc0kxIWTXlVm3-t96FuQsU6y46BoBYVI69uthFBSg9t5HJ5iMP9rfhHkjOXswnGvob1I9ZmKgeO_6AQ2Ezr3orGgsQitQ4vBwkd9iZYPTsErjHb7qEPCZd5urO85PrKWVzQANZ-eUPE10_-g",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSsvUEJG6hUgywqK0eiG6aHrUtb2ymJCOxQJpmhZhI_sGwOGjV1NYqwS7IxSNo0hBiuqcXoGoq_jSNKDpm7hH_S6WvYGQXuc5GdX_vb9svBIYLFah2G6x_8Ig",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcScSAFnWfXN0kYw5OdvaS-H8fYlNgPLyaBqfshqy79dX6p2AH92AyZvKD2oEAUvAnHv_yRvn58J9Mv-ZbYLNw-riPFOdjio074QOO2FmcQNmtzULJxKjnzHZw"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/NDulcnicDcndCoIwGADQJyqtaGYQkf18aWHEsLSboVOcwtzmlj9v1ev0NnVuz_fDjJF6bVlFQ9tRmiKfmKxZTEttUlPRKRXc0kxIWTXlVm3-t96FuQsU6y46BoBYVI69uthFBSg9t5HJ5iMP9rfhHkjOXswnGvob1I9ZmKgeO_6AQ2Ezr3orGgsQitQ4vBwkd9iZYPTsErjHb7qEPCZd5urO85PrKWVzQANZ-eUPE10_-g",
+        "https://serpapi.com/images/url/OF9RHHicDcnbCoIwAADQL1LDMi8QsSgTtamJlL6EbXkr59Qxm1_V7_Q3dV7P91MxRkdLUR4EDYKyB5bYnSzlcmQ5q5GMulYZq47SmpTbfvM_C0BsHlGMYmCTS3GFi2c6aQHmeSw5RpG-YBn6It_1xVj1QjfxdU1V4JgqEBn39mp3AAkHxOE3ceZEM1zzxKXsnvpwkoY6tAPc1N1CX0VBoNotimDL5sR3315DZiebfp__PuQ"
+      ]
+    },
+    {
+      "position": 34,
+      "title": "Cama Hospitalar Simples Sem Cabeceira Móvel e Grades S-0220",
+      "product_id": "13536225048662370339",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=catalogid:13536225048662370339,headlineOfferDocid:11104631677039256481,imageDocid:7574424312309297238,gpcid:6497343349072599134,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTM1MzYyMjUwNDg2NjIzNzAzMzkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMTEwNDYzMTY3NzAzOTI1NjQ4MSIsImltYWdlRG9jaWQiOiI3NTc0NDI0MzEyMzA5Mjk3MjM4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI2NDk3MzQzMzQ5MDcyNTk5MTM0IiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiIiwiY2F0YWxvZ2lkIjoiMTM1MzYyMjUwNDg2NjIzNzAzMzkiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMTEwNDYzMTY3NzAzOTI1NjQ4MSIsImltYWdlRG9jaWQiOiI3NTc0NDI0MzEyMzA5Mjk3MjM4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiI2NDk3MzQzMzQ5MDcyNTk5MTM0IiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Cirúrgica Salutar",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQCqTZp-k0HvlQLP67Q_4Say5AYNIWcv0tqUhYMmpWEGMBe5w7MMIYtaf6no3Soi0akij1MsPZVr2FSj6Xt2-Y5cWgFXCFhjxcvMULMSxvWIKViJUw",
+      "multiple_sources": true,
+      "price": "R$ 1.092,50 agora",
+      "extracted_price": 1092.5,
+      "installment": {
+        "price": "R$ 191,66/mês",
+        "extracted_price": 191.66,
+        "period": 6
+      },
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcQW1ub16YvnWJ57WO1WdD0TJgl3oJvtNXS_Ej2vUa_1m77zZ-L9XRKaKh_PddL8CnTBVIw6DSDlkmiYWic6HoggAb1XsvS2eHGh65jDocxQwR7IxUE5_fIAYQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/iO4KtnicDcltEoFAAADQEyWbqWjGmMhQmujLlj9N7WYL7UZri1O5jtvw_r7vp-K87QxZLil6vFpeYokXVBmRjue8RiPEGrmrWNvWlCzu8_8ZpodnG-RD8CyAlgoKHVWHewCxNY4ccpswR3AvCbP1RRFxnoFG198nyZ0lwS7fVdkBY3e6otHyaPeaFVq3a1OnsEbalhFiFiDpRKiU202lqReLocHvA90e4rWanW0z9X9UvD21"
+    },
+    {
+      "position": 35,
+      "title": "Cama Elétrica +grades +colchão +cabeceira +kit Massagem Marrom Supra Steel",
+      "product_id": "12895038350350126973",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:12895038350350126973,headlineOfferDocid:12895038350350126973,imageDocid:3949754023877945363,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTI4OTUwMzgzNTAzNTAxMjY5NzMiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjg5NTAzODM1MDM1MDEyNjk3MyIsImltYWdlRG9jaWQiOiIzOTQ5NzU0MDIzODc3OTQ1MzYzIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTI4OTUwMzgzNTAzNTAxMjY5NzMiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMjg5NTAzODM1MDM1MDEyNjk3MyIsImltYWdlRG9jaWQiOiIzOTQ5NzU0MDIzODc3OTQ1MzYzIiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Mercado Livre",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQ0RRqqTB_7YORA1kitJggPy-Wr-UPmTC5nrR2yEMS4byF4NVe7xB5jyJj1cDZy10QnZ_MJBDVxKu9Z0P4BKcNYG_rCyS7Mjdr_2HnDJM_CpQ",
+      "price": "R$ 10.900,00 agora",
+      "extracted_price": 10900.0,
+      "installment": {
+        "price": "R$ 454,17/mês",
+        "extracted_price": 454.17,
+        "period": 24
+      },
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSyE_Ti-pLxdSNbg6rUYfquPQ5T_emXe0OXm67i7oqhxlbnJg--HVlefmQHm0BbnZb_F2CW4CjbnUIw7XfwDKeg6tSCT_jKHstVPdslBYcKPmFJjrqYo8hxGQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/_tOO8HicDclJDoIwAADAF1WIC6iJMYICilEIqOCF2IUCoaXQGuBXfsff6Fzn-ymUEnKtaYSjbhSKYKAgn02oVC9VoglqmCaLRoiS0227-d96d8ErF0XjIYtLIM4Dji6QGt0tzdt3EC7ijLCE6NeEGWZpNm0x1JCfKADevSY5Cz2mW5A_YeZM7cfcriC_HXszyfu9T6ihIjvOKt-T6h5gWVsp8gPmnKquTZtlMbjhD-53P_Y",
+      "thumbnails": [
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSyE_Ti-pLxdSNbg6rUYfquPQ5T_emXe0OXm67i7oqhxlbnJg--HVlefmQHm0BbnZb_F2CW4CjbnUIw7XfwDKeg6tSCT_jKHstVPdslBYcKPmFJjrqYo8hxGQ",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTxPHaWL8SdzfMQ88eGekkFKpo-rYln3QcUXS6LdMTEjR5pKzYX2ISQoQ0KQLTst6EpH-XTwpTTFwJ75lbeVY8RSdaeREmc2DPwcYizV_U",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTqB4JH1_0pz1OTcUnyu-uY_bO1E8NHVzSk1K_RJ0xXj5DddtanAJEPxsC7xw_us0IBtcZ9QC5VFou5sckZcXs3L6n_EXsv6op5d62MZeWWR6WHPHAsa9iuqQ",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTSngAP7_M5UbzdfQcBWnVzL85bdmTWKgA649bXdDfRwUoRS2s-9SlO4q3vnt3LLY49iwZ4G74SUJs_CMohM8HqO9ERqjguKkj89tNHVuMGP6yr3TzXfmyg"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/_tOO8HicDclJDoIwAADAF1WIC6iJMYICilEIqOCF2IUCoaXQGuBXfsff6Fzn-ymUEnKtaYSjbhSKYKAgn02oVC9VoglqmCaLRoiS0227-d96d8ErF0XjIYtLIM4Dji6QGt0tzdt3EC7ijLCE6NeEGWZpNm0x1JCfKADevSY5Cz2mW5A_YeZM7cfcriC_HXszyfu9T6ihIjvOKt-T6h5gWVsp8gPmnKquTZtlMbjhD-53P_Y",
+        "https://serpapi.com/images/url/Gy0IZnicDcltCoIwAADQE6lhaEuICPKj1HA6zf0K3ZaaOpcOLG_TsbpNvb_v-6mlFJOlaYyT8S0ko4osua5WkyxkQ1Qy9NpUD0I0vNo_d_-zDhe6dQl6RV5xDUBCl3sIAWAua1vHF4My4o6vIUnzxAxoiOxHbAh_wbl-SuAAVz4M0CRNW3hKjmaBkDOfN0ZXsgyDOKEFi-2e6MdoJrhZslv6Awl3OYc",
+        "https://serpapi.com/images/url/UEV1TnicDcndEoFAGADQJ9IPipoxpoiE8lvpZqd2G9LYNt8u1VN5HW_DuT3fz41zBqYs5xQ_W8Zz0uMZVaQr8JQXWMLVQ4ZbxVhBr9N68j_T8omxxKfaHnquihTWqcEJn2kreuKCskB1xr4bdsdSXaODpzTxXZsTwlNqec6ugdmoeSMBysrmODH2My1cVEIDXCY4hsFGp8iJ4aVXTCN6f5vkUXTQI3fnWpAahaj3P4h3PnM",
+        "https://serpapi.com/images/url/NP8XxHicDclJDoIwAADAFwFRKlASY3AJRDZlUfRCpIWCSllaJfAo_-NvdK7z_ZSct0yXpJyifmx5jgWe0ZlIGL_xComoqSVWNm1bUbLqlv_TDQ9DE0UhJcZBTd1FnE24OKL1mZ4mR1tkuI7ONjEUALMEb4tgiJsgnDMBhk8fdPKbctlxLgBWwxWYKgjjPUs3blO6mtX5cBd0d_KyH3cNcs86vVzzoIy9HE1JUY_kB_lOPac"
+      ]
+    },
+    {
+      "position": 36,
+      "title": "Cama Hospitalar DX3 3 Movimentos",
+      "product_id": "15091294679443545547",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:15091294679443545547,headlineOfferDocid:15091294679443545547,imageDocid:7565368063093252037,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTUwOTEyOTQ2Nzk0NDM1NDU1NDciLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNTA5MTI5NDY3OTQ0MzU0NTU0NyIsImltYWdlRG9jaWQiOiI3NTY1MzY4MDYzMDkzMjUyMDM3IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTUwOTEyOTQ2Nzk0NDM1NDU1NDciLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNTA5MTI5NDY3OTQ0MzU0NTU0NyIsImltYWdlRG9jaWQiOiI3NTY1MzY4MDYzMDkzMjUyMDM3IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "Ita assistiva",
+      "source_icon": "https://encrypted-tbn0.gstatic.com/favicon-tbn?q=tbn%3AANd9GcQztUkwjsvvIDAdXpYZR4tb3kufBQ4_sfvzPqjdIDt_z2_Xif8XE9TTtJEAxJ5O7XgQYHhG-nGRMpyqdDBx9_nGty2eUnGXwXqNRMZtAYsTXQ",
+      "price": "R$ 4.559,05 agora",
+      "extracted_price": 4559.05,
+      "installment": {
+        "price": "R$ 399,92/mês",
+        "extracted_price": 399.92,
+        "period": 12
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ6aQrbriJmEBAqb09-PChzGEx_NsjhgzD9RmDDpZfFO5EpH2n30rPzUWlFFyTuAgP6C8WATJX-k-hbguWIDBRxM_fWYzLN_jE9RDPD0oupUs5q2F0lUdLhBg",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Ifr2mHicDclZCoJAAADQE7lkKClEjI5aYmaiWP2I64zmMjojqKfqOt2m3u_7fjBjhGqCUPb5tBJWFhzL-h2PKEtZnfP50AkUD4TUPTqNx_9pwCtUO78r6X3KptrpTB2MmahyvoE321wSjzYYbVANOgjJq7JusknOUr8XJ3-L4tay1nAGyFeMQwxC58G9OZyhOb5APViuSRU_N9dLGlMNoA_FYSYRlUfJEtuocLGOfoqNPhg",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ6aQrbriJmEBAqb09-PChzGEx_NsjhgzD9RmDDpZfFO5EpH2n30rPzUWlFFyTuAgP6C8WATJX-k-hbguWIDBRxM_fWYzLN_jE9RDPD0oupUs5q2F0lUdLhBg",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcRFIT_qhiEvoflmAwCh6ZER56wB24KYlVLEfsFmgE54zIVLsG7XvbNiGVSL3RR3SOlW9rW3JRA2IpxIlA8fD4kPyFCVhbrKSZPmCf8JfUO4O6Q9Ddm26L3Szg",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTGKXAXPTZCIDiU7SxM4vNq6XYKGS4cxaYdHa80Xv85q8R08QiQkvIRQhhc8WOoJHcQ4oV4kieeBMF4rU_DRGF-EK8Odamhd75kF94djAMwYj9BBXFgIVyr"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/Ifr2mHicDclZCoJAAADQE7lkKClEjI5aYmaiWP2I64zmMjojqKfqOt2m3u_7fjBjhGqCUPb5tBJWFhzL-h2PKEtZnfP50AkUD4TUPTqNx_9pwCtUO78r6X3KptrpTB2MmahyvoE321wSjzYYbVANOgjJq7JusknOUr8XJ3-L4tay1nAGyFeMQwxC58G9OZyhOb5APViuSRU_N9dLGlMNoA_FYSYRlUfJEtuocLGOfoqNPhg",
+        "https://serpapi.com/images/url/g6Es1XicDcn_DkJAAADgJ4rNodhakzA_hk5R_dNC5yzHcTfiqXqd3qa-f7_vB3NOmS6Kz7YYZsqf5YrnLRAqxh-8LoSiIyLDHaV1W-367f90Iyw1p4C2e7r3uLbGDjXEmEys3iyoqNNekv1rkwYWYjapLEVe3DRgzvoy5mHtpEkAIARJ1GTakAEPGpJL325jbNBBfsWzbaY4H_zkFhMTbTx0juRIPWqHkkhqAJKl-gFxYj0p",
+        "https://serpapi.com/images/url/XOOdeXicDcnbCoIwAADQLyojVk0hQiunida8NXsJ24ab4n1Y_VT_09_UeT3fj1CqGw1N4w0d3p3ibKYezXJejCpXks5pW2ujaLtONsWu3_7PMAOmIxojj5jkEt_27kEmm-jlgyno1yTzUAToK8-Yk8MFmeCqh-ECYomryQ2xEBRez-3JoRi0Kagk55ZvgyG5H0Jkz44ePLO8FmyzqmwdsNL0n1mpWxaxCzd9Dz-3xDxS"
+      ]
+    },
+    {
+      "position": 37,
+      "title": "Cama Hospitalar Residencial Centauro Articulada com Grades e Colchão - Pilati",
+      "product_id": "1209103286886720386",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:1209103286886720386,headlineOfferDocid:1209103286886720386,imageDocid:14461119301988738141,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTIwOTEwMzI4Njg4NjcyMDM4NiIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjEyMDkxMDMyODY4ODY3MjAzODYiLCJpbWFnZURvY2lkIjoiMTQ0NjExMTkzMDE5ODg3MzgxNDEiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0=",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTIwOTEwMzI4Njg4NjcyMDM4NiIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjEyMDkxMDMyODY4ODY3MjAzODYiLCJpbWFnZURvY2lkIjoiMTQ0NjExMTkzMDE5ODg3MzgxNDEiLCJyZHMiOiIiLCJxdWVyeSI6ImNhbWEraG9zcGl0YWxhcittYW51YWwrZWwlQzMlQTl0cmljYStncmFkZXMiLCJncGNpZCI6IiIsIm1pZCI6IiIsInB2dCI6ImhnIiwidXVsZSI6IncrQ0FJUUlDSUdRbkpoZW1scyIsImdsIjoiYnIiLCJobCI6InB0LWJyIn0%3D",
+      "source": "orthohouse.com.br",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcTHZYiiA8CroiUaGTEYLakpJrF780TV7Wy32ZJruWNGVRMUvhqWc659nTyW1bbpBiuJEUIHYqFAXxd2eulY1fh6Ckbxsu5ECJXKGwey7A",
+      "price": "R$ 5.035,95 agora",
+      "extracted_price": 5035.95,
+      "installment": {
+        "price": "R$ 841,42/mês",
+        "extracted_price": 841.42,
+        "period": 7
+      },
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcS18mZBoq3whtXlOTwTtsMh7EqdukaFCqzpvCLEu5rc-tD3JW5Xnb-6ybhY_4ANxmopfUMokq3Qfh55iRO0ej8SXTFCrPlLk4aunGVgmr5KdsugrWxfkZeRlA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/6vAmwHicDclbEoFQGADgFSVNDjFjTHKZIfeQXkydLifVuf5RVmU7dsP3-n0_BICrka4nFMuWQxJrEFGjkykIIccdzCpdEcZ5TrOJGP9vZG_j4RKfDKsKpkyYLwJ-ufNeHqgNGcxFXBfhwhFv_nTceY0k1mBmrq7Ip5HWbyNyu_fsbVMxnp43rBDmISUI5cddN3lYJ99bOHJfukUvrOnyklUSrWNVZ_LapEWQHEv7BwOyQHU"
+    },
+    {
+      "position": 38,
+      "title": "Cama Hospitalar Motorizada - 2 Movimentos Modelo Essencial NBTECH NB1254",
+      "product_id": "9132369202065765517",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:9132369202065765517,headlineOfferDocid:9132369202065765517,imageDocid:8930031740487415464,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiOTEzMjM2OTIwMjA2NTc2NTUxNyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjkxMzIzNjkyMDIwNjU3NjU1MTciLCJpbWFnZURvY2lkIjoiODkzMDAzMTc0MDQ4NzQxNTQ2NCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiOTEzMjM2OTIwMjA2NTc2NTUxNyIsImNhdGFsb2dpZCI6IiIsImhlYWRsaW5lT2ZmZXJEb2NpZCI6IjkxMzIzNjkyMDIwNjU3NjU1MTciLCJpbWFnZURvY2lkIjoiODkzMDAzMTc0MDQ4NzQxNTQ2NCIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "SPMedica.com",
+      "source_icon": "https://encrypted-tbn2.gstatic.com/favicon-tbn?q=tbn%3AANd9GcRUMYVvwKwWkfA29PI0gFrHFuJgL8gcXSdH4j56iC54flTljVjTV3Glz3iTAWJTewXYPiTc1UUV3vfC9dKcwVHQ_ntJepI4WZTS",
+      "price": "R$ 6.930,00",
+      "extracted_price": 6930.0,
+      "thumbnail": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSKzzQVmBPA9k9N8mIS6A4ZrPNoVhFwVfRs-ue2rNCwa9uq_n6fNto5prSKACjj3nmhJQ-y5odcFniMcfErv9BeI6LxzJ5oTFqW9T7Z3zCNCGAOMWAnu4iSnA",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/Q4JXKnicDcnbCoIwAADQLzKj0loQMSXDLstSFHwJmzNn7OI2s_yqfqe_qfN6vp_aGKmXtk04Vm9pSGmZGx-P7toUhuIRFszWtZCS8vu6Xf1vCVEJtjjeD8M5ZV4EwQOgBQtjF85yFSGR1kGfVhdtdWSikN8XoGuv3K2QEY5U8R76TTPlrN6drbcjShxwesTVRj2BR0L38Bp2jkiCNgPJPJ8OPvK38HTMIO9mNObwB7a1PrE",
+      "thumbnails": [
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSKzzQVmBPA9k9N8mIS6A4ZrPNoVhFwVfRs-ue2rNCwa9uq_n6fNto5prSKACjj3nmhJQ-y5odcFniMcfErv9BeI6LxzJ5oTFqW9T7Z3zCNCGAOMWAnu4iSnA",
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSRO5yUng1moAggZVrPw1UhNRVGDXPSLHETJyNDDktRHPi2DrDI8BBbhEUhqXblgtaIhAOVW6WfrcPUbTJ_VJd0JP0PyEF5D6nT4lf1J9-VYzIni2VubrWo"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/Q4JXKnicDcnbCoIwAADQLzKj0loQMSXDLstSFHwJmzNn7OI2s_yqfqe_qfN6vp_aGKmXtk04Vm9pSGmZGx-P7toUhuIRFszWtZCS8vu6Xf1vCVEJtjjeD8M5ZV4EwQOgBQtjF85yFSGR1kGfVhdtdWSikN8XoGuv3K2QEY5U8R76TTPlrN6drbcjShxwesTVRj2BR0L38Bp2jkiCNgPJPJ8OPvK38HTMIO9mNObwB7a1PrE",
+        "https://serpapi.com/images/url/FfbZrHicDclRCoIwAADQE6UpJRlEGDN1hA3TWf2Em7qNdK65CDtU9-k29X7f98ONUePathtJ9aRMU88Mka7FRlMZQS069PbIB6WEZNvH5n_rIK39iJ6y43IqJHP6IWDsijV6OQVPMxyBMzod4jCHUwrA3WQxEi7QIFntdoSHBX-cScdMlfDgiEuvbDVFBcnhDcN6DtEcTeF-CTyZL7rWgf4MX96JFC5-El0OPxHDPW0"
+      ]
+    },
+    {
+      "position": 39,
+      "title": "Cama Hospitalar Eletrica 05 Posições 03 Mov Luxo Grades Inj",
+      "product_id": "13569851617028991953",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:13569851617028991953,headlineOfferDocid:13569851617028991953,imageDocid:5667074835437992398,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTM1Njk4NTE2MTcwMjg5OTE5NTMiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMzU2OTg1MTYxNzAyODk5MTk1MyIsImltYWdlRG9jaWQiOiI1NjY3MDc0ODM1NDM3OTkyMzk4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTM1Njk4NTE2MTcwMjg5OTE5NTMiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxMzU2OTg1MTYxNzAyODk5MTk1MyIsImltYWdlRG9jaWQiOiI1NjY3MDc0ODM1NDM3OTkyMzk4IiwicmRzIjoiIiwicXVlcnkiOiJjYW1hK2hvc3BpdGFsYXIrbWFudWFsK2VsJUMzJUE5dHJpY2ErZ3JhZGVzIiwiZ3BjaWQiOiIiLCJtaWQiOiIiLCJwdnQiOiJoZyIsInV1bGUiOiJ3K0NBSVFJQ0lHUW5KaGVtbHMiLCJnbCI6ImJyIiwiaGwiOiJwdC1iciJ9",
+      "source": "mercadolivre.com.br",
+      "source_icon": "https://encrypted-tbn3.gstatic.com/favicon-tbn?q=tbn%3AANd9GcSBVGRqm58J9OJX3IxIyEgaTrGIXvmEaBTLCMDFyeY_ZzPlvxqD9Jc3IoGF3TbIIYsFBPBNUUleUhVLk5y1Ehzul9ptIAXWKXBkOwVS",
+      "price": "R$ 5.799,00",
+      "extracted_price": 5799.0,
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTOJiL3Cb8JbfpUmFpOhEt83IWWPQkxWvdvNWB4upcKHd8THfdSRkWpf-OoYHlHwOO00FDnBXh7N8Sd832dzPah-whN5oje8tVeA2Z-X1g7E46OuLsxC0CnxQ",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/QuShE3icDcltEoFAAADQE_WhomXGmKQkTSth8a92q03alpbiVK7jNry_7_uhQvB2oigZw_cXFxmRRMo0uWhFIkos46ZWWtpwXrJidpv-b2KFZLzEO-iXgW6nwE9zvq9dDqkjgL5CaBNVPXqSZ4jmxoPjtUfAzstJvK0QzyXYnLyr10Goqu6CzY_UDEFMgK6R9yahUkfDYXPJgDhklnaWjoPCdIwRfARtb6s266MfhZg9qQ",
+      "thumbnails": [
+        "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTOJiL3Cb8JbfpUmFpOhEt83IWWPQkxWvdvNWB4upcKHd8THfdSRkWpf-OoYHlHwOO00FDnBXh7N8Sd832dzPah-whN5oje8tVeA2Z-X1g7E46OuLsxC0CnxQ",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSFr54myGreciOYW9c_6BT8ZMucNu86u1Z7J5GrYfxGhTVtKWyzTpqG6rp7eo1iwdHeD0a6K2HwGjhMTA5qr5dSjom-Pmj7wZQ5GrIWJlVpjnArTXHr9sUk",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTnvTLIwnDOdZI3zecCYqKQN7JqF29_sdO5f9QdWCrwau2F2-y7Y9vCFzv0bhsuAkKS_9ZLhLpREeZ2UsrYD125cOMlWxNukw",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcTThj93cMZP1A6ZCjMMxe_1sysDA0ARtQk7ZFcXzQIo74TSY55UHpwpBdlOAi_Mp3APJTfGTqazFRPyHF3yBTVDYSLcixl9"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/QuShE3icDcltEoFAAADQE_WhomXGmKQkTSth8a92q03alpbiVK7jNry_7_uhQvB2oigZw_cXFxmRRMo0uWhFIkos46ZWWtpwXrJidpv-b2KFZLzEO-iXgW6nwE9zvq9dDqkjgL5CaBNVPXqSZ4jmxoPjtUfAzstJvK0QzyXYnLyr10Goqu6CzY_UDEFMgK6R9yahUkfDYXPJgDhklnaWjoPCdIwRfARtb6s266MfhZg9qQ",
+        "https://serpapi.com/images/url/KlyH7HicDcttCoIwAADQE6lZ-QkRRjRTtKKl6Z-wuZyWc86J2aG6T7fJ34_3-xIhWGcrCqaIj0zgXBJ3upCLTmSiRDJqaqUjDWMlLdbtajLbCXMLoPOOa8t6BByj8pDEFrrpG2imQY_C3tR7NTU8DfDk8QYERsKPxw9kLdA5M3CjlkPu4u0s0_25O4CKBNDRWq7l56qppWNdGUN6mvY-9l4Rq6jD4dXlVnd5_gEwLz6C",
+        "https://serpapi.com/images/url/rxZ0R3icDcnhDkJAAADgJ4pcMztba0aaiCnN-GPcXc7UOe4QT9Kr9Tb1_f2-HyolF6aqEoaGhUuCN7JimlILWcoGKah7qYJ2nDesPvT7_5lWiOEJJWxKAm9mToRzb7cSZGe9H4fGuXcBLASO9AeMcWoPczkCF2wWI4OT7a7TtqJitFr_VsA8oAG_HkkO7mLIHA3oKLo803c4tvMPE-Y2kQ",
+        "https://serpapi.com/images/url/5z9HH3icDcltCoIwAADQE-UHZqIQMRO1aDV1RfpHbJrOTGcb5DxId-s29f6-76cRgnFHVauevCQTVbkQt15Tai4KQYlChqfKm4Ex2tebcf0_BxxLOyAYN61tEJghHayybQvhVOU6l9wDGohF9LAyn1znaDdYS5ykpnkO2Zu5ZXcCNIfMAGiP7wEei9mPkQx9Q7r44qXJgdCps3942jU5"
+      ]
+    },
+    {
+      "position": 40,
+      "title": "Cama Hospitalar Motorizada Com Grade Bett Care 3 Movimentos Injetada Ortobras",
+      "product_id": "16454574532499607589",
+      "product_link": "https://www.google.com.br/search?ibp=oshop&q=cama hospitalar manual elétrica grades&prds=productid:16454574532499607589,headlineOfferDocid:16454574532499607589,imageDocid:11593075287847445829,pvt:hg&hl=pt-br&gl=br&udm=28",
+      "immersive_product_page_token": "eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTY0NTQ1NzQ1MzI0OTk2MDc1ODkiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNjQ1NDU3NDUzMjQ5OTYwNzU4OSIsImltYWdlRG9jaWQiOiIxMTU5MzA3NTI4Nzg0NzQ0NTgyOSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ==",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=eyJlaSI6Il9CY19hWkd5RllYSWtQSVBwYWJsb1FZIiwicHJvZHVjdGlkIjoiMTY0NTQ1NzQ1MzI0OTk2MDc1ODkiLCJjYXRhbG9naWQiOiIiLCJoZWFkbGluZU9mZmVyRG9jaWQiOiIxNjQ1NDU3NDUzMjQ5OTYwNzU4OSIsImltYWdlRG9jaWQiOiIxMTU5MzA3NTI4Nzg0NzQ0NTgyOSIsInJkcyI6IiIsInF1ZXJ5IjoiY2FtYStob3NwaXRhbGFyK21hbnVhbCtlbCVDMyVBOXRyaWNhK2dyYWRlcyIsImdwY2lkIjoiIiwibWlkIjoiIiwicHZ0IjoiaGciLCJ1dWxlIjoidytDQUlRSUNJR1FuSmhlbWxzIiwiZ2wiOiJiciIsImhsIjoicHQtYnIifQ%3D%3D",
+      "source": "Rede Santa Apolônia",
+      "source_icon": "https://encrypted-tbn1.gstatic.com/favicon-tbn?q=tbn%3AANd9GcRcWrBbFTC8JQhOe8SbkOTHEbGAkp83vsxp3Qq_K93FxQASv15jamr3ZER7ADWNkm_ZG2wMjQ8nO_aqSr0r7xlQbufXIAPw2iB_NUUG_bI_tw",
+      "price": "R$ 8.409,40",
+      "extracted_price": 8409.4,
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTdPIp9hEmVM7SNBGcxvXZA7Nvjw2h4XhjBySKsyFZa1ZNoPDEs9l3Evm6yDb4r8fyA2pcsVf172ejnq-_hWVXhzZL5CHPJKc7TI-oK9UQP",
+      "serpapi_thumbnail": "https://serpapi.com/images/url/nN4xknicDcn_DkJAAADgJ8JI6WytEUnqppHMP43z41jccTd1PU5v1dvU9-_3_WDOKTMVpRrQJCivSokXgyo3jOe8RTIivcIwobQdmu24-Z9pwRJ4KC5DnwLs9snZiKDtodecZpYB5-6pYT3FnS2igIl9lqsZJKHjMvBYuHO_Ek6hT-taWBpFLKlVQ6u6YZTu-Jak-J2dlrtDeAyQEfsSCcD1Ev4AT3c5ZQ",
+      "thumbnails": [
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcTdPIp9hEmVM7SNBGcxvXZA7Nvjw2h4XhjBySKsyFZa1ZNoPDEs9l3Evm6yDb4r8fyA2pcsVf172ejnq-_hWVXhzZL5CHPJKc7TI-oK9UQP",
+        "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcSTMHPZvmBt58hEQ9YvxEI2VfSSEeN1mxgHDLdSXrhLDaMHKsN4anFY0lhIZ_OFfdA49MJVphb3EkC_jjLg_Qn5YfGcm_WP7i9B2cu3ts8",
+        "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSfSO6DSqiR_G34ajm5RpT1Lpb7uo_vv3ET8-Qa9F6LfqAOXMpiHrNddCEuXbifc23JSgiHHAN_fnQA9uEMgV_rSac_zMhYwx63f844wsA",
+        "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcR8wsTGhkBjW2yA_PkHMnnCEbut9wpFcAyUbA_-cPCGy22qGlT53n9t5n6YzPTOPGQ2OdfSb6IpVDLoXKuPS1uVaFX8XuBQFwA84ktaNj-d"
+      ],
+      "serpapi_thumbnails": [
+        "https://serpapi.com/images/url/nN4xknicDcn_DkJAAADgJ8JI6WytEUnqppHMP43z41jccTd1PU5v1dvU9-_3_WDOKTMVpRrQJCivSokXgyo3jOe8RTIivcIwobQdmu24-Z9pwRJ4KC5DnwLs9snZiKDtodecZpYB5-6pYT3FnS2igIl9lqsZJKHjMvBYuHO_Ek6hT-taWBpFLKlVQ6u6YZTu-Jak-J2dlrtDeAyQEfsSCcD1Ev4AT3c5ZQ",
+        "https://serpapi.com/images/url/1e3hGnicDcnbEkJAAADQLwq5TJhpGuVaiNEoXgyLXcra7Gb0OX1Wf1Pn9Xw_iDFCdZ5vMJjehDX1ilVY4CBlJesAB8aBp2gkpMNw99z-TzfCWnNAcgncKJ-HPVNUZMVaNi-WJ6ZtklhNuB4W6Jp-ndwm5Jtl4J5oKJfYzoQH8vLibLe1IWvBMSWokqz7oeh7HxYxVrLWAUNxjTadthfBS2JU_QHyNzj5",
+        "https://serpapi.com/images/url/vf2zRHicDcltCoIwAADQE6mYZipEjDIl_EAXYb-GTjcXOKebWt2mY3Wben_f99MpJaRvGC3H00uottFUzU2dSlUphnU89IbsBiEYp4dx_z8fpI0XYkhg5pzgyAoUWnb16LeFuJqxqHfzgJbFCq6ullfe2YnJCLIyESya0qY5BnNZM4I31gVSFkUgRYTnwJuDhN7QBCuM3kl3X5-ORVzbXiX4AfIxOT4",
+        "https://serpapi.com/images/url/JUZ0xHicDcndEkJAGADQJ8JEDGaaZilbU7Ei6cqw5K_WymeMHqe36m3q3J7vpwLggylJBaOvmUORC5AxRSwHSKGmIu2e0lB1nNesXPer_5nIzQ1Mz_o0hLhqreYqzygh7e7EmL3NRjAm7lA0XzKUCJTYeJblHj9CVWEGqEy7vUnoEezLXn4PMm3Po82xiw8jCRZjlDqxHo-W70xIX7aQuo2Q_wBO4jly"
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "type": "Refinar resultados",
+      "input_type": "link_with_icon",
+      "options": [
+        {
+          "text": "Por perto",
+          "shoprs": "CAEYAyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMg8IAxIJUG9yIHBlcnRvGAJYpqAhYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+por+perto&shoprs=CAEYAyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMg8IAxIJUG9yIHBlcnRvGAJYpqAhYAI"
+        }
+      ]
+    },
+    {
+      "type": "Ordenar por",
+      "input_type": "link",
+      "options": [
+        {
+          "text": "Relevância",
+          "shoprs": "CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIFyoEEAEYAVAEYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIFyoEEAEYAVAEYAI"
+        },
+        {
+          "text": "Preço: do menor para o maior",
+          "shoprs": "CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIFxIdUHJlw6dvOiBkbyBtZW5vciBwYXJhIG8gbWFpb3IqBBABGAFQAWACiAEB",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIFxIdUHJlw6dvOiBkbyBtZW5vciBwYXJhIG8gbWFpb3IqBBABGAFQAWACiAEB"
+        },
+        {
+          "text": "Preço: do maior para o menor",
+          "shoprs": "CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIFxIdUHJlw6dvOiBkbyBtYWlvciBwYXJhIG8gbWVub3IqBBABGAFQAmACiAEC",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIFxIdUHJlw6dvOiBkbyBtYWlvciBwYXJhIG8gbWVub3IqBBABGAFQAmACiAEC"
+        },
+        {
+          "text": "Classificação: da maior para ...",
+          "shoprs": "CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMjIIFxImQ2xhc3NpZmljYcOnw6NvOiBkYSBtYWlvciBwYXJhIGEgbWVub3IqBBABGAFQA2ACiAED",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYFyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMjIIFxImQ2xhc3NpZmljYcOnw6NvOiBkYSBtYWlvciBwYXJhIGEgbWVub3IqBBABGAFQA2ACiAED"
+        }
+      ]
+    },
+    {
+      "type": "Preço",
+      "input_type": "price_range",
+      "options": [
+        {
+          "text": "Abaixo de R$ 3.500",
+          "shoprs": "CAESDRILEQAAAGC4E-pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMiwIBRITQWJhaXhvIGRlIFIkwqAzLjUwMBgCIg0SCxEAAABguBPqQRgBKgIYAVimoCFgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+de+at%C3%A9+R%24%C2%A03.500&shoprs=CAESDRILEQAAAGC4E-pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMiwIBRITQWJhaXhvIGRlIFIkwqAzLjUwMBgCIg0SCxEAAABguBPqQRgBKgIYAVimoCFgAg"
+        },
+        {
+          "text": "R$ 3.500 - R$ 7.000",
+          "shoprs": "CAESFhIUCQAAAGC4E-pBEQAAAEC4E_pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMjcIBRIVUiTCoDMuNTAwIC0gUiTCoDcuMDAwGAIiFhIUCQAAAGC4E-pBEQAAAEC4E_pBGAEqAhgBWKagIWAC",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+entre+R%24%C2%A03.500+e+R%24%C2%A07.000&shoprs=CAESFhIUCQAAAGC4E-pBEQAAAEC4E_pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMjcIBRIVUiTCoDMuNTAwIC0gUiTCoDcuMDAwGAIiFhIUCQAAAGC4E-pBEQAAAEC4E_pBGAEqAhgBWKagIWAC"
+        },
+        {
+          "text": "Acima de R$ 7.000",
+          "shoprs": "CAESDRILCQAAAEC4E_pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMisIBRISQWNpbWEgZGUgUiTCoDcuMDAwGAIiDRILCQAAAEC4E_pBGAEqAhgBWKagIWAC",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+acima+de+R%24%C2%A07.000&shoprs=CAESDRILCQAAAEC4E_pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMisIBRISQWNpbWEgZGUgUiTCoDcuMDAwGAIiDRILCQAAAEC4E_pBGAEqAhgBWKagIWAC"
+        }
+      ]
+    },
+    {
+      "type": "Lojas",
+      "input_type": "link",
+      "options": [
+        {
+          "text": "Mercado Livre",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhEIAhINTWVyY2FkbyBMaXZyZVimoCFgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=mercado+livre+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhEIAhINTWVyY2FkbyBMaXZyZVimoCFgAg"
+        },
+        {
+          "text": "Dellamed",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgwIAhIIRGVsbGFtZWRYpqAhYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=dellamed+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgwIAhIIRGVsbGFtZWRYpqAhYAI"
+        },
+        {
+          "text": "Magazine Luiza",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhIIAhIOTWFnYXppbmUgTHVpemFYpqAhYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=magazine+luiza+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhIIAhIOTWFnYXppbmUgTHVpemFYpqAhYAI"
+        },
+        {
+          "text": "Dormed",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIAhIGRG9ybWVkWKagIWAC",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=dormed+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIAhIGRG9ybWVkWKagIWAC"
+        }
+      ]
+    },
+    {
+      "type": "Categoria",
+      "input_type": "link",
+      "options": [
+        {
+          "text": "Camas hospitalares",
+          "shoprs": "CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhYICRISQ2FtYXMgaG9zcGl0YWxhcmVzYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=camas+hospitalares+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhYICRISQ2FtYXMgaG9zcGl0YWxhcmVzYAI"
+        },
+        {
+          "text": "Móveis hospitalares",
+          "shoprs": "CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgICRIUTcOzdmVpcyBob3NwaXRhbGFyZXNgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=m%C3%B3veis+hospitalares+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgICRIUTcOzdmVpcyBob3NwaXRhbGFyZXNgAg"
+        }
+      ]
+    },
+    {
+      "type": "Marca",
+      "input_type": "checkbox",
+      "options": [
+        {
+          "text": "Pilati",
+          "shoprs": "CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgIARIGUGlsYXRpOgwIg_M8EJzz_90DMAFYpqAhYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=pilati+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgIARIGUGlsYXRpOgwIg_M8EJzz_90DMAFYpqAhYAI"
+        },
+        {
+          "text": "Bond No. 9",
+          "shoprs": "CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhoIARIKQm9uZCBOby4gOToKCIPzPBC0zlAwAVimoCFgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=bond+no.+9+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhoIARIKQm9uZCBOby4gOToKCIPzPBC0zlAwAVimoCFgAg"
+        },
+        {
+          "text": "Ortobras",
+          "shoprs": "CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhoIARIIT3J0b2JyYXM6DAiD8zwQjZL83QMwAVimoCFgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=ortobras+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhoIARIIT3J0b2JyYXM6DAiD8zwQjZL83QMwAVimoCFgAg"
+        },
+        {
+          "text": "NGA",
+          "shoprs": "CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhUIARIDTkdBOgwIg_M8EKuNgN4DMAFYpqAhYAI",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=nga+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhUIARIDTkdBOgwIg_M8EKuNgN4DMAFYpqAhYAI"
+        }
+      ]
+    },
+    {
+      "type": "Tipo",
+      "input_type": "checkbox",
+      "options": [
+        {
+          "text": "Assistência domiciliar",
+          "shoprs": "CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIARIXQXNzaXN0w6puY2lhIGRvbWljaWxpYXI6DAimj6oCEKiPqgIwAlimoCFgAg",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=assist%C3%AAncia+domiciliar+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYASonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMikIARIXQXNzaXN0w6puY2lhIGRvbWljaWxpYXI6DAimj6oCEKiPqgIwAlimoCFgAg"
+        }
+      ]
+    },
+    {
+      "type": "Carousel Filters",
+      "options": [
+        {
+          "text": "Mercado Livre",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhEIAhINTWVyY2FkbyBMaXZyZVimoCFgAQ",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=mercado+livre+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhEIAhINTWVyY2FkbyBMaXZyZVimoCFgAQ",
+          "input_type": "link"
+        },
+        {
+          "text": "Dellamed",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgwIAhIIRGVsbGFtZWRYpqAhYAE",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=dellamed+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgwIAhIIRGVsbGFtZWRYpqAhYAE",
+          "input_type": "link"
+        },
+        {
+          "text": "Abaixo de R$ 3.500",
+          "shoprs": "CAESDRILEQAAAGC4E-pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMiwIBRITQWJhaXhvIGRlIFIkwqAzLjUwMBgCIg0SCxEAAABguBPqQRgBKgIYAVimoCFgAQ",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+de+at%C3%A9+R%24%C2%A03.500&shoprs=CAESDRILEQAAAGC4E-pBGAEYBSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMiwIBRITQWJhaXhvIGRlIFIkwqAzLjUwMBgCIg0SCxEAAABguBPqQRgBKgIYAVimoCFgAQ",
+          "input_type": "price_range"
+        },
+        {
+          "text": "Por perto",
+          "shoprs": "CAEYAyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMg8IAxIJUG9yIHBlcnRvGAJYpqAhYAE",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades+por+perto&shoprs=CAEYAyonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMg8IAxIJUG9yIHBlcnRvGAJYpqAhYAE",
+          "input_type": "link_with_icon"
+        },
+        {
+          "text": "Magazine Luiza",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhIIAhIOTWFnYXppbmUgTHVpemFYpqAhYAE",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=magazine+luiza+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhIIAhIOTWFnYXppbmUgTHVpemFYpqAhYAE",
+          "input_type": "link"
+        },
+        {
+          "text": "Camas hospitalares",
+          "shoprs": "CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhYICRISQ2FtYXMgaG9zcGl0YWxhcmVzYAE",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=camas+hospitalares+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhYICRISQ2FtYXMgaG9zcGl0YWxhcmVzYAE",
+          "input_type": "link"
+        },
+        {
+          "text": "Dormed",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIAhIGRG9ybWVkWKagIWAB",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=dormed+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMgoIAhIGRG9ybWVkWKagIWAB",
+          "input_type": "link"
+        },
+        {
+          "text": "Móveis hospitalares",
+          "shoprs": "CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgICRIUTcOzdmVpcyBob3NwaXRhbGFyZXNgAQ",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=m%C3%B3veis+hospitalares+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYCSonY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhgICRIUTcOzdmVpcyBob3NwaXRhbGFyZXNgAQ",
+          "input_type": "link"
+        },
+        {
+          "text": "mercadolivre.com.br",
+          "shoprs": "CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhcIAhITbWVyY2Fkb2xpdnJlLmNvbS5iclimoCFgAQ",
+          "serpapi_link": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=mercadolivre.com.br+cama+hospitalar+manual+el%C3%A9trica+grades&shoprs=CAEYAionY2FtYSBob3NwaXRhbGFyIG1hbnVhbCBlbMOpdHJpY2EgZ3JhZGVzMhcIAhITbWVyY2Fkb2xpdnJlLmNvbS5iclimoCFgAQ",
+          "input_type": "link"
+        }
+      ]
+    }
+  ],
+  "serpapi_pagination": {
+    "next": "https://serpapi.com/search.json?device=desktop&engine=google_shopping&gl=br&google_domain=google.com.br&hl=pt-br&location=Brazil&num=100&q=cama+hospitalar+manual+el%C3%A9trica+grades&start=10"
+  }
+}

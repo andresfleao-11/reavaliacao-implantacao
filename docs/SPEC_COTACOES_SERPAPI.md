@@ -1,0 +1,273 @@
+# Especificação: Sistema de Cotações via SerpAPI
+
+> **Versão:** 1.0  
+> **Data:** Dezembro/2024  
+> **Objetivo:** Obter cotações válidas de produtos via Google Shopping + Google Immersive API
+
+---
+
+## 1. Visão Geral
+
+O sistema busca produtos no Google Shopping via SerpAPI, valida cada produto através da API Immersive, e retorna um conjunto de cotações válidas respeitando critérios de variação de preço e quantidade mínima.
+
+### Parâmetros de Configuração
+
+| Parâmetro | Descrição | Exemplo |
+|-----------|-----------|---------|
+| `max_price_variation` | Variação máxima permitida no bloco | 0.25 (25%) |
+| `quotes_per_search` | Quantidade de cotações necessárias | 3 |
+| `variation_increment` | Incremento quando falha | 0.20 (20%) |
+| `max_variation_limit` | Limite máximo de variação | 0.50 (50%) |
+| `max_valid_products` | Limite de produtos a processar | 150 |
+| `blocked_domains` | Lista de domínios bloqueados | [...] |
+
+---
+
+## 2. Estruturas de Dados
+
+### 2.1 Enums
+
+```python
+class ValidationStatus(Enum):
+    PENDING = "pending"
+    VALID = "valid"
+    FAILED = "failed"
+
+class FailureReason(Enum):
+    NO_STORE_LINK = "no_store_link"
+    BLOCKED_DOMAIN = "blocked_domain"
+    FOREIGN_DOMAIN = "foreign_domain"
+    DUPLICATE_DOMAIN = "duplicate_domain"
+    LISTING_URL = "listing_url"
+    PRICE_MISMATCH = "price_mismatch"
+    EXTRACTION_ERROR = "extraction_error"
+
+class BlockStatus(Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    VALID = "valid"
+    FAILED = "failed"
+```
+
+### 2.2 Dataclasses
+
+```python
+@dataclass
+class ShoppingProduct:
+    """Produto extraído do Google Shopping"""
+    position: int
+    title: str
+    serpapi_immersive_product_api: str
+    source: str
+    extracted_price: Optional[float]
+
+@dataclass
+class ProcessedProduct:
+    """Produto com dados de validação"""
+    position: int
+    title: str
+    immersive_api_url: str
+    source: str
+    extracted_price: float
+    store_link: Optional[str] = None
+    validated: bool = False
+    validation_status: ValidationStatus = ValidationStatus.PENDING
+    failure_reason: Optional[FailureReason] = None
+
+@dataclass
+class QuotationBlock:
+    """Bloco de produtos para cotação"""
+    products: List[ProcessedProduct]
+    min_price: float
+    max_price: float
+    variation_percentage: float
+    status: BlockStatus = BlockStatus.PENDING
+```
+
+---
+
+## 3. Fluxo - Etapa 1: Google Shopping
+
+### 3.1 Extração de Dados
+- **Entrada:** JSON da resposta SerpAPI
+- **Campos:** `position`, `title`, `serpapi_immersive_product_api`, `source`, `extracted_price`
+
+### 3.2 Filtro de Domínios Bloqueados
+- Verificar `source` contra `blocked_domains`
+- Normalizar domínios (lowercase, remover www.)
+- **Descartar** produtos de domínios bloqueados
+
+### 3.3 Filtro de Preços Inválidos
+Remover produtos onde `extracted_price` é:
+- `None`
+- Zero (`0` ou `0.0`)
+- Não conversível para número
+
+### 3.4 Ordenação
+```python
+products.sort(key=lambda x: x.extracted_price)  # Crescente
+```
+
+### 3.5 Limitação
+```python
+products = products[:MAX_VALID_PRODUCTS]  # 150
+```
+
+### 3.6 Formação de Blocos
+
+**Regras:**
+- Variação máxima: `(max_price - min_price) / min_price <= max_variation`
+- Mínimo de produtos: `quotes_per_search`
+- Blocos com menos produtos são **DESCARTADOS**
+
+**Algoritmo:**
+1. Iniciar bloco com primeiro produto
+2. Adicionar produtos enquanto variação <= limite
+3. Quando variação exceder, fechar bloco (se >= mín) e iniciar novo
+4. Descartar blocos com menos de `quotes_per_search` produtos
+
+---
+
+## 4. Fluxo - Etapa 2: Google Immersive
+
+### 4.1 Validações do Produto
+
+Cada produto deve passar por **TODAS** as validações na ordem:
+
+| # | Validação | Condição de Falha | FailureReason |
+|---|-----------|-------------------|---------------|
+| 1 | Link de loja | API não retornou link válido | `NO_STORE_LINK` |
+| 2 | Domínio bloqueado | Domínio em `blocked_domains` | `BLOCKED_DOMAIN` |
+| 3 | Domínio brasileiro | TLD não é `.br` ou `.com.br` | `FOREIGN_DOMAIN` |
+| 4 | Domínio duplicado | Já existe cotação deste domínio | `DUPLICATE_DOMAIN` |
+| 5 | URL de listagem | URL contém padrões de busca | `LISTING_URL` |
+| 6 | Extração de preço | Não conseguiu extrair preço | `EXTRACTION_ERROR` |
+| 7 | Conferência de preço | Preço difere do `extracted_price` | `PRICE_MISMATCH` |
+
+### 4.2 Padrões de URL de Listagem
+
+URLs rejeitadas se contiverem:
+- `/busca/`
+- `/search/`
+- `?q=`
+- `/categoria/`
+- `/colecao/`
+- Domínio `buscape.com.br`
+- Domínio `zoom.com.br`
+
+### 4.3 Processamento de Bloco
+
+```
+PARA cada produto no bloco:
+    SE produto.validation_status == VALID:
+        contar como válido (já validado antes)
+        CONTINUAR
+    
+    validar_produto(produto)
+    
+    SE produto válido:
+        válidos++
+        SE válidos >= quotes_per_search:
+            RETORNAR SUCESSO
+    SENÃO:
+        SE válidos + restantes < quotes_per_search:
+            BLOCO FALHOU (impossível atingir meta)
+            SAIR do loop
+```
+
+---
+
+## 5. Regras de Negócio Críticas
+
+### RN01 - Produtos Já Validados
+- **NÃO** são revalidados
+- Sempre incluídos no pool de formação de blocos
+- Domínios registrados para verificação de duplicidade
+
+### RN02 - Produtos que Falharam
+- **DESCARTADOS** permanentemente
+- Não participam da reformação de blocos
+
+### RN03 - Reformação de Blocos
+Quando bloco falha:
+1. Reunir: `validados + não_verificados` (sem falhos)
+2. Reordenar por preço crescente
+3. Reformar blocos com mesma variação
+4. Continuar processamento
+
+### RN04 - Incremento de Variação
+Quando não é possível formar blocos válidos:
+1. Aumentar variação: `atual + variation_increment`
+2. Verificar se `nova_variação <= max_variation_limit`
+3. Reformar blocos (sem revalidar produtos)
+4. Se exceder limite → **FALHA FINAL**
+
+### RN05 - Fórmula de Variação
+```python
+variacao = (preco_maximo - preco_minimo) / preco_minimo
+```
+
+---
+
+## 6. Funções Auxiliares Necessárias
+
+```python
+def normalize_domain(url_or_domain: str) -> str:
+    """Remove protocolo, www, converte lowercase"""
+
+def extract_domain(url: str) -> str:
+    """Extrai domínio de URL completa"""
+
+def is_brazilian_domain(domain: str) -> bool:
+    """Verifica se TLD é .br ou .com.br"""
+
+def is_listing_url(url: str) -> bool:
+    """Verifica padrões de página de busca/categoria"""
+
+def extract_price_from_page(url: str) -> Optional[float]:
+    """Faz scraping do preço na página do produto"""
+
+def prices_match(price1: float, price2: float, tolerance: float = 0.05) -> bool:
+    """Compara preços com tolerância (default 5%)"""
+
+def calculate_variation(min_price: float, max_price: float) -> float:
+    """Calcula variação percentual"""
+
+def form_blocks(products: List, max_variation: float, min_size: int) -> List[QuotationBlock]:
+    """Forma blocos respeitando variação e tamanho mínimo"""
+```
+
+---
+
+## 7. Fluxo Principal Resumido
+
+```
+1. Receber JSON do Google Shopping
+2. Extrair e filtrar produtos (domínios, preços)
+3. Ordenar por preço, limitar a 150
+4. Formar blocos (variação ≤ 25%, mín 3)
+
+5. LOOP principal:
+   5.1 Processar bloco atual
+   5.2 Validar produtos até atingir 3 válidos
+   5.3 Se bloco OK → SUCESSO
+   5.4 Se bloco falha → reformar com validados + pendentes
+   5.5 Se sem blocos → aumentar variação +20%
+   5.6 Se variação > limite → FALHA FINAL
+
+6. Retornar cotações válidas
+```
+
+---
+
+## 8. Códigos de Erro/Log
+
+| Código | Situação |
+|--------|----------|
+| `SHOPPING_EMPTY` | Nenhum produto retornado do Shopping |
+| `ALL_FILTERED` | Todos produtos filtrados (domínio/preço) |
+| `NO_VALID_BLOCKS` | Impossível formar blocos com mínimo de produtos |
+| `VALIDATION_FAILED` | Produto falhou em validação específica |
+| `BLOCK_FAILED` | Bloco não atingiu cotações necessárias |
+| `VARIATION_EXCEEDED` | Atingiu limite máximo de variação |
+| `SUCCESS` | Cotações obtidas com sucesso |

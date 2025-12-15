@@ -1,0 +1,4250 @@
+[
+  {
+    "value": "Brazil",
+    "label": "Brasil (Pais inteiro)"
+  },
+  {
+    "value": "State of Sao Paulo,Brazil",
+    "label": "SP (Estado)"
+  },
+  {
+    "value": "State of Minas Gerais,Brazil",
+    "label": "MG (Estado)"
+  },
+  {
+    "value": "State of Rio de Janeiro,Brazil",
+    "label": "RJ (Estado)"
+  },
+  {
+    "value": "State of Bahia,Brazil",
+    "label": "BA (Estado)"
+  },
+  {
+    "value": "State of Parana,Brazil",
+    "label": "PR (Estado)"
+  },
+  {
+    "value": "State of Rio Grande do Sul,Brazil",
+    "label": "RS (Estado)"
+  },
+  {
+    "value": "Ceara,Brazil",
+    "label": "CE (Estado)"
+  },
+  {
+    "value": "State of Pernambuco,Brazil",
+    "label": "PE (Estado)"
+  },
+  {
+    "value": "State of Santa Catarina,Brazil",
+    "label": "SC (Estado)"
+  },
+  {
+    "value": "State of Goias,Brazil",
+    "label": "GO (Estado)"
+  },
+  {
+    "value": "Federal District,Brazil",
+    "label": "DF (Estado)"
+  },
+  {
+    "value": "State of Para,Brazil",
+    "label": "PA (Estado)"
+  },
+  {
+    "value": "State of Maranhao,Brazil",
+    "label": "MA (Estado)"
+  },
+  {
+    "value": "State of Mato Grosso,Brazil",
+    "label": "MT (Estado)"
+  },
+  {
+    "value": "State of Espirito Santo,Brazil",
+    "label": "ES (Estado)"
+  },
+  {
+    "value": "State of Paraiba,Brazil",
+    "label": "PB (Estado)"
+  },
+  {
+    "value": "State of Amazonas,Brazil",
+    "label": "AM (Estado)"
+  },
+  {
+    "value": "State of Alagoas,Brazil",
+    "label": "AL (Estado)"
+  },
+  {
+    "value": "State of Rio Grande do Norte,Brazil",
+    "label": "RN (Estado)"
+  },
+  {
+    "value": "State of Mato Grosso do Sul,Brazil",
+    "label": "MS (Estado)"
+  },
+  {
+    "value": "State of Piaui,Brazil",
+    "label": "PI (Estado)"
+  },
+  {
+    "value": "State of Sergipe,Brazil",
+    "label": "SE (Estado)"
+  },
+  {
+    "value": "State of Tocantins,Brazil",
+    "label": "TO (Estado)"
+  },
+  {
+    "value": "State of Rondonia,Brazil",
+    "label": "RO (Estado)"
+  },
+  {
+    "value": "State of Acre,Brazil",
+    "label": "AC (Estado)"
+  },
+  {
+    "value": "State of Amapa,Brazil",
+    "label": "AP (Estado)"
+  },
+  {
+    "value": "State of Roraima,Brazil",
+    "label": "RR (Estado)"
+  },
+  {
+    "value": "State of Ceara,Brazil",
+    "label": "State of Ceara (Estado)"
+  },
+  {
+    "value": "Sao Paulo,State of Sao Paulo,Brazil",
+    "label": "Sao Paulo, SP"
+  },
+  {
+    "value": "Rio de Janeiro,State of Rio de Janeiro,Brazil",
+    "label": "Rio de Janeiro, RJ"
+  },
+  {
+    "value": "Rio de Janeiro,Rio de Janeiro,State of Rio de Janeiro,Brazil",
+    "label": "Rio de Janeiro, RJ"
+  },
+  {
+    "value": "Belo Horizonte,State of Minas Gerais,Brazil",
+    "label": "Belo Horizonte, MG"
+  },
+  {
+    "value": "Campinas,State of Sao Paulo,Brazil",
+    "label": "Campinas, SP"
+  },
+  {
+    "value": "Curitiba,State of Parana,Brazil",
+    "label": "Curitiba, PR"
+  },
+  {
+    "value": "Brasilia,Federal District,Brazil",
+    "label": "Brasilia, DF"
+  },
+  {
+    "value": "Salvador,State of Bahia,Brazil",
+    "label": "Salvador, BA"
+  },
+  {
+    "value": "Salvador,Salvador,State of Bahia,Brazil",
+    "label": "Salvador, BA"
+  },
+  {
+    "value": "Porto Alegre,State of Rio Grande do Sul,Brazil",
+    "label": "Porto Alegre, RS"
+  },
+  {
+    "value": "Goiania,Goiania,State of Goias,Brazil",
+    "label": "Goiania, GO"
+  },
+  {
+    "value": "Belem,State of Para,Brazil",
+    "label": "Belem, PA"
+  },
+  {
+    "value": "Belem,Belem,State of Para,Brazil",
+    "label": "Belem, PA"
+  },
+  {
+    "value": "Fortaleza,Ceara,Brazil",
+    "label": "Fortaleza, CE"
+  },
+  {
+    "value": "Manaus,State of Amazonas,Brazil",
+    "label": "Manaus, AM"
+  },
+  {
+    "value": "Manaus,Manaus,State of Amazonas,Brazil",
+    "label": "Manaus, AM"
+  },
+  {
+    "value": "Florianopolis,State of Santa Catarina,Brazil",
+    "label": "Florianopolis, SC"
+  },
+  {
+    "value": "Florianopolis,Florianopolis,State of Santa Catarina,Brazil",
+    "label": "Florianopolis, SC"
+  },
+  {
+    "value": "Guarulhos,State of Sao Paulo,Brazil",
+    "label": "Guarulhos, SP"
+  },
+  {
+    "value": "Goiania,State of Goias,Brazil",
+    "label": "Goiania, GO"
+  },
+  {
+    "value": "Recife,State of Pernambuco,Brazil",
+    "label": "Recife, PE"
+  },
+  {
+    "value": "Maceio,Maceio,State of Alagoas,Brazil",
+    "label": "Maceio, AL"
+  },
+  {
+    "value": "Campo Grande,State of Mato Grosso do Sul,Brazil",
+    "label": "Campo Grande, MS"
+  },
+  {
+    "value": "Cuiaba,State of Mato Grosso,Brazil",
+    "label": "Cuiaba, MT"
+  },
+  {
+    "value": "Natal,Natal,State of Rio Grande do Norte,Brazil",
+    "label": "Natal, RN"
+  },
+  {
+    "value": "Cuiaba,Cuiaba,State of Mato Grosso,Brazil",
+    "label": "Cuiaba, MT"
+  },
+  {
+    "value": "Vitoria,State of Espirito Santo,Brazil",
+    "label": "Vitoria, ES"
+  },
+  {
+    "value": "Vila Velha,State of Espirito Santo,Brazil",
+    "label": "Vila Velha, ES"
+  },
+  {
+    "value": "Vila Velha,Vila Velha,State of Espirito Santo,Brazil",
+    "label": "Vila Velha, ES"
+  },
+  {
+    "value": "Joao Pessoa,State of Paraiba,Brazil",
+    "label": "Joao Pessoa, PB"
+  },
+  {
+    "value": "Natal,State of Rio Grande do Norte,Brazil",
+    "label": "Natal, RN"
+  },
+  {
+    "value": "Uberlandia,State of Minas Gerais,Brazil",
+    "label": "Uberlandia, MG"
+  },
+  {
+    "value": "Teresina,State of Piaui,Brazil",
+    "label": "Teresina, PI"
+  },
+  {
+    "value": "Uberlandia,Uberlandia,State of Minas Gerais,Brazil",
+    "label": "Uberlandia, MG"
+  },
+  {
+    "value": "Sao Bernardo do Campo,State of Sao Paulo,Brazil",
+    "label": "Sao Bernardo do Campo, SP"
+  },
+  {
+    "value": "Sao Jose dos Campos,State of Sao Paulo,Brazil",
+    "label": "Sao Jose dos Campos, SP"
+  },
+  {
+    "value": "Osasco,Osasco,State of Sao Paulo,Brazil",
+    "label": "Osasco, SP"
+  },
+  {
+    "value": "Santo Andre,State of Sao Paulo,Brazil",
+    "label": "Santo Andre, SP"
+  },
+  {
+    "value": "Ribeirao Preto,State of Sao Paulo,Brazil",
+    "label": "Ribeirao Preto, SP"
+  },
+  {
+    "value": "Ribeirao Preto,Ribeirao Preto,State of Sao Paulo,Brazil",
+    "label": "Ribeirao Preto, SP"
+  },
+  {
+    "value": "Sorocaba,State of Sao Paulo,Brazil",
+    "label": "Sorocaba, SP"
+  },
+  {
+    "value": "Bauru,State of Sao Paulo,Brazil",
+    "label": "Bauru, SP"
+  },
+  {
+    "value": "Duque de Caxias,State of Rio de Janeiro,Brazil",
+    "label": "Duque de Caxias, RJ"
+  },
+  {
+    "value": "Maringa,State of Parana,Brazil",
+    "label": "Maringa, PR"
+  },
+  {
+    "value": "Maringa,Maringa,State of Parana,Brazil",
+    "label": "Maringa, PR"
+  },
+  {
+    "value": "Sao Luis,State of Maranhao,Brazil",
+    "label": "Sao Luis, MA"
+  },
+  {
+    "value": "Maceio,State of Alagoas,Brazil",
+    "label": "Maceio, AL"
+  },
+  {
+    "value": "Aracaju,Aracaju,State of Sergipe,Brazil",
+    "label": "Aracaju, SE"
+  },
+  {
+    "value": "Nova Iguacu,State of Rio de Janeiro,Brazil",
+    "label": "Nova Iguacu, RJ"
+  },
+  {
+    "value": "Santos,State of Sao Paulo,Brazil",
+    "label": "Santos, SP"
+  },
+  {
+    "value": "Contagem,State of Minas Gerais,Brazil",
+    "label": "Contagem, MG"
+  },
+  {
+    "value": "Santos,Santos,State of Sao Paulo,Brazil",
+    "label": "Santos, SP"
+  },
+  {
+    "value": "Joinville,State of Santa Catarina,Brazil",
+    "label": "Joinville, SC"
+  },
+  {
+    "value": "Nova Iguacu,Nova Iguacu,State of Rio de Janeiro,Brazil",
+    "label": "Nova Iguacu, RJ"
+  },
+  {
+    "value": "Osasco,State of Sao Paulo,Brazil",
+    "label": "Osasco, SP"
+  },
+  {
+    "value": "Ponta Grossa,State of Parana,Brazil",
+    "label": "Ponta Grossa, PR"
+  },
+  {
+    "value": "Palmas,State of Tocantins,Brazil",
+    "label": "Palmas, TO"
+  },
+  {
+    "value": "Ponta Grossa,Ponta Grossa,State of Parana,Brazil",
+    "label": "Ponta Grossa, PR"
+  },
+  {
+    "value": "Jundiai,State of Sao Paulo,Brazil",
+    "label": "Jundiai, SP"
+  },
+  {
+    "value": "Cabo Frio,State of Rio de Janeiro,Brazil",
+    "label": "Cabo Frio, RJ"
+  },
+  {
+    "value": "Sao Goncalo,State of Rio de Janeiro,Brazil",
+    "label": "Sao Goncalo, RJ"
+  },
+  {
+    "value": "Niteroi,State of Rio de Janeiro,Brazil",
+    "label": "Niteroi, RJ"
+  },
+  {
+    "value": "Niteroi,Niteroi,State of Rio de Janeiro,Brazil",
+    "label": "Niteroi, RJ"
+  },
+  {
+    "value": "Jaboatao dos Guararapes,State of Pernambuco,Brazil",
+    "label": "Jaboatao dos Guararapes, PE"
+  },
+  {
+    "value": "Praia Grande,State of Sao Paulo,Brazil",
+    "label": "Praia Grande, SP"
+  },
+  {
+    "value": "Sao Jose do Rio Preto,Sao Jose do Rio Preto,State of Sao Paulo,Brazil",
+    "label": "Sao Jose do Rio Preto, SP"
+  },
+  {
+    "value": "Praia Grande,Praia Grande,State of Sao Paulo,Brazil",
+    "label": "Praia Grande, SP"
+  },
+  {
+    "value": "Aparecida de Goiania,State of Goias,Brazil",
+    "label": "Aparecida de Goiania, GO"
+  },
+  {
+    "value": "Sao Jose do Rio Preto,State of Sao Paulo,Brazil",
+    "label": "Sao Jose do Rio Preto, SP"
+  },
+  {
+    "value": "Itajai,State of Santa Catarina,Brazil",
+    "label": "Itajai, SC"
+  },
+  {
+    "value": "Blumenau,State of Santa Catarina,Brazil",
+    "label": "Blumenau, SC"
+  },
+  {
+    "value": "Itajai,Itajai,State of Santa Catarina,Brazil",
+    "label": "Itajai, SC"
+  },
+  {
+    "value": "Feira de Santana,State of Bahia,Brazil",
+    "label": "Feira de Santana, BA"
+  },
+  {
+    "value": "Aracaju,State of Sergipe,Brazil",
+    "label": "Aracaju, SE"
+  },
+  {
+    "value": "Sao Jose,State of Santa Catarina,Brazil",
+    "label": "Sao Jose, SC"
+  },
+  {
+    "value": "Sao Jose,Sao Jose,State of Santa Catarina,Brazil",
+    "label": "Sao Jose, SC"
+  },
+  {
+    "value": "Barueri,State of Sao Paulo,Brazil",
+    "label": "Barueri, SP"
+  },
+  {
+    "value": "Caxias do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Caxias do Sul, RS"
+  },
+  {
+    "value": "Rondonopolis,State of Mato Grosso,Brazil",
+    "label": "Rondonopolis, MT"
+  },
+  {
+    "value": "Sumare,Sumare,State of Sao Paulo,Brazil",
+    "label": "Sumare, SP"
+  },
+  {
+    "value": "Porto Velho,State of Rondonia,Brazil",
+    "label": "Porto Velho, RO"
+  },
+  {
+    "value": "Ananindeua,State of Para,Brazil",
+    "label": "Ananindeua, PA"
+  },
+  {
+    "value": "Sumare,State of Sao Paulo,Brazil",
+    "label": "Sumare, SP"
+  },
+  {
+    "value": "Londrina,State of Parana,Brazil",
+    "label": "Londrina, PR"
+  },
+  {
+    "value": "Caxias do Sul,Caxias do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Caxias do Sul, RS"
+  },
+  {
+    "value": "Betim,State of Minas Gerais,Brazil",
+    "label": "Betim, MG"
+  },
+  {
+    "value": "Serra,State of Espirito Santo,Brazil",
+    "label": "Serra, ES"
+  },
+  {
+    "value": "Mogi das Cruzes,State of Sao Paulo,Brazil",
+    "label": "Mogi das Cruzes, SP"
+  },
+  {
+    "value": "Piracicaba,State of Sao Paulo,Brazil",
+    "label": "Piracicaba, SP"
+  },
+  {
+    "value": "Cotia,State of Sao Paulo,Brazil",
+    "label": "Cotia, SP"
+  },
+  {
+    "value": "Carapicuiba,State of Sao Paulo,Brazil",
+    "label": "Carapicuiba, SP"
+  },
+  {
+    "value": "Balneario Camboriu,Balneario Camboriu,State of Santa Catarina,Brazil",
+    "label": "Balneario Camboriu, SC"
+  },
+  {
+    "value": "Sao Jose dos Pinhais,State of Parana,Brazil",
+    "label": "Sao Jose dos Pinhais, PR"
+  },
+  {
+    "value": "Piracicaba,Piracicaba,State of Sao Paulo,Brazil",
+    "label": "Piracicaba, SP"
+  },
+  {
+    "value": "Campina Grande,State of Paraiba,Brazil",
+    "label": "Campina Grande, PB"
+  },
+  {
+    "value": "Juiz de Fora,State of Minas Gerais,Brazil",
+    "label": "Juiz de Fora, MG"
+  },
+  {
+    "value": "Franca,State of Sao Paulo,Brazil",
+    "label": "Franca, SP"
+  },
+  {
+    "value": "Maua,State of Sao Paulo,Brazil",
+    "label": "Maua, SP"
+  },
+  {
+    "value": "Marilia,State of Sao Paulo,Brazil",
+    "label": "Marilia, SP"
+  },
+  {
+    "value": "Mogi das Cruzes,Mogi das Cruzes,State of Sao Paulo,Brazil",
+    "label": "Mogi das Cruzes, SP"
+  },
+  {
+    "value": "Paulista,State of Pernambuco,Brazil",
+    "label": "Paulista, PE"
+  },
+  {
+    "value": "Suzano,State of Sao Paulo,Brazil",
+    "label": "Suzano, SP"
+  },
+  {
+    "value": "Marilia,Marilia,State of Sao Paulo,Brazil",
+    "label": "Marilia, SP"
+  },
+  {
+    "value": "Cabo Frio,Cabo Frio,State of Rio de Janeiro,Brazil",
+    "label": "Cabo Frio, RJ"
+  },
+  {
+    "value": "Americana,Americana,State of Sao Paulo,Brazil",
+    "label": "Americana, SP"
+  },
+  {
+    "value": "Canoas,State of Rio Grande do Sul,Brazil",
+    "label": "Canoas, RS"
+  },
+  {
+    "value": "Imperatriz,State of Maranhao,Brazil",
+    "label": "Imperatriz, MA"
+  },
+  {
+    "value": "Paulista,Paulista,State of Pernambuco,Brazil",
+    "label": "Paulista, PE"
+  },
+  {
+    "value": "Imperatriz,Imperatriz,State of Maranhao,Brazil",
+    "label": "Imperatriz, MA"
+  },
+  {
+    "value": "Diadema,State of Sao Paulo,Brazil",
+    "label": "Diadema, SP"
+  },
+  {
+    "value": "Taubate,State of Sao Paulo,Brazil",
+    "label": "Taubate, SP"
+  },
+  {
+    "value": "Hortolandia,State of Sao Paulo,Brazil",
+    "label": "Hortolandia, SP"
+  },
+  {
+    "value": "Palhoca,State of Santa Catarina,Brazil",
+    "label": "Palhoca, SC"
+  },
+  {
+    "value": "Viamao,State of Rio Grande do Sul,Brazil",
+    "label": "Viamao, RS"
+  },
+  {
+    "value": "Cariacica,State of Espirito Santo,Brazil",
+    "label": "Cariacica, ES"
+  },
+  {
+    "value": "Sao Joao de Meriti,State of Rio de Janeiro,Brazil",
+    "label": "Sao Joao de Meriti, RJ"
+  },
+  {
+    "value": "Campos dos Goytacazes,State of Rio de Janeiro,Brazil",
+    "label": "Campos dos Goytacazes, RJ"
+  },
+  {
+    "value": "Macapa,State of Amapa,Brazil",
+    "label": "Macapa, AP"
+  },
+  {
+    "value": "Belford Roxo,State of Rio de Janeiro,Brazil",
+    "label": "Belford Roxo, RJ"
+  },
+  {
+    "value": "Limeira,State of Sao Paulo,Brazil",
+    "label": "Limeira, SP"
+  },
+  {
+    "value": "Vitoria da Conquista,State of Bahia,Brazil",
+    "label": "Vitoria da Conquista, BA"
+  },
+  {
+    "value": "Montes Claros,State of Minas Gerais,Brazil",
+    "label": "Montes Claros, MG"
+  },
+  {
+    "value": "Foz do Iguacu,State of Parana,Brazil",
+    "label": "Foz do Iguacu, PR"
+  },
+  {
+    "value": "Sao Vicente,State of Sao Paulo,Brazil",
+    "label": "Sao Vicente, SP"
+  },
+  {
+    "value": "Jacarei,State of Sao Paulo,Brazil",
+    "label": "Jacarei, SP"
+  },
+  {
+    "value": "Belford Roxo,Belford Roxo,State of Rio de Janeiro,Brazil",
+    "label": "Belford Roxo, RJ"
+  },
+  {
+    "value": "Anapolis,State of Goias,Brazil",
+    "label": "Anapolis, GO"
+  },
+  {
+    "value": "Petrolina,State of Pernambuco,Brazil",
+    "label": "Petrolina, PE"
+  },
+  {
+    "value": "Pocos de Caldas,State of Minas Gerais,Brazil",
+    "label": "Pocos de Caldas, MG"
+  },
+  {
+    "value": "Boa Vista,State of Roraima,Brazil",
+    "label": "Boa Vista, RR"
+  },
+  {
+    "value": "Pocos de Caldas,Pocos de Caldas,State of Minas Gerais,Brazil",
+    "label": "Pocos de Caldas, MG"
+  },
+  {
+    "value": "Itaquaquecetuba,State of Sao Paulo,Brazil",
+    "label": "Itaquaquecetuba, SP"
+  },
+  {
+    "value": "Rio Branco,State of Acre,Brazil",
+    "label": "Rio Branco, AC"
+  },
+  {
+    "value": "Presidente Prudente,State of Sao Paulo,Brazil",
+    "label": "Presidente Prudente, SP"
+  },
+  {
+    "value": "Rio das Ostras,State of Rio de Janeiro,Brazil",
+    "label": "Rio das Ostras, RJ"
+  },
+  {
+    "value": "Presidente Prudente,Presidente Prudente,State of Sao Paulo,Brazil",
+    "label": "Presidente Prudente, SP"
+  },
+  {
+    "value": "Anapolis,Anapolis,State of Goias,Brazil",
+    "label": "Anapolis, GO"
+  },
+  {
+    "value": "Foz do Iguacu,Foz do Iguacu,State of Parana,Brazil",
+    "label": "Foz do Iguacu, PR"
+  },
+  {
+    "value": "Cascavel,State of Parana,Brazil",
+    "label": "Cascavel, PR"
+  },
+  {
+    "value": "Campos dos Goytacazes,Campos dos Goytacazes,State of Rio de Janeiro,Brazil",
+    "label": "Campos dos Goytacazes, RJ"
+  },
+  {
+    "value": "Macapa,Macapa,State of Amapa,Brazil",
+    "label": "Macapa, AP"
+  },
+  {
+    "value": "Americana,State of Sao Paulo,Brazil",
+    "label": "Americana, SP"
+  },
+  {
+    "value": "Viamao,Viamao,State of Rio Grande do Sul,Brazil",
+    "label": "Viamao, RS"
+  },
+  {
+    "value": "Petrolina,Petrolina,State of Pernambuco,Brazil",
+    "label": "Petrolina, PE"
+  },
+  {
+    "value": "Caucaia,Ceara,Brazil",
+    "label": "Caucaia, CE"
+  },
+  {
+    "value": "Valinhos,State of Sao Paulo,Brazil",
+    "label": "Valinhos, SP"
+  },
+  {
+    "value": "Atibaia,State of Sao Paulo,Brazil",
+    "label": "Atibaia, SP"
+  },
+  {
+    "value": "Cascavel,Cascavel,State of Parana,Brazil",
+    "label": "Cascavel, PR"
+  },
+  {
+    "value": "Camacari,State of Bahia,Brazil",
+    "label": "Camacari, BA"
+  },
+  {
+    "value": "Caruaru,State of Pernambuco,Brazil",
+    "label": "Caruaru, PE"
+  },
+  {
+    "value": "Volta Redonda,State of Rio de Janeiro,Brazil",
+    "label": "Volta Redonda, RJ"
+  },
+  {
+    "value": "Sorriso,State of Mato Grosso,Brazil",
+    "label": "Sorriso, MT"
+  },
+  {
+    "value": "Varzea Grande,State of Mato Grosso,Brazil",
+    "label": "Varzea Grande, MT"
+  },
+  {
+    "value": "Guaruja,State of Sao Paulo,Brazil",
+    "label": "Guaruja, SP"
+  },
+  {
+    "value": "Indaiatuba,State of Sao Paulo,Brazil",
+    "label": "Indaiatuba, SP"
+  },
+  {
+    "value": "Parnamirim,State of Rio Grande do Norte,Brazil",
+    "label": "Parnamirim, RN"
+  },
+  {
+    "value": "Sao Caetano do Sul,Sao Caetano do Sul,State of Sao Paulo,Brazil",
+    "label": "Sao Caetano do Sul, SP"
+  },
+  {
+    "value": "Petropolis,State of Rio de Janeiro,Brazil",
+    "label": "Petropolis, RJ"
+  },
+  {
+    "value": "Juazeiro do Norte,Ceara,Brazil",
+    "label": "Juazeiro do Norte, CE"
+  },
+  {
+    "value": "Uberaba,State of Minas Gerais,Brazil",
+    "label": "Uberaba, MG"
+  },
+  {
+    "value": "Gravatai,State of Rio Grande do Sul,Brazil",
+    "label": "Gravatai, RS"
+  },
+  {
+    "value": "Olinda,State of Pernambuco,Brazil",
+    "label": "Olinda, PE"
+  },
+  {
+    "value": "Novo Gama,State of Goias,Brazil",
+    "label": "Novo Gama, GO"
+  },
+  {
+    "value": "Lauro de Freitas,State of Bahia,Brazil",
+    "label": "Lauro de Freitas, BA"
+  },
+  {
+    "value": "Uberaba,Uberaba,State of Minas Gerais,Brazil",
+    "label": "Uberaba, MG"
+  },
+  {
+    "value": "Indaiatuba,Indaiatuba,State of Sao Paulo,Brazil",
+    "label": "Indaiatuba, SP"
+  },
+  {
+    "value": "Juazeiro do Norte,Juazeiro do Norte,Ceara,Brazil",
+    "label": "Juazeiro do Norte, CE"
+  },
+  {
+    "value": "Limeira,Limeira,State of Sao Paulo,Brazil",
+    "label": "Limeira, SP"
+  },
+  {
+    "value": "Pelotas,State of Rio Grande do Sul,Brazil",
+    "label": "Pelotas, RS"
+  },
+  {
+    "value": "Cabo de Santo Agostinho,State of Pernambuco,Brazil",
+    "label": "Cabo de Santo Agostinho, PE"
+  },
+  {
+    "value": "Criciuma,State of Santa Catarina,Brazil",
+    "label": "Criciuma, SC"
+  },
+  {
+    "value": "Chapeco,State of Santa Catarina,Brazil",
+    "label": "Chapeco, SC"
+  },
+  {
+    "value": "Pouso Alegre,State of Minas Gerais,Brazil",
+    "label": "Pouso Alegre, MG"
+  },
+  {
+    "value": "Santana de Parnaiba,State of Sao Paulo,Brazil",
+    "label": "Santana de Parnaiba, SP"
+  },
+  {
+    "value": "Novo Hamburgo,State of Rio Grande do Sul,Brazil",
+    "label": "Novo Hamburgo, RS"
+  },
+  {
+    "value": "Sinop,State of Mato Grosso,Brazil",
+    "label": "Sinop, MT"
+  },
+  {
+    "value": "Jaragua do Sul,State of Santa Catarina,Brazil",
+    "label": "Jaragua do Sul, SC"
+  },
+  {
+    "value": "Sao Carlos,State of Sao Paulo,Brazil",
+    "label": "Sao Carlos, SP"
+  },
+  {
+    "value": "Araraquara,State of Sao Paulo,Brazil",
+    "label": "Araraquara, SP"
+  },
+  {
+    "value": "Ribeirao das Neves,State of Minas Gerais,Brazil",
+    "label": "Ribeirao das Neves, MG"
+  },
+  {
+    "value": "Mossoro,State of Rio Grande do Norte,Brazil",
+    "label": "Mossoro, RN"
+  },
+  {
+    "value": "Ipatinga,State of Minas Gerais,Brazil",
+    "label": "Ipatinga, MG"
+  },
+  {
+    "value": "Santarem,State of Para,Brazil",
+    "label": "Santarem, PA"
+  },
+  {
+    "value": "Governador Valadares,State of Minas Gerais,Brazil",
+    "label": "Governador Valadares, MG"
+  },
+  {
+    "value": "Sao Leopoldo,State of Rio Grande do Sul,Brazil",
+    "label": "Sao Leopoldo, RS"
+  },
+  {
+    "value": "Franco da Rocha,State of Sao Paulo,Brazil",
+    "label": "Franco da Rocha, SP"
+  },
+  {
+    "value": "Embu,State of Sao Paulo,Brazil",
+    "label": "Embu, SP"
+  },
+  {
+    "value": "Valparaiso de Goias,State of Goias,Brazil",
+    "label": "Valparaiso de Goias, GO"
+  },
+  {
+    "value": "Ourinhos,State of Sao Paulo,Brazil",
+    "label": "Ourinhos, SP"
+  },
+  {
+    "value": "Valinhos,Valinhos,State of Sao Paulo,Brazil",
+    "label": "Valinhos, SP"
+  },
+  {
+    "value": "Arapiraca,State of Alagoas,Brazil",
+    "label": "Arapiraca, AL"
+  },
+  {
+    "value": "Jacarei,Jacarei,State of Sao Paulo,Brazil",
+    "label": "Jacarei, SP"
+  },
+  {
+    "value": "Esmeraldas,State of Minas Gerais,Brazil",
+    "label": "Esmeraldas, MG"
+  },
+  {
+    "value": "Mage,State of Rio de Janeiro,Brazil",
+    "label": "Mage, RJ"
+  },
+  {
+    "value": "Ourinhos,Ourinhos,State of Sao Paulo,Brazil",
+    "label": "Ourinhos, SP"
+  },
+  {
+    "value": "Colombo,State of Parana,Brazil",
+    "label": "Colombo, PR"
+  },
+  {
+    "value": "Resende,State of Rio de Janeiro,Brazil",
+    "label": "Resende, RJ"
+  },
+  {
+    "value": "Sao Carlos,Sao Carlos,State of Sao Paulo,Brazil",
+    "label": "Sao Carlos, SP"
+  },
+  {
+    "value": "Marica,State of Rio de Janeiro,Brazil",
+    "label": "Marica, RJ"
+  },
+  {
+    "value": "Araraquara,Araraquara,State of Sao Paulo,Brazil",
+    "label": "Araraquara, SP"
+  },
+  {
+    "value": "Santa Maria,State of Rio Grande do Sul,Brazil",
+    "label": "Santa Maria, RS"
+  },
+  {
+    "value": "Aracatuba,State of Sao Paulo,Brazil",
+    "label": "Aracatuba, SP"
+  },
+  {
+    "value": "Teresopolis,State of Rio de Janeiro,Brazil",
+    "label": "Teresopolis, RJ"
+  },
+  {
+    "value": "Aracatuba,Aracatuba,State of Sao Paulo,Brazil",
+    "label": "Aracatuba, SP"
+  },
+  {
+    "value": "Parauapebas,State of Para,Brazil",
+    "label": "Parauapebas, PA"
+  },
+  {
+    "value": "Maracanau,Ceara,Brazil",
+    "label": "Maracanau, CE"
+  },
+  {
+    "value": "Campo Largo,State of Parana,Brazil",
+    "label": "Campo Largo, PR"
+  },
+  {
+    "value": "Aguas Lindas de Goias,State of Goias,Brazil",
+    "label": "Aguas Lindas de Goias, GO"
+  },
+  {
+    "value": "Itu,State of Sao Paulo,Brazil",
+    "label": "Itu, SP"
+  },
+  {
+    "value": "Caraguatatuba,State of Sao Paulo,Brazil",
+    "label": "Caraguatatuba, SP"
+  },
+  {
+    "value": "Taboao da Serra,State of Sao Paulo,Brazil",
+    "label": "Taboao da Serra, SP"
+  },
+  {
+    "value": "Passo Fundo,State of Rio Grande do Sul,Brazil",
+    "label": "Passo Fundo, RS"
+  },
+  {
+    "value": "Itapecerica da Serra,State of Sao Paulo,Brazil",
+    "label": "Itapecerica da Serra, SP"
+  },
+  {
+    "value": "Sete Lagoas,State of Minas Gerais,Brazil",
+    "label": "Sete Lagoas, MG"
+  },
+  {
+    "value": "Castanhal,State of Para,Brazil",
+    "label": "Castanhal, PA"
+  },
+  {
+    "value": "Santa Luzia,State of Minas Gerais,Brazil",
+    "label": "Santa Luzia, MG"
+  },
+  {
+    "value": "Maraba,State of Para,Brazil",
+    "label": "Maraba, PA"
+  },
+  {
+    "value": "Balneario Camboriu,State of Santa Catarina,Brazil",
+    "label": "Balneario Camboriu, SC"
+  },
+  {
+    "value": "Campo Largo,Campo Largo,State of Parana,Brazil",
+    "label": "Campo Largo, PR"
+  },
+  {
+    "value": "Sao Caetano do Sul,State of Sao Paulo,Brazil",
+    "label": "Sao Caetano do Sul, SP"
+  },
+  {
+    "value": "Macae,State of Rio de Janeiro,Brazil",
+    "label": "Macae, RJ"
+  },
+  {
+    "value": "Santa Barbara d'Oeste,State of Sao Paulo,Brazil",
+    "label": "Santa Barbara d'Oeste, SP"
+  },
+  {
+    "value": "Macae,Macae,State of Rio de Janeiro,Brazil",
+    "label": "Macae, RJ"
+  },
+  {
+    "value": "Vitoria de Santo Antao,State of Pernambuco,Brazil",
+    "label": "Vitoria de Santo Antao, PE"
+  },
+  {
+    "value": "Sapucaia do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Sapucaia do Sul, RS"
+  },
+  {
+    "value": "Rio Verde,State of Goias,Brazil",
+    "label": "Rio Verde, GO"
+  },
+  {
+    "value": "Fazenda Rio Grande,State of Parana,Brazil",
+    "label": "Fazenda Rio Grande, PR"
+  },
+  {
+    "value": "Dourados,State of Mato Grosso do Sul,Brazil",
+    "label": "Dourados, MS"
+  },
+  {
+    "value": "Vitoria de Santo Antao,Vitoria de Santo Antao,State of Pernambuco,Brazil",
+    "label": "Vitoria de Santo Antao, PE"
+  },
+  {
+    "value": "Rio Claro,State of Sao Paulo,Brazil",
+    "label": "Rio Claro, SP"
+  },
+  {
+    "value": "Resende,Resende,State of Rio de Janeiro,Brazil",
+    "label": "Resende, RJ"
+  },
+  {
+    "value": "Juazeiro,State of Bahia,Brazil",
+    "label": "Juazeiro, BA"
+  },
+  {
+    "value": "Patos de Minas,State of Minas Gerais,Brazil",
+    "label": "Patos de Minas, MG"
+  },
+  {
+    "value": "Santa Barbara d'Oeste,Santa Barbara d'Oeste,State of Sao Paulo,Brazil",
+    "label": "Santa Barbara d'Oeste, SP"
+  },
+  {
+    "value": "Mogi Guacu,State of Sao Paulo,Brazil",
+    "label": "Mogi Guacu, SP"
+  },
+  {
+    "value": "Nova Lima,State of Minas Gerais,Brazil",
+    "label": "Nova Lima, MG"
+  },
+  {
+    "value": "Paulinia,Paulinia,State of Sao Paulo,Brazil",
+    "label": "Paulinia, SP"
+  },
+  {
+    "value": "Patos de Minas,Patos de Minas,State of Minas Gerais,Brazil",
+    "label": "Patos de Minas, MG"
+  },
+  {
+    "value": "Linhares,State of Espirito Santo,Brazil",
+    "label": "Linhares, ES"
+  },
+  {
+    "value": "Braganca Paulista,State of Sao Paulo,Brazil",
+    "label": "Braganca Paulista, SP"
+  },
+  {
+    "value": "Tubarao,State of Santa Catarina,Brazil",
+    "label": "Tubarao, SC"
+  },
+  {
+    "value": "Mogi Guacu,Mogi Guacu,State of Sao Paulo,Brazil",
+    "label": "Mogi Guacu, SP"
+  },
+  {
+    "value": "Divinopolis,State of Minas Gerais,Brazil",
+    "label": "Divinopolis, MG"
+  },
+  {
+    "value": "Bezerros,State of Pernambuco,Brazil",
+    "label": "Bezerros, PE"
+  },
+  {
+    "value": "Porto Seguro,State of Bahia,Brazil",
+    "label": "Porto Seguro, BA"
+  },
+  {
+    "value": "Paco do Lumiar,State of Maranhao,Brazil",
+    "label": "Paco do Lumiar, MA"
+  },
+  {
+    "value": "Camacari,Camacari,State of Bahia,Brazil",
+    "label": "Camacari, BA"
+  },
+  {
+    "value": "Lages,State of Santa Catarina,Brazil",
+    "label": "Lages, SC"
+  },
+  {
+    "value": "Ibirite,Ibirite,State of Minas Gerais,Brazil",
+    "label": "Ibirite, MG"
+  },
+  {
+    "value": "Sobral,Ceara,Brazil",
+    "label": "Sobral, CE"
+  },
+  {
+    "value": "Araucaria,State of Parana,Brazil",
+    "label": "Araucaria, PR"
+  },
+  {
+    "value": "Lages,Lages,State of Santa Catarina,Brazil",
+    "label": "Lages, SC"
+  },
+  {
+    "value": "Brusque,State of Santa Catarina,Brazil",
+    "label": "Brusque, SC"
+  },
+  {
+    "value": "Itaborai,State of Rio de Janeiro,Brazil",
+    "label": "Itaborai, RJ"
+  },
+  {
+    "value": "Botucatu,State of Sao Paulo,Brazil",
+    "label": "Botucatu, SP"
+  },
+  {
+    "value": "Itapevi,State of Sao Paulo,Brazil",
+    "label": "Itapevi, SP"
+  },
+  {
+    "value": "Luziania,State of Goias,Brazil",
+    "label": "Luziania, GO"
+  },
+  {
+    "value": "Irece,State of Bahia,Brazil",
+    "label": "Irece, BA"
+  },
+  {
+    "value": "Itabuna,State of Bahia,Brazil",
+    "label": "Itabuna, BA"
+  },
+  {
+    "value": "Cachoeiro de Itapemirim,State of Espirito Santo,Brazil",
+    "label": "Cachoeiro de Itapemirim, ES"
+  },
+  {
+    "value": "Barra Mansa,State of Rio de Janeiro,Brazil",
+    "label": "Barra Mansa, RJ"
+  },
+  {
+    "value": "Catanduva,State of Sao Paulo,Brazil",
+    "label": "Catanduva, SP"
+  },
+  {
+    "value": "Pindamonhangaba,State of Sao Paulo,Brazil",
+    "label": "Pindamonhangaba, SP"
+  },
+  {
+    "value": "Franco da Rocha,Franco da Rocha,State of Sao Paulo,Brazil",
+    "label": "Franco da Rocha, SP"
+  },
+  {
+    "value": "Pinhais,State of Parana,Brazil",
+    "label": "Pinhais, PR"
+  },
+  {
+    "value": "Sabara,State of Minas Gerais,Brazil",
+    "label": "Sabara, MG"
+  },
+  {
+    "value": "Catanduva,Catanduva,State of Sao Paulo,Brazil",
+    "label": "Catanduva, SP"
+  },
+  {
+    "value": "Itabuna,Itabuna,State of Bahia,Brazil",
+    "label": "Itabuna, BA"
+  },
+  {
+    "value": "Sao Sebastiao,Sao Sebastiao,State of Sao Paulo,Brazil",
+    "label": "Sao Sebastiao, SP"
+  },
+  {
+    "value": "Cachoeirinha,State of Rio Grande do Sul,Brazil",
+    "label": "Cachoeirinha, RS"
+  },
+  {
+    "value": "Garanhuns,State of Pernambuco,Brazil",
+    "label": "Garanhuns, PE"
+  },
+  {
+    "value": "Nova Friburgo,State of Rio de Janeiro,Brazil",
+    "label": "Nova Friburgo, RJ"
+  },
+  {
+    "value": "Angra dos Reis,State of Rio de Janeiro,Brazil",
+    "label": "Angra dos Reis, RJ"
+  },
+  {
+    "value": "Imbituba,State of Santa Catarina,Brazil",
+    "label": "Imbituba, SC"
+  },
+  {
+    "value": "Santo Antonio de Jesus,State of Bahia,Brazil",
+    "label": "Santo Antonio de Jesus, BA"
+  },
+  {
+    "value": "Itapetininga,State of Sao Paulo,Brazil",
+    "label": "Itapetininga, SP"
+  },
+  {
+    "value": "Araras,State of Sao Paulo,Brazil",
+    "label": "Araras, SP"
+  },
+  {
+    "value": "Igarassu,State of Pernambuco,Brazil",
+    "label": "Igarassu, PE"
+  },
+  {
+    "value": "Jau,State of Sao Paulo,Brazil",
+    "label": "Jau, SP"
+  },
+  {
+    "value": "Concordia,State of Santa Catarina,Brazil",
+    "label": "Concordia, SC"
+  },
+  {
+    "value": "Santo Antonio de Jesus,Santo Antonio de Jesus,State of Bahia,Brazil",
+    "label": "Santo Antonio de Jesus, BA"
+  },
+  {
+    "value": "Toledo,State of Parana,Brazil",
+    "label": "Toledo, PR"
+  },
+  {
+    "value": "Cajamar,State of Sao Paulo,Brazil",
+    "label": "Cajamar, SP"
+  },
+  {
+    "value": "Trindade,State of Goias,Brazil",
+    "label": "Trindade, GO"
+  },
+  {
+    "value": "Sao Joao da Boa Vista,State of Sao Paulo,Brazil",
+    "label": "Sao Joao da Boa Vista, SP"
+  },
+  {
+    "value": "Araguaina,State of Tocantins,Brazil",
+    "label": "Araguaina, TO"
+  },
+  {
+    "value": "Alvorada,State of Rio Grande do Sul,Brazil",
+    "label": "Alvorada, RS"
+  },
+  {
+    "value": "Arapongas,State of Parana,Brazil",
+    "label": "Arapongas, PR"
+  },
+  {
+    "value": "Guaratingueta,State of Sao Paulo,Brazil",
+    "label": "Guaratingueta, SP"
+  },
+  {
+    "value": "Itapira,State of Sao Paulo,Brazil",
+    "label": "Itapira, SP"
+  },
+  {
+    "value": "Santa Cruz do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Santa Cruz do Sul, RS"
+  },
+  {
+    "value": "Concordia,Concordia,State of Santa Catarina,Brazil",
+    "label": "Concordia, SC"
+  },
+  {
+    "value": "Mesquita,Mesquita,State of Rio de Janeiro,Brazil",
+    "label": "Mesquita, RJ"
+  },
+  {
+    "value": "Marituba,State of Para,Brazil",
+    "label": "Marituba, PA"
+  },
+  {
+    "value": "Barreiras,State of Bahia,Brazil",
+    "label": "Barreiras, BA"
+  },
+  {
+    "value": "Timon,State of Maranhao,Brazil",
+    "label": "Timon, MA"
+  },
+  {
+    "value": "Varginha,Varginha,State of Minas Gerais,Brazil",
+    "label": "Varginha, MG"
+  },
+  {
+    "value": "Guarapuava,State of Parana,Brazil",
+    "label": "Guarapuava, PR"
+  },
+  {
+    "value": "Jandira,Jandira,State of Sao Paulo,Brazil",
+    "label": "Jandira, SP"
+  },
+  {
+    "value": "Nilopolis,Nilopolis,State of Rio de Janeiro,Brazil",
+    "label": "Nilopolis, RJ"
+  },
+  {
+    "value": "Rio Grande,State of Rio Grande do Sul,Brazil",
+    "label": "Rio Grande, RS"
+  },
+  {
+    "value": "Senador Canedo,State of Goias,Brazil",
+    "label": "Senador Canedo, GO"
+  },
+  {
+    "value": "Jau,Jau,State of Sao Paulo,Brazil",
+    "label": "Jau, SP"
+  },
+  {
+    "value": "Sao Jose de Ribamar,State of Maranhao,Brazil",
+    "label": "Sao Jose de Ribamar, MA"
+  },
+  {
+    "value": "Navegantes,Navegantes,State of Santa Catarina,Brazil",
+    "label": "Navegantes, SC"
+  },
+  {
+    "value": "Araruama,State of Rio de Janeiro,Brazil",
+    "label": "Araruama, RJ"
+  },
+  {
+    "value": "Itapetininga,Itapetininga,State of Sao Paulo,Brazil",
+    "label": "Itapetininga, SP"
+  },
+  {
+    "value": "Santa Cruz do Sul,Santa Cruz do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Santa Cruz do Sul, RS"
+  },
+  {
+    "value": "Ipojuca,State of Pernambuco,Brazil",
+    "label": "Ipojuca, PE"
+  },
+  {
+    "value": "Pirassununga,State of Sao Paulo,Brazil",
+    "label": "Pirassununga, SP"
+  },
+  {
+    "value": "Tatui,State of Sao Paulo,Brazil",
+    "label": "Tatui, SP"
+  },
+  {
+    "value": "Vespasiano,State of Minas Gerais,Brazil",
+    "label": "Vespasiano, MG"
+  },
+  {
+    "value": "Ilheus,Ilheus,State of Bahia,Brazil",
+    "label": "Ilheus, BA"
+  },
+  {
+    "value": "Trindade,Trindade,State of Goias,Brazil",
+    "label": "Trindade, GO"
+  },
+  {
+    "value": "Porto Seguro,Porto Seguro,State of Bahia,Brazil",
+    "label": "Porto Seguro, BA"
+  },
+  {
+    "value": "Timon,Timon,State of Maranhao,Brazil",
+    "label": "Timon, MA"
+  },
+  {
+    "value": "Salto,Salto,State of Sao Paulo,Brazil",
+    "label": "Salto, SP"
+  },
+  {
+    "value": "Piraquara,State of Parana,Brazil",
+    "label": "Piraquara, PR"
+  },
+  {
+    "value": "Itatiba,State of Sao Paulo,Brazil",
+    "label": "Itatiba, SP"
+  },
+  {
+    "value": "Pindamonhangaba,Pindamonhangaba,State of Sao Paulo,Brazil",
+    "label": "Pindamonhangaba, SP"
+  },
+  {
+    "value": "Guaratingueta,Guaratingueta,State of Sao Paulo,Brazil",
+    "label": "Guaratingueta, SP"
+  },
+  {
+    "value": "Guarapuava,Guarapuava,State of Parana,Brazil",
+    "label": "Guarapuava, PR"
+  },
+  {
+    "value": "Amparo,State of Sao Paulo,Brazil",
+    "label": "Amparo, SP"
+  },
+  {
+    "value": "Vinhedo,State of Sao Paulo,Brazil",
+    "label": "Vinhedo, SP"
+  },
+  {
+    "value": "Abaetetuba,State of Para,Brazil",
+    "label": "Abaetetuba, PA"
+  },
+  {
+    "value": "Nova Serrana,State of Minas Gerais,Brazil",
+    "label": "Nova Serrana, MG"
+  },
+  {
+    "value": "Guarapari,State of Espirito Santo,Brazil",
+    "label": "Guarapari, ES"
+  },
+  {
+    "value": "Ilheus,State of Bahia,Brazil",
+    "label": "Ilheus, BA"
+  },
+  {
+    "value": "Salto,State of Sao Paulo,Brazil",
+    "label": "Salto, SP"
+  },
+  {
+    "value": "Camboriu,State of Santa Catarina,Brazil",
+    "label": "Camboriu, SC"
+  },
+  {
+    "value": "Ibiuna,State of Sao Paulo,Brazil",
+    "label": "Ibiuna, SP"
+  },
+  {
+    "value": "Rio Grande,Rio Grande,State of Rio Grande do Sul,Brazil",
+    "label": "Rio Grande, RS"
+  },
+  {
+    "value": "Sao Joao da Boa Vista,Sao Joao da Boa Vista,State of Sao Paulo,Brazil",
+    "label": "Sao Joao da Boa Vista, SP"
+  },
+  {
+    "value": "Cubatao,Cubatao,State of Sao Paulo,Brazil",
+    "label": "Cubatao, SP"
+  },
+  {
+    "value": "Itanhaem,Itanhaem,State of Sao Paulo,Brazil",
+    "label": "Itanhaem, SP"
+  },
+  {
+    "value": "Birigui,State of Sao Paulo,Brazil",
+    "label": "Birigui, SP"
+  },
+  {
+    "value": "Goiana,State of Pernambuco,Brazil",
+    "label": "Goiana, PE"
+  },
+  {
+    "value": "Itaguai,State of Rio de Janeiro,Brazil",
+    "label": "Itaguai, RJ"
+  },
+  {
+    "value": "Araruama,Araruama,State of Rio de Janeiro,Brazil",
+    "label": "Araruama, RJ"
+  },
+  {
+    "value": "Sarandi,State of Parana,Brazil",
+    "label": "Sarandi, PR"
+  },
+  {
+    "value": "Araras,Araras,State of Sao Paulo,Brazil",
+    "label": "Araras, SP"
+  },
+  {
+    "value": "Camaragibe,State of Pernambuco,Brazil",
+    "label": "Camaragibe, PE"
+  },
+  {
+    "value": "Joao Monlevade,State of Minas Gerais,Brazil",
+    "label": "Joao Monlevade, MG"
+  },
+  {
+    "value": "Primavera do Leste,State of Mato Grosso,Brazil",
+    "label": "Primavera do Leste, MT"
+  },
+  {
+    "value": "Sao Sebastiao,State of Sao Paulo,Brazil",
+    "label": "Sao Sebastiao, SP"
+  },
+  {
+    "value": "Barcarena,State of Para,Brazil",
+    "label": "Barcarena, PA"
+  },
+  {
+    "value": "Itanhaem,State of Sao Paulo,Brazil",
+    "label": "Itanhaem, SP"
+  },
+  {
+    "value": "Ubatuba,Ubatuba,State of Sao Paulo,Brazil",
+    "label": "Ubatuba, SP"
+  },
+  {
+    "value": "Caxias,State of Maranhao,Brazil",
+    "label": "Caxias, MA"
+  },
+  {
+    "value": "Mesquita,State of Rio de Janeiro,Brazil",
+    "label": "Mesquita, RJ"
+  },
+  {
+    "value": "Itaperuna,State of Rio de Janeiro,Brazil",
+    "label": "Itaperuna, RJ"
+  },
+  {
+    "value": "Barretos,State of Sao Paulo,Brazil",
+    "label": "Barretos, SP"
+  },
+  {
+    "value": "Paulinia,State of Sao Paulo,Brazil",
+    "label": "Paulinia, SP"
+  },
+  {
+    "value": "Parnaiba,State of Piaui,Brazil",
+    "label": "Parnaiba, PI"
+  },
+  {
+    "value": "Catalao,State of Goias,Brazil",
+    "label": "Catalao, GO"
+  },
+  {
+    "value": "Balsas,State of Maranhao,Brazil",
+    "label": "Balsas, MA"
+  },
+  {
+    "value": "Ibiuna,Ibiuna,State of Sao Paulo,Brazil",
+    "label": "Ibiuna, SP"
+  },
+  {
+    "value": "Vinhedo,Vinhedo,State of Sao Paulo,Brazil",
+    "label": "Vinhedo, SP"
+  },
+  {
+    "value": "Ferraz de Vasconcelos,State of Sao Paulo,Brazil",
+    "label": "Ferraz de Vasconcelos, SP"
+  },
+  {
+    "value": "Itaguai,Itaguai,State of Rio de Janeiro,Brazil",
+    "label": "Itaguai, RJ"
+  },
+  {
+    "value": "Itupeva,State of Sao Paulo,Brazil",
+    "label": "Itupeva, SP"
+  },
+  {
+    "value": "Viana,State of Espirito Santo,Brazil",
+    "label": "Viana, ES"
+  },
+  {
+    "value": "Pato Branco,State of Parana,Brazil",
+    "label": "Pato Branco, PR"
+  },
+  {
+    "value": "Birigui,Birigui,State of Sao Paulo,Brazil",
+    "label": "Birigui, SP"
+  },
+  {
+    "value": "Alagoinhas,State of Bahia,Brazil",
+    "label": "Alagoinhas, BA"
+  },
+  {
+    "value": "Pato Branco,Pato Branco,State of Parana,Brazil",
+    "label": "Pato Branco, PR"
+  },
+  {
+    "value": "Altamira,State of Para,Brazil",
+    "label": "Altamira, PA"
+  },
+  {
+    "value": "Paranagua,State of Parana,Brazil",
+    "label": "Paranagua, PR"
+  },
+  {
+    "value": "Aruja,State of Sao Paulo,Brazil",
+    "label": "Aruja, SP"
+  },
+  {
+    "value": "Araxa,State of Minas Gerais,Brazil",
+    "label": "Araxa, MG"
+  },
+  {
+    "value": "Barretos,Barretos,State of Sao Paulo,Brazil",
+    "label": "Barretos, SP"
+  },
+  {
+    "value": "Barbacena,State of Minas Gerais,Brazil",
+    "label": "Barbacena, MG"
+  },
+  {
+    "value": "Cubatao,State of Sao Paulo,Brazil",
+    "label": "Cubatao, SP"
+  },
+  {
+    "value": "Campo Mourao,State of Parana,Brazil",
+    "label": "Campo Mourao, PR"
+  },
+  {
+    "value": "Senhor do Bonfim,State of Bahia,Brazil",
+    "label": "Senhor do Bonfim, BA"
+  },
+  {
+    "value": "Sao Lourenco da Mata,State of Pernambuco,Brazil",
+    "label": "Sao Lourenco da Mata, PE"
+  },
+  {
+    "value": "Ubatuba,State of Sao Paulo,Brazil",
+    "label": "Ubatuba, SP"
+  },
+  {
+    "value": "Avare,State of Sao Paulo,Brazil",
+    "label": "Avare, SP"
+  },
+  {
+    "value": "Goiana,Goiana,State of Pernambuco,Brazil",
+    "label": "Goiana, PE"
+  },
+  {
+    "value": "Rio Largo,Rio Largo,State of Alagoas,Brazil",
+    "label": "Rio Largo, AL"
+  },
+  {
+    "value": "Paulo Afonso,State of Bahia,Brazil",
+    "label": "Paulo Afonso, BA"
+  },
+  {
+    "value": "Votorantim,Votorantim,State of Sao Paulo,Brazil",
+    "label": "Votorantim, SP"
+  },
+  {
+    "value": "Conselheiro Lafaiete,State of Minas Gerais,Brazil",
+    "label": "Conselheiro Lafaiete, MG"
+  },
+  {
+    "value": "Santo Angelo,State of Rio Grande do Sul,Brazil",
+    "label": "Santo Angelo, RS"
+  },
+  {
+    "value": "Santa Ines,State of Maranhao,Brazil",
+    "label": "Santa Ines, MA"
+  },
+  {
+    "value": "Sao Roque,State of Sao Paulo,Brazil",
+    "label": "Sao Roque, SP"
+  },
+  {
+    "value": "Leme,State of Sao Paulo,Brazil",
+    "label": "Leme, SP"
+  },
+  {
+    "value": "Nova Odessa,State of Sao Paulo,Brazil",
+    "label": "Nova Odessa, SP"
+  },
+  {
+    "value": "Ibirite,State of Minas Gerais,Brazil",
+    "label": "Ibirite, MG"
+  },
+  {
+    "value": "Nilopolis,State of Rio de Janeiro,Brazil",
+    "label": "Nilopolis, RJ"
+  },
+  {
+    "value": "Navegantes,State of Santa Catarina,Brazil",
+    "label": "Navegantes, SC"
+  },
+  {
+    "value": "Valenca,State of Bahia,Brazil",
+    "label": "Valenca, BA"
+  },
+  {
+    "value": "Simoes Filho,State of Bahia,Brazil",
+    "label": "Simoes Filho, BA"
+  },
+  {
+    "value": "Ponta Pora,State of Mato Grosso do Sul,Brazil",
+    "label": "Ponta Pora, MS"
+  },
+  {
+    "value": "Almirante Tamandare,State of Parana,Brazil",
+    "label": "Almirante Tamandare, PR"
+  },
+  {
+    "value": "Jaguariuna,State of Sao Paulo,Brazil",
+    "label": "Jaguariuna, SP"
+  },
+  {
+    "value": "Sertaozinho,State of Sao Paulo,Brazil",
+    "label": "Sertaozinho, SP"
+  },
+  {
+    "value": "Lavras,State of Minas Gerais,Brazil",
+    "label": "Lavras, MG"
+  },
+  {
+    "value": "Itatiba,Itatiba,State of Sao Paulo,Brazil",
+    "label": "Itatiba, SP"
+  },
+  {
+    "value": "Ribeirao Pires,State of Sao Paulo,Brazil",
+    "label": "Ribeirao Pires, SP"
+  },
+  {
+    "value": "Biguacu,State of Santa Catarina,Brazil",
+    "label": "Biguacu, SC"
+  },
+  {
+    "value": "Cambe,State of Parana,Brazil",
+    "label": "Cambe, PR"
+  },
+  {
+    "value": "Francisco Beltrao,State of Parana,Brazil",
+    "label": "Francisco Beltrao, PR"
+  },
+  {
+    "value": "Lencois Paulista,State of Sao Paulo,Brazil",
+    "label": "Lencois Paulista, SP"
+  },
+  {
+    "value": "Mairipora,State of Sao Paulo,Brazil",
+    "label": "Mairipora, SP"
+  },
+  {
+    "value": "Queimados,Queimados,State of Rio de Janeiro,Brazil",
+    "label": "Queimados, RJ"
+  },
+  {
+    "value": "Passos,State of Minas Gerais,Brazil",
+    "label": "Passos, MG"
+  },
+  {
+    "value": "Caieiras,State of Sao Paulo,Brazil",
+    "label": "Caieiras, SP"
+  },
+  {
+    "value": "Teixeira de Freitas,State of Bahia,Brazil",
+    "label": "Teixeira de Freitas, BA"
+  },
+  {
+    "value": "Paranagua,Paranagua,State of Parana,Brazil",
+    "label": "Paranagua, PR"
+  },
+  {
+    "value": "Teofilo Otoni,State of Minas Gerais,Brazil",
+    "label": "Teofilo Otoni, MG"
+  },
+  {
+    "value": "Serra Talhada,State of Pernambuco,Brazil",
+    "label": "Serra Talhada, PE"
+  },
+  {
+    "value": "Lavras,Lavras,State of Minas Gerais,Brazil",
+    "label": "Lavras, MG"
+  },
+  {
+    "value": "Santa Rita,State of Paraiba,Brazil",
+    "label": "Santa Rita, PB"
+  },
+  {
+    "value": "Avare,Avare,State of Sao Paulo,Brazil",
+    "label": "Avare, SP"
+  },
+  {
+    "value": "Apucarana,State of Parana,Brazil",
+    "label": "Apucarana, PR"
+  },
+  {
+    "value": "Salgueiro,State of Pernambuco,Brazil",
+    "label": "Salgueiro, PE"
+  },
+  {
+    "value": "Crato,Ceara,Brazil",
+    "label": "Crato, CE"
+  },
+  {
+    "value": "Aquiraz,Ceara,Brazil",
+    "label": "Aquiraz, CE"
+  },
+  {
+    "value": "Leme,Leme,State of Sao Paulo,Brazil",
+    "label": "Leme, SP"
+  },
+  {
+    "value": "Umuarama,State of Parana,Brazil",
+    "label": "Umuarama, PR"
+  },
+  {
+    "value": "Araquari,State of Santa Catarina,Brazil",
+    "label": "Araquari, SC"
+  },
+  {
+    "value": "Nova Odessa,Nova Odessa,State of Sao Paulo,Brazil",
+    "label": "Nova Odessa, SP"
+  },
+  {
+    "value": "Jequie,State of Bahia,Brazil",
+    "label": "Jequie, BA"
+  },
+  {
+    "value": "Sao Mateus,State of Espirito Santo,Brazil",
+    "label": "Sao Mateus, ES"
+  },
+  {
+    "value": "Lajeado,State of Rio Grande do Sul,Brazil",
+    "label": "Lajeado, RS"
+  },
+  {
+    "value": "Assis,State of Sao Paulo,Brazil",
+    "label": "Assis, SP"
+  },
+  {
+    "value": "Registro,State of Sao Paulo,Brazil",
+    "label": "Registro, SP"
+  },
+  {
+    "value": "Caldas Novas,State of Goias,Brazil",
+    "label": "Caldas Novas, GO"
+  },
+  {
+    "value": "Lencois Paulista,Lencois Paulista,State of Sao Paulo,Brazil",
+    "label": "Lencois Paulista, SP"
+  },
+  {
+    "value": "Lajeado,Lajeado,State of Rio Grande do Sul,Brazil",
+    "label": "Lajeado, RS"
+  },
+  {
+    "value": "Sao Joao del Rei,State of Minas Gerais,Brazil",
+    "label": "Sao Joao del Rei, MG"
+  },
+  {
+    "value": "Bento Goncalves,State of Rio Grande do Sul,Brazil",
+    "label": "Bento Goncalves, RS"
+  },
+  {
+    "value": "Formosa,State of Goias,Brazil",
+    "label": "Formosa, GO"
+  },
+  {
+    "value": "Bertioga,Bertioga,State of Sao Paulo,Brazil",
+    "label": "Bertioga, SP"
+  },
+  {
+    "value": "Tangara da Serra,State of Mato Grosso,Brazil",
+    "label": "Tangara da Serra, MT"
+  },
+  {
+    "value": "Ituiutaba,State of Minas Gerais,Brazil",
+    "label": "Ituiutaba, MG"
+  },
+  {
+    "value": "Para de Minas,State of Minas Gerais,Brazil",
+    "label": "Para de Minas, MG"
+  },
+  {
+    "value": "Patos,State of Paraiba,Brazil",
+    "label": "Patos, PB"
+  },
+  {
+    "value": "Picos,State of Piaui,Brazil",
+    "label": "Picos, PI"
+  },
+  {
+    "value": "Varginha,State of Minas Gerais,Brazil",
+    "label": "Varginha, MG"
+  },
+  {
+    "value": "Sabara,Sabara,State of Minas Gerais,Brazil",
+    "label": "Sabara, MG"
+  },
+  {
+    "value": "Iguatu,Ceara,Brazil",
+    "label": "Iguatu, CE"
+  },
+  {
+    "value": "Tres Lagoas,State of Mato Grosso do Sul,Brazil",
+    "label": "Tres Lagoas, MS"
+  },
+  {
+    "value": "Gravata,State of Pernambuco,Brazil",
+    "label": "Gravata, PE"
+  },
+  {
+    "value": "Varzea Paulista,State of Sao Paulo,Brazil",
+    "label": "Varzea Paulista, SP"
+  },
+  {
+    "value": "Planaltina,State of Goias,Brazil",
+    "label": "Planaltina, GO"
+  },
+  {
+    "value": "Sertaozinho,Sertaozinho,State of Sao Paulo,Brazil",
+    "label": "Sertaozinho, SP"
+  },
+  {
+    "value": "Assu,State of Rio Grande do Norte,Brazil",
+    "label": "Assu, RN"
+  },
+  {
+    "value": "Erechim,State of Rio Grande do Sul,Brazil",
+    "label": "Erechim, RS"
+  },
+  {
+    "value": "Assis,Assis,State of Sao Paulo,Brazil",
+    "label": "Assis, SP"
+  },
+  {
+    "value": "Santa Rosa,State of Rio Grande do Sul,Brazil",
+    "label": "Santa Rosa, RS"
+  },
+  {
+    "value": "Cacapava,State of Sao Paulo,Brazil",
+    "label": "Cacapava, SP"
+  },
+  {
+    "value": "Sao Pedro da Aldeia,State of Rio de Janeiro,Brazil",
+    "label": "Sao Pedro da Aldeia, RJ"
+  },
+  {
+    "value": "Santana do Ipanema,State of Alagoas,Brazil",
+    "label": "Santana do Ipanema, AL"
+  },
+  {
+    "value": "Arapongas,Arapongas,State of Parana,Brazil",
+    "label": "Arapongas, PR"
+  },
+  {
+    "value": "Itapema,Itapema,State of Santa Catarina,Brazil",
+    "label": "Itapema, SC"
+  },
+  {
+    "value": "Ji-Parana,State of Rondonia,Brazil",
+    "label": "Ji-Parana, RO"
+  },
+  {
+    "value": "Ararangua,State of Santa Catarina,Brazil",
+    "label": "Ararangua, SC"
+  },
+  {
+    "value": "Bertioga,State of Sao Paulo,Brazil",
+    "label": "Bertioga, SP"
+  },
+  {
+    "value": "Esteio,State of Rio Grande do Sul,Brazil",
+    "label": "Esteio, RS"
+  },
+  {
+    "value": "Jaguariuna,Jaguariuna,State of Sao Paulo,Brazil",
+    "label": "Jaguariuna, SP"
+  },
+  {
+    "value": "Para de Minas,Para de Minas,State of Minas Gerais,Brazil",
+    "label": "Para de Minas, MG"
+  },
+  {
+    "value": "Eunapolis,State of Bahia,Brazil",
+    "label": "Eunapolis, BA"
+  },
+  {
+    "value": "Nossa Senhora do Socorro,State of Sergipe,Brazil",
+    "label": "Nossa Senhora do Socorro, SE"
+  },
+  {
+    "value": "Acu,State of Rio Grande do Norte,Brazil",
+    "label": "Acu, RN"
+  },
+  {
+    "value": "Passos,Passos,State of Minas Gerais,Brazil",
+    "label": "Passos, MG"
+  },
+  {
+    "value": "Colatina,State of Espirito Santo,Brazil",
+    "label": "Colatina, ES"
+  },
+  {
+    "value": "Francisco Morato,State of Sao Paulo,Brazil",
+    "label": "Francisco Morato, SP"
+  },
+  {
+    "value": "Itabira,State of Minas Gerais,Brazil",
+    "label": "Itabira, MG"
+  },
+  {
+    "value": "Saquarema,State of Rio de Janeiro,Brazil",
+    "label": "Saquarema, RJ"
+  },
+  {
+    "value": "Tijucas,State of Santa Catarina,Brazil",
+    "label": "Tijucas, SC"
+  },
+  {
+    "value": "Votuporanga,State of Sao Paulo,Brazil",
+    "label": "Votuporanga, SP"
+  },
+  {
+    "value": "Itumbiara,State of Goias,Brazil",
+    "label": "Itumbiara, GO"
+  },
+  {
+    "value": "Lins,State of Sao Paulo,Brazil",
+    "label": "Lins, SP"
+  },
+  {
+    "value": "Marechal Candido Rondon,State of Parana,Brazil",
+    "label": "Marechal Candido Rondon, PR"
+  },
+  {
+    "value": "Votorantim,State of Sao Paulo,Brazil",
+    "label": "Votorantim, SP"
+  },
+  {
+    "value": "Biguacu,Biguacu,State of Santa Catarina,Brazil",
+    "label": "Biguacu, SC"
+  },
+  {
+    "value": "Alfenas,State of Minas Gerais,Brazil",
+    "label": "Alfenas, MG"
+  },
+  {
+    "value": "Itajuba,State of Minas Gerais,Brazil",
+    "label": "Itajuba, MG"
+  },
+  {
+    "value": "Lorena,State of Sao Paulo,Brazil",
+    "label": "Lorena, SP"
+  },
+  {
+    "value": "Bebedouro,State of Sao Paulo,Brazil",
+    "label": "Bebedouro, SP"
+  },
+  {
+    "value": "Sapiranga,State of Rio Grande do Sul,Brazil",
+    "label": "Sapiranga, RS"
+  },
+  {
+    "value": "Bacabal,State of Maranhao,Brazil",
+    "label": "Bacabal, MA"
+  },
+  {
+    "value": "Serrinha,State of Bahia,Brazil",
+    "label": "Serrinha, BA"
+  },
+  {
+    "value": "Cidade Ocidental,State of Goias,Brazil",
+    "label": "Cidade Ocidental, GO"
+  },
+  {
+    "value": "Sapiranga,Sapiranga,State of Rio Grande do Sul,Brazil",
+    "label": "Sapiranga, RS"
+  },
+  {
+    "value": "Queimados,State of Rio de Janeiro,Brazil",
+    "label": "Queimados, RJ"
+  },
+  {
+    "value": "Alfenas,Alfenas,State of Minas Gerais,Brazil",
+    "label": "Alfenas, MG"
+  },
+  {
+    "value": "Caceres,State of Mato Grosso,Brazil",
+    "label": "Caceres, MT"
+  },
+  {
+    "value": "Luis Eduardo Magalhaes,State of Bahia,Brazil",
+    "label": "Luis Eduardo Magalhaes, BA"
+  },
+  {
+    "value": "Moji-Mirim,State of Sao Paulo,Brazil",
+    "label": "Moji-Mirim, SP"
+  },
+  {
+    "value": "Penha,Penha,State of Santa Catarina,Brazil",
+    "label": "Penha, SC"
+  },
+  {
+    "value": "Araguari,State of Minas Gerais,Brazil",
+    "label": "Araguari, MG"
+  },
+  {
+    "value": "Itapema,State of Santa Catarina,Brazil",
+    "label": "Itapema, SC"
+  },
+  {
+    "value": "Poa,State of Sao Paulo,Brazil",
+    "label": "Poa, SP"
+  },
+  {
+    "value": "Torres,State of Rio Grande do Sul,Brazil",
+    "label": "Torres, RS"
+  },
+  {
+    "value": "Cruzeiro,State of Sao Paulo,Brazil",
+    "label": "Cruzeiro, SP"
+  },
+  {
+    "value": "Jandira,State of Sao Paulo,Brazil",
+    "label": "Jandira, SP"
+  },
+  {
+    "value": "Paranavai,State of Parana,Brazil",
+    "label": "Paranavai, PR"
+  },
+  {
+    "value": "Tijucas,Tijucas,State of Santa Catarina,Brazil",
+    "label": "Tijucas, SC"
+  },
+  {
+    "value": "Canela,State of Rio Grande do Sul,Brazil",
+    "label": "Canela, RS"
+  },
+  {
+    "value": "Lagoa Santa,State of Minas Gerais,Brazil",
+    "label": "Lagoa Santa, MG"
+  },
+  {
+    "value": "Muriae,State of Minas Gerais,Brazil",
+    "label": "Muriae, MG"
+  },
+  {
+    "value": "Simoes Filho,Simoes Filho,State of Bahia,Brazil",
+    "label": "Simoes Filho, BA"
+  },
+  {
+    "value": "Maranguape,Ceara,Brazil",
+    "label": "Maranguape, CE"
+  },
+  {
+    "value": "Lorena,Lorena,State of Sao Paulo,Brazil",
+    "label": "Lorena, SP"
+  },
+  {
+    "value": "Itabaiana,State of Sergipe,Brazil",
+    "label": "Itabaiana, SE"
+  },
+  {
+    "value": "Armacao dos Buzios,State of Rio de Janeiro,Brazil",
+    "label": "Armacao dos Buzios, RJ"
+  },
+  {
+    "value": "Penha,State of Santa Catarina,Brazil",
+    "label": "Penha, SC"
+  },
+  {
+    "value": "Eusebio,Ceara,Brazil",
+    "label": "Eusebio, CE"
+  },
+  {
+    "value": "Lins,Lins,State of Sao Paulo,Brazil",
+    "label": "Lins, SP"
+  },
+  {
+    "value": "Araripina,State of Pernambuco,Brazil",
+    "label": "Araripina, PE"
+  },
+  {
+    "value": "Igarape,State of Minas Gerais,Brazil",
+    "label": "Igarape, MG"
+  },
+  {
+    "value": "Santa Cruz do Capibaribe,State of Pernambuco,Brazil",
+    "label": "Santa Cruz do Capibaribe, PE"
+  },
+  {
+    "value": "Uba,State of Minas Gerais,Brazil",
+    "label": "Uba, MG"
+  },
+  {
+    "value": "Tres Rios,Tres Rios,State of Rio de Janeiro,Brazil",
+    "label": "Tres Rios, RJ"
+  },
+  {
+    "value": "Ijui,State of Rio Grande do Sul,Brazil",
+    "label": "Ijui, RS"
+  },
+  {
+    "value": "Cajazeiras,State of Paraiba,Brazil",
+    "label": "Cajazeiras, PB"
+  },
+  {
+    "value": "Candeias,State of Bahia,Brazil",
+    "label": "Candeias, BA"
+  },
+  {
+    "value": "Guaiba,State of Rio Grande do Sul,Brazil",
+    "label": "Guaiba, RS"
+  },
+  {
+    "value": "Lagarto,State of Sergipe,Brazil",
+    "label": "Lagarto, SE"
+  },
+  {
+    "value": "Cabedelo,State of Paraiba,Brazil",
+    "label": "Cabedelo, PB"
+  },
+  {
+    "value": "Itupeva,Itupeva,State of Sao Paulo,Brazil",
+    "label": "Itupeva, SP"
+  },
+  {
+    "value": "Xangri-la,State of Rio Grande do Sul,Brazil",
+    "label": "Xangri-la, RS"
+  },
+  {
+    "value": "Cacoal,State of Rondonia,Brazil",
+    "label": "Cacoal, RO"
+  },
+  {
+    "value": "Sao Bento do Sul,State of Santa Catarina,Brazil",
+    "label": "Sao Bento do Sul, SC"
+  },
+  {
+    "value": "Pacatuba,Ceara,Brazil",
+    "label": "Pacatuba, CE"
+  },
+  {
+    "value": "Muriae,Muriae,State of Minas Gerais,Brazil",
+    "label": "Muriae, MG"
+  },
+  {
+    "value": "Cacapava,Cacapava,State of Sao Paulo,Brazil",
+    "label": "Cacapava, SP"
+  },
+  {
+    "value": "Itapeva,State of Sao Paulo,Brazil",
+    "label": "Itapeva, SP"
+  },
+  {
+    "value": "Boituva,State of Sao Paulo,Brazil",
+    "label": "Boituva, SP"
+  },
+  {
+    "value": "Sao Lourenco,State of Minas Gerais,Brazil",
+    "label": "Sao Lourenco, MG"
+  },
+  {
+    "value": "Itajuba,Itajuba,State of Minas Gerais,Brazil",
+    "label": "Itajuba, MG"
+  },
+  {
+    "value": "Itaituba,State of Para,Brazil",
+    "label": "Itaituba, PA"
+  },
+  {
+    "value": "Caratinga,State of Minas Gerais,Brazil",
+    "label": "Caratinga, MG"
+  },
+  {
+    "value": "Sao Lourenco,Sao Lourenco,State of Minas Gerais,Brazil",
+    "label": "Sao Lourenco, MG"
+  },
+  {
+    "value": "Esteio,Esteio,State of Rio Grande do Sul,Brazil",
+    "label": "Esteio, RS"
+  },
+  {
+    "value": "Barra do Pirai,State of Rio de Janeiro,Brazil",
+    "label": "Barra do Pirai, RJ"
+  },
+  {
+    "value": "Matao,State of Sao Paulo,Brazil",
+    "label": "Matao, SP"
+  },
+  {
+    "value": "Araguari,Araguari,State of Minas Gerais,Brazil",
+    "label": "Araguari, MG"
+  },
+  {
+    "value": "Peruibe,State of Sao Paulo,Brazil",
+    "label": "Peruibe, SP"
+  },
+  {
+    "value": "Sousa,State of Paraiba,Brazil",
+    "label": "Sousa, PB"
+  },
+  {
+    "value": "Torres,Torres,State of Rio Grande do Sul,Brazil",
+    "label": "Torres, RS"
+  },
+  {
+    "value": "Maranguape,Maranguape,Ceara,Brazil",
+    "label": "Maranguape, CE"
+  },
+  {
+    "value": "Jatai,State of Goias,Brazil",
+    "label": "Jatai, GO"
+  },
+  {
+    "value": "Videira,State of Santa Catarina,Brazil",
+    "label": "Videira, SC"
+  },
+  {
+    "value": "Paragominas,State of Para,Brazil",
+    "label": "Paragominas, PA"
+  },
+  {
+    "value": "Redencao,State of Para,Brazil",
+    "label": "Redencao, PA"
+  },
+  {
+    "value": "Campo Limpo Paulista,State of Sao Paulo,Brazil",
+    "label": "Campo Limpo Paulista, SP"
+  },
+  {
+    "value": "Monte Mor,State of Sao Paulo,Brazil",
+    "label": "Monte Mor, SP"
+  },
+  {
+    "value": "Lucas do Rio Verde,State of Mato Grosso,Brazil",
+    "label": "Lucas do Rio Verde, MT"
+  },
+  {
+    "value": "Cruz das Almas,State of Bahia,Brazil",
+    "label": "Cruz das Almas, BA"
+  },
+  {
+    "value": "Abreu e Lima,State of Pernambuco,Brazil",
+    "label": "Abreu e Lima, PE"
+  },
+  {
+    "value": "Andradina,State of Sao Paulo,Brazil",
+    "label": "Andradina, SP"
+  },
+  {
+    "value": "Cruz Alta,State of Rio Grande do Sul,Brazil",
+    "label": "Cruz Alta, RS"
+  },
+  {
+    "value": "Frutal,State of Minas Gerais,Brazil",
+    "label": "Frutal, MG"
+  },
+  {
+    "value": "Paracatu,State of Minas Gerais,Brazil",
+    "label": "Paracatu, MG"
+  },
+  {
+    "value": "Uruguaiana,State of Rio Grande do Sul,Brazil",
+    "label": "Uruguaiana, RS"
+  },
+  {
+    "value": "Ariquemes,State of Rondonia,Brazil",
+    "label": "Ariquemes, RO"
+  },
+  {
+    "value": "Tres Rios,State of Rio de Janeiro,Brazil",
+    "label": "Tres Rios, RJ"
+  },
+  {
+    "value": "Itapipoca,Ceara,Brazil",
+    "label": "Itapipoca, CE"
+  },
+  {
+    "value": "Seropedica,State of Rio de Janeiro,Brazil",
+    "label": "Seropedica, RJ"
+  },
+  {
+    "value": "Tiangua,Ceara,Brazil",
+    "label": "Tiangua, CE"
+  },
+  {
+    "value": "Mongagua,Mongagua,State of Sao Paulo,Brazil",
+    "label": "Mongagua, SP"
+  },
+  {
+    "value": "Gaspar,State of Santa Catarina,Brazil",
+    "label": "Gaspar, SC"
+  },
+  {
+    "value": "Rio Largo,State of Alagoas,Brazil",
+    "label": "Rio Largo, AL"
+  },
+  {
+    "value": "Moji-Mirim,Moji-Mirim,State of Sao Paulo,Brazil",
+    "label": "Moji-Mirim, SP"
+  },
+  {
+    "value": "Cataguases,State of Minas Gerais,Brazil",
+    "label": "Cataguases, MG"
+  },
+  {
+    "value": "Arcoverde,State of Pernambuco,Brazil",
+    "label": "Arcoverde, PE"
+  },
+  {
+    "value": "Farroupilha,State of Rio Grande do Sul,Brazil",
+    "label": "Farroupilha, RS"
+  },
+  {
+    "value": "Bombinhas,Bombinhas,State of Santa Catarina,Brazil",
+    "label": "Bombinhas, SC"
+  },
+  {
+    "value": "Campina Grande do Sul,State of Parana,Brazil",
+    "label": "Campina Grande do Sul, PR"
+  },
+  {
+    "value": "Mirassol,State of Sao Paulo,Brazil",
+    "label": "Mirassol, SP"
+  },
+  {
+    "value": "Caico,State of Rio Grande do Norte,Brazil",
+    "label": "Caico, RN"
+  },
+  {
+    "value": "Paracatu,Paracatu,State of Minas Gerais,Brazil",
+    "label": "Paracatu, MG"
+  },
+  {
+    "value": "Vicosa,State of Minas Gerais,Brazil",
+    "label": "Vicosa, MG"
+  },
+  {
+    "value": "Curvelo,State of Minas Gerais,Brazil",
+    "label": "Curvelo, MG"
+  },
+  {
+    "value": "Itabirito,State of Minas Gerais,Brazil",
+    "label": "Itabirito, MG"
+  },
+  {
+    "value": "Itauna,State of Minas Gerais,Brazil",
+    "label": "Itauna, MG"
+  },
+  {
+    "value": "Marechal Deodoro,State of Alagoas,Brazil",
+    "label": "Marechal Deodoro, AL"
+  },
+  {
+    "value": "Itacoatiara,State of Amazonas,Brazil",
+    "label": "Itacoatiara, AM"
+  },
+  {
+    "value": "Patrocinio,State of Minas Gerais,Brazil",
+    "label": "Patrocinio, MG"
+  },
+  {
+    "value": "Santana,State of Amapa,Brazil",
+    "label": "Santana, AP"
+  },
+  {
+    "value": "Bage,State of Rio Grande do Sul,Brazil",
+    "label": "Bage, RS"
+  },
+  {
+    "value": "Gurupi,State of Tocantins,Brazil",
+    "label": "Gurupi, TO"
+  },
+  {
+    "value": "Marataizes,State of Espirito Santo,Brazil",
+    "label": "Marataizes, ES"
+  },
+  {
+    "value": "Aracati,Ceara,Brazil",
+    "label": "Aracati, CE"
+  },
+  {
+    "value": "Jaboticabal,State of Sao Paulo,Brazil",
+    "label": "Jaboticabal, SP"
+  },
+  {
+    "value": "Xanxere,State of Santa Catarina,Brazil",
+    "label": "Xanxere, SC"
+  },
+  {
+    "value": "Nova Mutum,State of Mato Grosso,Brazil",
+    "label": "Nova Mutum, MT"
+  },
+  {
+    "value": "Monte Mor,Monte Mor,State of Sao Paulo,Brazil",
+    "label": "Monte Mor, SP"
+  },
+  {
+    "value": "Abreu e Lima,Abreu e Lima,State of Pernambuco,Brazil",
+    "label": "Abreu e Lima, PE"
+  },
+  {
+    "value": "Matao,Matao,State of Sao Paulo,Brazil",
+    "label": "Matao, SP"
+  },
+  {
+    "value": "Candeias,Candeias,State of Bahia,Brazil",
+    "label": "Candeias, BA"
+  },
+  {
+    "value": "Tucurui,State of Para,Brazil",
+    "label": "Tucurui, PA"
+  },
+  {
+    "value": "Canoinhas,State of Santa Catarina,Brazil",
+    "label": "Canoinhas, SC"
+  },
+  {
+    "value": "Carpina,State of Pernambuco,Brazil",
+    "label": "Carpina, PE"
+  },
+  {
+    "value": "Sao Sebastiao do Paraiso,State of Minas Gerais,Brazil",
+    "label": "Sao Sebastiao do Paraiso, MG"
+  },
+  {
+    "value": "Penedo,State of Alagoas,Brazil",
+    "label": "Penedo, AL"
+  },
+  {
+    "value": "Boituva,Boituva,State of Sao Paulo,Brazil",
+    "label": "Boituva, SP"
+  },
+  {
+    "value": "Rio do Sul,State of Santa Catarina,Brazil",
+    "label": "Rio do Sul, SC"
+  },
+  {
+    "value": "Tramandai,State of Rio Grande do Sul,Brazil",
+    "label": "Tramandai, RS"
+  },
+  {
+    "value": "Pirassununga,Pirassununga,State of Sao Paulo,Brazil",
+    "label": "Pirassununga, SP"
+  },
+  {
+    "value": "Itauna,Itauna,State of Minas Gerais,Brazil",
+    "label": "Itauna, MG"
+  },
+  {
+    "value": "Olimpia,State of Sao Paulo,Brazil",
+    "label": "Olimpia, SP"
+  },
+  {
+    "value": "Vilhena,State of Rondonia,Brazil",
+    "label": "Vilhena, RO"
+  },
+  {
+    "value": "Bayeux,Bayeux,State of Paraiba,Brazil",
+    "label": "Bayeux, PB"
+  },
+  {
+    "value": "Caratinga,Caratinga,State of Minas Gerais,Brazil",
+    "label": "Caratinga, MG"
+  },
+  {
+    "value": "Limoeiro do Norte,Ceara,Brazil",
+    "label": "Limoeiro do Norte, CE"
+  },
+  {
+    "value": "Guanambi,State of Bahia,Brazil",
+    "label": "Guanambi, BA"
+  },
+  {
+    "value": "Vacaria,State of Rio Grande do Sul,Brazil",
+    "label": "Vacaria, RS"
+  },
+  {
+    "value": "Extrema,State of Minas Gerais,Brazil",
+    "label": "Extrema, MG"
+  },
+  {
+    "value": "Guararema,State of Sao Paulo,Brazil",
+    "label": "Guararema, SP"
+  },
+  {
+    "value": "Ouro Preto,State of Minas Gerais,Brazil",
+    "label": "Ouro Preto, MG"
+  },
+  {
+    "value": "Cianorte,State of Parana,Brazil",
+    "label": "Cianorte, PR"
+  },
+  {
+    "value": "Itaberaba,State of Bahia,Brazil",
+    "label": "Itaberaba, BA"
+  },
+  {
+    "value": "Icara,State of Santa Catarina,Brazil",
+    "label": "Icara, SC"
+  },
+  {
+    "value": "Mairipora,Mairipora,State of Sao Paulo,Brazil",
+    "label": "Mairipora, SP"
+  },
+  {
+    "value": "Crateus,Ceara,Brazil",
+    "label": "Crateus, CE"
+  },
+  {
+    "value": "Corumba,State of Mato Grosso do Sul,Brazil",
+    "label": "Corumba, MS"
+  },
+  {
+    "value": "Ponte Nova,State of Minas Gerais,Brazil",
+    "label": "Ponte Nova, MG"
+  },
+  {
+    "value": "Rolandia,State of Parana,Brazil",
+    "label": "Rolandia, PR"
+  },
+  {
+    "value": "Santa Isabel,State of Sao Paulo,Brazil",
+    "label": "Santa Isabel, SP"
+  },
+  {
+    "value": "Inhumas,State of Goias,Brazil",
+    "label": "Inhumas, GO"
+  },
+  {
+    "value": "Tramandai,Tramandai,State of Rio Grande do Sul,Brazil",
+    "label": "Tramandai, RS"
+  },
+  {
+    "value": "Tres Coracoes,State of Minas Gerais,Brazil",
+    "label": "Tres Coracoes, MG"
+  },
+  {
+    "value": "Coronel Fabriciano,State of Minas Gerais,Brazil",
+    "label": "Coronel Fabriciano, MG"
+  },
+  {
+    "value": "Mongagua,State of Sao Paulo,Brazil",
+    "label": "Mongagua, SP"
+  },
+  {
+    "value": "Montenegro,State of Rio Grande do Sul,Brazil",
+    "label": "Montenegro, RS"
+  },
+  {
+    "value": "Osorio,State of Rio Grande do Sul,Brazil",
+    "label": "Osorio, RS"
+  },
+  {
+    "value": "Timoteo,State of Minas Gerais,Brazil",
+    "label": "Timoteo, MG"
+  },
+  {
+    "value": "Mirassol,Mirassol,State of Sao Paulo,Brazil",
+    "label": "Mirassol, SP"
+  },
+  {
+    "value": "Pedro Leopoldo,State of Minas Gerais,Brazil",
+    "label": "Pedro Leopoldo, MG"
+  },
+  {
+    "value": "Rio Bonito,State of Rio de Janeiro,Brazil",
+    "label": "Rio Bonito, RJ"
+  },
+  {
+    "value": "Gramado,State of Rio Grande do Sul,Brazil",
+    "label": "Gramado, RS"
+  },
+  {
+    "value": "Sao Jose de Mipibu,State of Rio Grande do Norte,Brazil",
+    "label": "Sao Jose de Mipibu, RN"
+  },
+  {
+    "value": "Presidente Epitacio,State of Sao Paulo,Brazil",
+    "label": "Presidente Epitacio, SP"
+  },
+  {
+    "value": "Alegrete,State of Rio Grande do Sul,Brazil",
+    "label": "Alegrete, RS"
+  },
+  {
+    "value": "Barra do Garcas,State of Mato Grosso,Brazil",
+    "label": "Barra do Garcas, MT"
+  },
+  {
+    "value": "Cachoeiras de Macacu,State of Rio de Janeiro,Brazil",
+    "label": "Cachoeiras de Macacu, RJ"
+  },
+  {
+    "value": "Cameta,State of Para,Brazil",
+    "label": "Cameta, PA"
+  },
+  {
+    "value": "Campo Bom,State of Rio Grande do Sul,Brazil",
+    "label": "Campo Bom, RS"
+  },
+  {
+    "value": "Aracati,Aracati,Ceara,Brazil",
+    "label": "Aracati, CE"
+  },
+  {
+    "value": "Farroupilha,Farroupilha,State of Rio Grande do Sul,Brazil",
+    "label": "Farroupilha, RS"
+  },
+  {
+    "value": "Paraiso do Tocantins,State of Tocantins,Brazil",
+    "label": "Paraiso do Tocantins, TO"
+  },
+  {
+    "value": "Venancio Aires,State of Rio Grande do Sul,Brazil",
+    "label": "Venancio Aires, RS"
+  },
+  {
+    "value": "Itabirito,Itabirito,State of Minas Gerais,Brazil",
+    "label": "Itabirito, MG"
+  },
+  {
+    "value": "Pinheiro,State of Maranhao,Brazil",
+    "label": "Pinheiro, MA"
+  },
+  {
+    "value": "Olimpia,Olimpia,State of Sao Paulo,Brazil",
+    "label": "Olimpia, SP"
+  },
+  {
+    "value": "Unai,State of Minas Gerais,Brazil",
+    "label": "Unai, MG"
+  },
+  {
+    "value": "Aparecida,State of Sao Paulo,Brazil",
+    "label": "Aparecida, SP"
+  },
+  {
+    "value": "Braganca,State of Para,Brazil",
+    "label": "Braganca, PA"
+  },
+  {
+    "value": "Ivaipora,State of Parana,Brazil",
+    "label": "Ivaipora, PR"
+  },
+  {
+    "value": "Surubim,State of Pernambuco,Brazil",
+    "label": "Surubim, PE"
+  },
+  {
+    "value": "Acarau,Ceara,Brazil",
+    "label": "Acarau, CE"
+  },
+  {
+    "value": "Itapetinga,State of Bahia,Brazil",
+    "label": "Itapetinga, BA"
+  },
+  {
+    "value": "Santana do Livramento,State of Rio Grande do Sul,Brazil",
+    "label": "Santana do Livramento, RS"
+  },
+  {
+    "value": "Mococa,State of Sao Paulo,Brazil",
+    "label": "Mococa, SP"
+  },
+  {
+    "value": "Aracruz,State of Espirito Santo,Brazil",
+    "label": "Aracruz, ES"
+  },
+  {
+    "value": "Estancia Velha,State of Rio Grande do Sul,Brazil",
+    "label": "Estancia Velha, RS"
+  },
+  {
+    "value": "Itatiaia,State of Rio de Janeiro,Brazil",
+    "label": "Itatiaia, RJ"
+  },
+  {
+    "value": "Penapolis,State of Sao Paulo,Brazil",
+    "label": "Penapolis, SP"
+  },
+  {
+    "value": "Sao Francisco do Sul,State of Santa Catarina,Brazil",
+    "label": "Sao Francisco do Sul, SC"
+  },
+  {
+    "value": "Sao Gabriel,State of Rio Grande do Sul,Brazil",
+    "label": "Sao Gabriel, RS"
+  },
+  {
+    "value": "Rolandia,Rolandia,State of Parana,Brazil",
+    "label": "Rolandia, PR"
+  },
+  {
+    "value": "Horizonte,Ceara,Brazil",
+    "label": "Horizonte, CE"
+  },
+  {
+    "value": "Manhuacu,State of Minas Gerais,Brazil",
+    "label": "Manhuacu, MG"
+  },
+  {
+    "value": "Tupa,State of Sao Paulo,Brazil",
+    "label": "Tupa, SP"
+  },
+  {
+    "value": "Diamantina,State of Minas Gerais,Brazil",
+    "label": "Diamantina, MG"
+  },
+  {
+    "value": "Guapimirim,State of Rio de Janeiro,Brazil",
+    "label": "Guapimirim, RJ"
+  },
+  {
+    "value": "Sao Goncalo do Amarante,State of Rio Grande do Norte,Brazil",
+    "label": "Sao Goncalo do Amarante, RN"
+  },
+  {
+    "value": "Fernandopolis,State of Sao Paulo,Brazil",
+    "label": "Fernandopolis, SP"
+  },
+  {
+    "value": "Acailandia,State of Maranhao,Brazil",
+    "label": "Acailandia, MA"
+  },
+  {
+    "value": "Codo,State of Maranhao,Brazil",
+    "label": "Codo, MA"
+  },
+  {
+    "value": "Porto Belo,Porto Belo,State of Santa Catarina,Brazil",
+    "label": "Porto Belo, SC"
+  },
+  {
+    "value": "Palmares,State of Pernambuco,Brazil",
+    "label": "Palmares, PE"
+  },
+  {
+    "value": "Venancio Aires,Venancio Aires,State of Rio Grande do Sul,Brazil",
+    "label": "Venancio Aires, RS"
+  },
+  {
+    "value": "Pedro Leopoldo,Pedro Leopoldo,State of Minas Gerais,Brazil",
+    "label": "Pedro Leopoldo, MG"
+  },
+  {
+    "value": "Estancia Velha,Estancia Velha,State of Rio Grande do Sul,Brazil",
+    "label": "Estancia Velha, RS"
+  },
+  {
+    "value": "Barra Bonita,State of Sao Paulo,Brazil",
+    "label": "Barra Bonita, SP"
+  },
+  {
+    "value": "Guaratuba,State of Parana,Brazil",
+    "label": "Guaratuba, PR"
+  },
+  {
+    "value": "Serrana,State of Sao Paulo,Brazil",
+    "label": "Serrana, SP"
+  },
+  {
+    "value": "Sao Miguel do Oeste,State of Santa Catarina,Brazil",
+    "label": "Sao Miguel do Oeste, SC"
+  },
+  {
+    "value": "Mococa,Mococa,State of Sao Paulo,Brazil",
+    "label": "Mococa, SP"
+  },
+  {
+    "value": "Campos do Jordao,State of Sao Paulo,Brazil",
+    "label": "Campos do Jordao, SP"
+  },
+  {
+    "value": "Laguna,State of Santa Catarina,Brazil",
+    "label": "Laguna, SC"
+  },
+  {
+    "value": "Currais Novos,State of Rio Grande do Norte,Brazil",
+    "label": "Currais Novos, RN"
+  },
+  {
+    "value": "Bonito,State of Pernambuco,Brazil",
+    "label": "Bonito, PE"
+  },
+  {
+    "value": "Montenegro,Montenegro,State of Rio Grande do Sul,Brazil",
+    "label": "Montenegro, RS"
+  },
+  {
+    "value": "Cacador,State of Santa Catarina,Brazil",
+    "label": "Cacador, SC"
+  },
+  {
+    "value": "Santo Antonio do Descoberto,State of Goias,Brazil",
+    "label": "Santo Antonio do Descoberto, GO"
+  },
+  {
+    "value": "Penapolis,Penapolis,State of Sao Paulo,Brazil",
+    "label": "Penapolis, SP"
+  },
+  {
+    "value": "Tres Coracoes,Tres Coracoes,State of Minas Gerais,Brazil",
+    "label": "Tres Coracoes, MG"
+  },
+  {
+    "value": "Quixada,Ceara,Brazil",
+    "label": "Quixada, CE"
+  },
+  {
+    "value": "Alta Floresta,State of Mato Grosso,Brazil",
+    "label": "Alta Floresta, MT"
+  },
+  {
+    "value": "Cravinhos,State of Sao Paulo,Brazil",
+    "label": "Cravinhos, SP"
+  },
+  {
+    "value": "Piripiri,State of Piaui,Brazil",
+    "label": "Piripiri, PI"
+  },
+  {
+    "value": "Baixo Guandu,State of Espirito Santo,Brazil",
+    "label": "Baixo Guandu, ES"
+  },
+  {
+    "value": "Brumadinho,State of Minas Gerais,Brazil",
+    "label": "Brumadinho, MG"
+  },
+  {
+    "value": "Jaragua,State of Goias,Brazil",
+    "label": "Jaragua, GO"
+  },
+  {
+    "value": "Porto Uniao,State of Santa Catarina,Brazil",
+    "label": "Porto Uniao, SC"
+  },
+  {
+    "value": "Barra do Pirai,Barra do Pirai,State of Rio de Janeiro,Brazil",
+    "label": "Barra do Pirai, RJ"
+  },
+  {
+    "value": "Capao da Canoa,State of Rio Grande do Sul,Brazil",
+    "label": "Capao da Canoa, RS"
+  },
+  {
+    "value": "Castro,State of Parana,Brazil",
+    "label": "Castro, PR"
+  },
+  {
+    "value": "Lagoa da Prata,State of Minas Gerais,Brazil",
+    "label": "Lagoa da Prata, MG"
+  },
+  {
+    "value": "Nova Andradina,State of Mato Grosso do Sul,Brazil",
+    "label": "Nova Andradina, MS"
+  },
+  {
+    "value": "Sao Jose do Rio Pardo,State of Sao Paulo,Brazil",
+    "label": "Sao Jose do Rio Pardo, SP"
+  },
+  {
+    "value": "Taquara,State of Rio Grande do Sul,Brazil",
+    "label": "Taquara, RS"
+  },
+  {
+    "value": "Barbalha,Ceara,Brazil",
+    "label": "Barbalha, CE"
+  },
+  {
+    "value": "Braco do Norte,State of Santa Catarina,Brazil",
+    "label": "Braco do Norte, SC"
+  },
+  {
+    "value": "Itarare,State of Sao Paulo,Brazil",
+    "label": "Itarare, SP"
+  },
+  {
+    "value": "Brumado,State of Bahia,Brazil",
+    "label": "Brumado, BA"
+  },
+  {
+    "value": "Cosmopolis,State of Sao Paulo,Brazil",
+    "label": "Cosmopolis, SP"
+  },
+  {
+    "value": "Palmeira dos Indios,State of Alagoas,Brazil",
+    "label": "Palmeira dos Indios, AL"
+  },
+  {
+    "value": "Telemaco Borba,State of Parana,Brazil",
+    "label": "Telemaco Borba, PR"
+  },
+  {
+    "value": "Extrema,Extrema,State of Minas Gerais,Brazil",
+    "label": "Extrema, MG"
+  },
+  {
+    "value": "Sao Francisco do Sul,Sao Francisco do Sul,State of Santa Catarina,Brazil",
+    "label": "Sao Francisco do Sul, SC"
+  },
+  {
+    "value": "Formiga,State of Minas Gerais,Brazil",
+    "label": "Formiga, MG"
+  },
+  {
+    "value": "Marialva,State of Parana,Brazil",
+    "label": "Marialva, PR"
+  },
+  {
+    "value": "Medianeira,State of Parana,Brazil",
+    "label": "Medianeira, PR"
+  },
+  {
+    "value": "Oliveira,State of Minas Gerais,Brazil",
+    "label": "Oliveira, MG"
+  },
+  {
+    "value": "Porto Feliz,State of Sao Paulo,Brazil",
+    "label": "Porto Feliz, SP"
+  },
+  {
+    "value": "Cascavel,Ceara,Brazil",
+    "label": "Cascavel, CE"
+  },
+  {
+    "value": "Itapira,Itapira,State of Sao Paulo,Brazil",
+    "label": "Itapira, SP"
+  },
+  {
+    "value": "Campos do Jordao,Campos do Jordao,State of Sao Paulo,Brazil",
+    "label": "Campos do Jordao, SP"
+  },
+  {
+    "value": "Valenca,State of Rio de Janeiro,Brazil",
+    "label": "Valenca, RJ"
+  },
+  {
+    "value": "Bayeux,State of Paraiba,Brazil",
+    "label": "Bayeux, PB"
+  },
+  {
+    "value": "Ceara-Mirim,State of Rio Grande do Norte,Brazil",
+    "label": "Ceara-Mirim, RN"
+  },
+  {
+    "value": "Congonhas,State of Minas Gerais,Brazil",
+    "label": "Congonhas, MG"
+  },
+  {
+    "value": "Ibitinga,State of Sao Paulo,Brazil",
+    "label": "Ibitinga, SP"
+  },
+  {
+    "value": "Indaial,State of Santa Catarina,Brazil",
+    "label": "Indaial, SC"
+  },
+  {
+    "value": "Mafra,State of Santa Catarina,Brazil",
+    "label": "Mafra, SC"
+  },
+  {
+    "value": "Macaubas,State of Bahia,Brazil",
+    "label": "Macaubas, BA"
+  },
+  {
+    "value": "Aquiraz,Aquiraz,Ceara,Brazil",
+    "label": "Aquiraz, CE"
+  },
+  {
+    "value": "Caninde,Ceara,Brazil",
+    "label": "Caninde, CE"
+  },
+  {
+    "value": "Agudos,State of Sao Paulo,Brazil",
+    "label": "Agudos, SP"
+  },
+  {
+    "value": "Jales,State of Sao Paulo,Brazil",
+    "label": "Jales, SP"
+  },
+  {
+    "value": "Mariana,State of Minas Gerais,Brazil",
+    "label": "Mariana, MG"
+  },
+  {
+    "value": "Toritama,State of Pernambuco,Brazil",
+    "label": "Toritama, PE"
+  },
+  {
+    "value": "Sant'Ana do Livramento,State of Rio Grande do Sul,Brazil",
+    "label": "Sant'Ana do Livramento, RS"
+  },
+  {
+    "value": "Aparecida,Aparecida,State of Sao Paulo,Brazil",
+    "label": "Aparecida, SP"
+  },
+  {
+    "value": "Cordeiropolis,State of Sao Paulo,Brazil",
+    "label": "Cordeiropolis, SP"
+  },
+  {
+    "value": "Santa Cruz do Rio Pardo,State of Sao Paulo,Brazil",
+    "label": "Santa Cruz do Rio Pardo, SP"
+  },
+  {
+    "value": "Pacajus,Ceara,Brazil",
+    "label": "Pacajus, CE"
+  },
+  {
+    "value": "Barra do Corda,State of Maranhao,Brazil",
+    "label": "Barra do Corda, MA"
+  },
+  {
+    "value": "Bom Despacho,State of Minas Gerais,Brazil",
+    "label": "Bom Despacho, MG"
+  },
+  {
+    "value": "Carazinho,State of Rio Grande do Sul,Brazil",
+    "label": "Carazinho, RS"
+  },
+  {
+    "value": "Goianesia,State of Goias,Brazil",
+    "label": "Goianesia, GO"
+  },
+  {
+    "value": "Matinhos,State of Parana,Brazil",
+    "label": "Matinhos, PR"
+  },
+  {
+    "value": "Piraju,State of Sao Paulo,Brazil",
+    "label": "Piraju, SP"
+  },
+  {
+    "value": "Sao Miguel,State of Rio Grande do Norte,Brazil",
+    "label": "Sao Miguel, RN"
+  },
+  {
+    "value": "Sao Jose de Mipibu,Sao Jose de Mipibu,State of Rio Grande do Norte,Brazil",
+    "label": "Sao Jose de Mipibu, RN"
+  },
+  {
+    "value": "Ibitinga,Ibitinga,State of Sao Paulo,Brazil",
+    "label": "Ibitinga, SP"
+  },
+  {
+    "value": "Vargem Grande Paulista,Vargem Grande Paulista,State of Sao Paulo,Brazil",
+    "label": "Vargem Grande Paulista, SP"
+  },
+  {
+    "value": "Camaqua,State of Rio Grande do Sul,Brazil",
+    "label": "Camaqua, RS"
+  },
+  {
+    "value": "Dracena,State of Sao Paulo,Brazil",
+    "label": "Dracena, SP"
+  },
+  {
+    "value": "Porto Ferreira,State of Sao Paulo,Brazil",
+    "label": "Porto Ferreira, SP"
+  },
+  {
+    "value": "Frederico Westphalen,State of Rio Grande do Sul,Brazil",
+    "label": "Frederico Westphalen, RS"
+  },
+  {
+    "value": "Santo Antonio do Descoberto,Santo Antonio do Descoberto,State of Goias,Brazil",
+    "label": "Santo Antonio do Descoberto, GO"
+  },
+  {
+    "value": "Curitibanos,State of Santa Catarina,Brazil",
+    "label": "Curitibanos, SC"
+  },
+  {
+    "value": "Cruzeiro do Sul,State of Acre,Brazil",
+    "label": "Cruzeiro do Sul, AC"
+  },
+  {
+    "value": "Guaramirim,State of Santa Catarina,Brazil",
+    "label": "Guaramirim, SC"
+  },
+  {
+    "value": "Ouro Branco,State of Minas Gerais,Brazil",
+    "label": "Ouro Branco, MG"
+  },
+  {
+    "value": "Pedreira,State of Sao Paulo,Brazil",
+    "label": "Pedreira, SP"
+  },
+  {
+    "value": "Porto Nacional,State of Tocantins,Brazil",
+    "label": "Porto Nacional, TO"
+  },
+  {
+    "value": "Rolim de Moura,State of Rondonia,Brazil",
+    "label": "Rolim de Moura, RO"
+  },
+  {
+    "value": "Pirapora,State of Minas Gerais,Brazil",
+    "label": "Pirapora, MG"
+  },
+  {
+    "value": "Parobe,State of Rio Grande do Sul,Brazil",
+    "label": "Parobe, RS"
+  },
+  {
+    "value": "Barra Velha,State of Santa Catarina,Brazil",
+    "label": "Barra Velha, SC"
+  },
+  {
+    "value": "Barra de Sao Francisco,State of Espirito Santo,Brazil",
+    "label": "Barra de Sao Francisco, ES"
+  },
+  {
+    "value": "Mineiros,State of Goias,Brazil",
+    "label": "Mineiros, GO"
+  },
+  {
+    "value": "Sao Cristovao,State of Sergipe,Brazil",
+    "label": "Sao Cristovao, SE"
+  },
+  {
+    "value": "Uniao da Vitoria,State of Parana,Brazil",
+    "label": "Uniao da Vitoria, PR"
+  },
+  {
+    "value": "Tobias Barreto,State of Sergipe,Brazil",
+    "label": "Tobias Barreto, SE"
+  },
+  {
+    "value": "Castro,Castro,State of Parana,Brazil",
+    "label": "Castro, PR"
+  },
+  {
+    "value": "Santa Isabel,Santa Isabel,State of Sao Paulo,Brazil",
+    "label": "Santa Isabel, SP"
+  },
+  {
+    "value": "Cravinhos,Cravinhos,State of Sao Paulo,Brazil",
+    "label": "Cravinhos, SP"
+  },
+  {
+    "value": "Aquidauana,State of Mato Grosso do Sul,Brazil",
+    "label": "Aquidauana, MS"
+  },
+  {
+    "value": "Irati,State of Parana,Brazil",
+    "label": "Irati, PR"
+  },
+  {
+    "value": "Jarinu,State of Sao Paulo,Brazil",
+    "label": "Jarinu, SP"
+  },
+  {
+    "value": "Bom Despacho,Bom Despacho,State of Minas Gerais,Brazil",
+    "label": "Bom Despacho, MG"
+  },
+  {
+    "value": "Sao Roque,Sao Roque,State of Sao Paulo,Brazil",
+    "label": "Sao Roque, SP"
+  },
+  {
+    "value": "Ibiruba,State of Rio Grande do Sul,Brazil",
+    "label": "Ibiruba, RS"
+  },
+  {
+    "value": "Dois Vizinhos,State of Parana,Brazil",
+    "label": "Dois Vizinhos, PR"
+  },
+  {
+    "value": "Pederneiras,State of Sao Paulo,Brazil",
+    "label": "Pederneiras, SP"
+  },
+  {
+    "value": "Porto Belo,State of Santa Catarina,Brazil",
+    "label": "Porto Belo, SC"
+  },
+  {
+    "value": "Carazinho,Carazinho,State of Rio Grande do Sul,Brazil",
+    "label": "Carazinho, RS"
+  },
+  {
+    "value": "Macaiba,Macaiba,State of Rio Grande do Norte,Brazil",
+    "label": "Macaiba, RN"
+  },
+  {
+    "value": "Itaitinga,Ceara,Brazil",
+    "label": "Itaitinga, CE"
+  },
+  {
+    "value": "Joacaba,State of Santa Catarina,Brazil",
+    "label": "Joacaba, SC"
+  },
+  {
+    "value": "Mangaratiba,State of Rio de Janeiro,Brazil",
+    "label": "Mangaratiba, RJ"
+  },
+  {
+    "value": "Morrinhos,State of Goias,Brazil",
+    "label": "Morrinhos, GO"
+  },
+  {
+    "value": "Quirinopolis,State of Goias,Brazil",
+    "label": "Quirinopolis, GO"
+  },
+  {
+    "value": "Sao Joaquim da Barra,State of Sao Paulo,Brazil",
+    "label": "Sao Joaquim da Barra, SP"
+  },
+  {
+    "value": "Bady Bassitt,State of Sao Paulo,Brazil",
+    "label": "Bady Bassitt, SP"
+  },
+  {
+    "value": "Guaratuba,Guaratuba,State of Parana,Brazil",
+    "label": "Guaratuba, PR"
+  },
+  {
+    "value": "Pedreira,Pedreira,State of Sao Paulo,Brazil",
+    "label": "Pedreira, SP"
+  },
+  {
+    "value": "Cachoeira do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Cachoeira do Sul, RS"
+  },
+  {
+    "value": "Campo Belo,State of Minas Gerais,Brazil",
+    "label": "Campo Belo, MG"
+  },
+  {
+    "value": "Janauba,State of Minas Gerais,Brazil",
+    "label": "Janauba, MG"
+  },
+  {
+    "value": "Taquaritinga,State of Sao Paulo,Brazil",
+    "label": "Taquaritinga, SP"
+  },
+  {
+    "value": "Manhuacu,Manhuacu,State of Minas Gerais,Brazil",
+    "label": "Manhuacu, MG"
+  },
+  {
+    "value": "Agudos,Agudos,State of Sao Paulo,Brazil",
+    "label": "Agudos, SP"
+  },
+  {
+    "value": "Itamaraju,State of Bahia,Brazil",
+    "label": "Itamaraju, BA"
+  },
+  {
+    "value": "Santo Antonio da Platina,State of Parana,Brazil",
+    "label": "Santo Antonio da Platina, PR"
+  },
+  {
+    "value": "Escada,State of Pernambuco,Brazil",
+    "label": "Escada, PE"
+  },
+  {
+    "value": "Salto de Pirapora,State of Sao Paulo,Brazil",
+    "label": "Salto de Pirapora, SP"
+  },
+  {
+    "value": "Cosmopolis,Cosmopolis,State of Sao Paulo,Brazil",
+    "label": "Cosmopolis, SP"
+  },
+  {
+    "value": "Mamanguape,State of Paraiba,Brazil",
+    "label": "Mamanguape, PB"
+  },
+  {
+    "value": "Marialva,Marialva,State of Parana,Brazil",
+    "label": "Marialva, PR"
+  },
+  {
+    "value": "Mariana,Mariana,State of Minas Gerais,Brazil",
+    "label": "Mariana, MG"
+  },
+  {
+    "value": "Ibipora,State of Parana,Brazil",
+    "label": "Ibipora, PR"
+  },
+  {
+    "value": "Ilhabela,State of Sao Paulo,Brazil",
+    "label": "Ilhabela, SP"
+  },
+  {
+    "value": "Sarzedo,State of Minas Gerais,Brazil",
+    "label": "Sarzedo, MG"
+  },
+  {
+    "value": "Campos Novos,State of Santa Catarina,Brazil",
+    "label": "Campos Novos, SC"
+  },
+  {
+    "value": "Casimiro de Abreu,State of Rio de Janeiro,Brazil",
+    "label": "Casimiro de Abreu, RJ"
+  },
+  {
+    "value": "Tres Pontas,State of Minas Gerais,Brazil",
+    "label": "Tres Pontas, MG"
+  },
+  {
+    "value": "Santo Antonio da Patrulha,State of Rio Grande do Sul,Brazil",
+    "label": "Santo Antonio da Patrulha, RS"
+  },
+  {
+    "value": "Campina Grande do Sul,Campina Grande do Sul,State of Parana,Brazil",
+    "label": "Campina Grande do Sul, PR"
+  },
+  {
+    "value": "Joacaba,Joacaba,State of Santa Catarina,Brazil",
+    "label": "Joacaba, SC"
+  },
+  {
+    "value": "Bombinhas,State of Santa Catarina,Brazil",
+    "label": "Bombinhas, SC"
+  },
+  {
+    "value": "Capivari,State of Sao Paulo,Brazil",
+    "label": "Capivari, SP"
+  },
+  {
+    "value": "Cristalina,State of Goias,Brazil",
+    "label": "Cristalina, GO"
+  },
+  {
+    "value": "Japeri,State of Rio de Janeiro,Brazil",
+    "label": "Japeri, RJ"
+  },
+  {
+    "value": "Paraty,State of Rio de Janeiro,Brazil",
+    "label": "Paraty, RJ"
+  },
+  {
+    "value": "Ilha Solteira,State of Sao Paulo,Brazil",
+    "label": "Ilha Solteira, SP"
+  },
+  {
+    "value": "Russas,Ceara,Brazil",
+    "label": "Russas, CE"
+  },
+  {
+    "value": "Artur Nogueira,State of Sao Paulo,Brazil",
+    "label": "Artur Nogueira, SP"
+  },
+  {
+    "value": "Estancia,State of Sergipe,Brazil",
+    "label": "Estancia, SE"
+  },
+  {
+    "value": "Miguel Pereira,State of Rio de Janeiro,Brazil",
+    "label": "Miguel Pereira, RJ"
+  },
+  {
+    "value": "Portao,State of Rio Grande do Sul,Brazil",
+    "label": "Portao, RS"
+  },
+  {
+    "value": "Sao Borja,State of Rio Grande do Sul,Brazil",
+    "label": "Sao Borja, RS"
+  },
+  {
+    "value": "Sao Gabriel da Palha,State of Espirito Santo,Brazil",
+    "label": "Sao Gabriel da Palha, ES"
+  },
+  {
+    "value": "Belo Jardim,State of Pernambuco,Brazil",
+    "label": "Belo Jardim, PE"
+  },
+  {
+    "value": "Paraty,Paraty,State of Rio de Janeiro,Brazil",
+    "label": "Paraty, RJ"
+  },
+  {
+    "value": "Morrinhos,Morrinhos,State of Goias,Brazil",
+    "label": "Morrinhos, GO"
+  },
+  {
+    "value": "Itatiaia,Itatiaia,State of Rio de Janeiro,Brazil",
+    "label": "Itatiaia, RJ"
+  },
+  {
+    "value": "Bom Jesus da Lapa,State of Bahia,Brazil",
+    "label": "Bom Jesus da Lapa, BA"
+  },
+  {
+    "value": "Sao Joaquim da Barra,Sao Joaquim da Barra,State of Sao Paulo,Brazil",
+    "label": "Sao Joaquim da Barra, SP"
+  },
+  {
+    "value": "Aracariguama,State of Sao Paulo,Brazil",
+    "label": "Aracariguama, SP"
+  },
+  {
+    "value": "Embu-Guacu,State of Sao Paulo,Brazil",
+    "label": "Embu-Guacu, SP"
+  },
+  {
+    "value": "Iuna,State of Espirito Santo,Brazil",
+    "label": "Iuna, ES"
+  },
+  {
+    "value": "Jaguariaiva,State of Parana,Brazil",
+    "label": "Jaguariaiva, PR"
+  },
+  {
+    "value": "Maravilha,State of Santa Catarina,Brazil",
+    "label": "Maravilha, SC"
+  },
+  {
+    "value": "Cornelio Procopio,State of Parana,Brazil",
+    "label": "Cornelio Procopio, PR"
+  },
+  {
+    "value": "Arraial do Cabo,State of Rio de Janeiro,Brazil",
+    "label": "Arraial do Cabo, RJ"
+  },
+  {
+    "value": "Macaiba,State of Rio Grande do Norte,Brazil",
+    "label": "Macaiba, RN"
+  },
+  {
+    "value": "Santo Antonio de Padua,State of Rio de Janeiro,Brazil",
+    "label": "Santo Antonio de Padua, RJ"
+  },
+  {
+    "value": "Juina,State of Mato Grosso,Brazil",
+    "label": "Juina, MT"
+  },
+  {
+    "value": "Ibipora,Ibipora,State of Parana,Brazil",
+    "label": "Ibipora, PR"
+  },
+  {
+    "value": "Juquitiba,State of Sao Paulo,Brazil",
+    "label": "Juquitiba, SP"
+  },
+  {
+    "value": "Mairinque,State of Sao Paulo,Brazil",
+    "label": "Mairinque, SP"
+  },
+  {
+    "value": "Mata de Sao Joao,State of Bahia,Brazil",
+    "label": "Mata de Sao Joao, BA"
+  },
+  {
+    "value": "Pimenta Bueno,State of Rondonia,Brazil",
+    "label": "Pimenta Bueno, RO"
+  },
+  {
+    "value": "Barao de Cocais,State of Minas Gerais,Brazil",
+    "label": "Barao de Cocais, MG"
+  },
+  {
+    "value": "Boa Esperanca,State of Minas Gerais,Brazil",
+    "label": "Boa Esperanca, MG"
+  },
+  {
+    "value": "Picarras,State of Santa Catarina,Brazil",
+    "label": "Picarras, SC"
+  },
+  {
+    "value": "Ouro Preto,Ouro Preto,State of Minas Gerais,Brazil",
+    "label": "Ouro Preto, MG"
+  },
+  {
+    "value": "Monte Carmelo,State of Minas Gerais,Brazil",
+    "label": "Monte Carmelo, MG"
+  },
+  {
+    "value": "Sao Mateus do Sul,State of Parana,Brazil",
+    "label": "Sao Mateus do Sul, PR"
+  },
+  {
+    "value": "Leopoldina,State of Minas Gerais,Brazil",
+    "label": "Leopoldina, MG"
+  },
+  {
+    "value": "Pirenopolis,State of Goias,Brazil",
+    "label": "Pirenopolis, GO"
+  },
+  {
+    "value": "Sidrolandia,State of Mato Grosso do Sul,Brazil",
+    "label": "Sidrolandia, MS"
+  },
+  {
+    "value": "Pesqueira,State of Pernambuco,Brazil",
+    "label": "Pesqueira, PE"
+  },
+  {
+    "value": "Vargem Grande Paulista,State of Sao Paulo,Brazil",
+    "label": "Vargem Grande Paulista, SP"
+  },
+  {
+    "value": "Taquaritinga,Taquaritinga,State of Sao Paulo,Brazil",
+    "label": "Taquaritinga, SP"
+  },
+  {
+    "value": "Cajati,State of Sao Paulo,Brazil",
+    "label": "Cajati, SP"
+  },
+  {
+    "value": "Capao Bonito,State of Sao Paulo,Brazil",
+    "label": "Capao Bonito, SP"
+  },
+  {
+    "value": "Pontal do Parana,State of Parana,Brazil",
+    "label": "Pontal do Parana, PR"
+  },
+  {
+    "value": "Santiago,State of Rio Grande do Sul,Brazil",
+    "label": "Santiago, RS"
+  },
+  {
+    "value": "Timbo,State of Santa Catarina,Brazil",
+    "label": "Timbo, SC"
+  },
+  {
+    "value": "Uniao dos Palmares,State of Alagoas,Brazil",
+    "label": "Uniao dos Palmares, AL"
+  },
+  {
+    "value": "Estancia,Estancia,State of Sergipe,Brazil",
+    "label": "Estancia, SE"
+  },
+  {
+    "value": "Santo Estevao,State of Bahia,Brazil",
+    "label": "Santo Estevao, BA"
+  },
+  {
+    "value": "Artur Nogueira,Artur Nogueira,State of Sao Paulo,Brazil",
+    "label": "Artur Nogueira, SP"
+  },
+  {
+    "value": "Santa Cruz do Rio Pardo,Santa Cruz do Rio Pardo,State of Sao Paulo,Brazil",
+    "label": "Santa Cruz do Rio Pardo, SP"
+  },
+  {
+    "value": "Amargosa,State of Bahia,Brazil",
+    "label": "Amargosa, BA"
+  },
+  {
+    "value": "Juatuba,State of Minas Gerais,Brazil",
+    "label": "Juatuba, MG"
+  },
+  {
+    "value": "Batatais,State of Sao Paulo,Brazil",
+    "label": "Batatais, SP"
+  },
+  {
+    "value": "Chapadinha,State of Maranhao,Brazil",
+    "label": "Chapadinha, MA"
+  },
+  {
+    "value": "Jacobina,State of Bahia,Brazil",
+    "label": "Jacobina, BA"
+  },
+  {
+    "value": "Mateus Leme,State of Minas Gerais,Brazil",
+    "label": "Mateus Leme, MG"
+  },
+  {
+    "value": "Navirai,State of Mato Grosso do Sul,Brazil",
+    "label": "Navirai, MS"
+  },
+  {
+    "value": "Cornelio Procopio,Cornelio Procopio,State of Parana,Brazil",
+    "label": "Cornelio Procopio, PR"
+  },
+  {
+    "value": "Porto Feliz,Porto Feliz,State of Sao Paulo,Brazil",
+    "label": "Porto Feliz, SP"
+  },
+  {
+    "value": "Osorio,Osorio,State of Rio Grande do Sul,Brazil",
+    "label": "Osorio, RS"
+  },
+  {
+    "value": "Propria,State of Sergipe,Brazil",
+    "label": "Propria, SE"
+  },
+  {
+    "value": "Cambui,State of Minas Gerais,Brazil",
+    "label": "Cambui, MG"
+  },
+  {
+    "value": "Goianira,State of Goias,Brazil",
+    "label": "Goianira, GO"
+  },
+  {
+    "value": "Louveira,State of Sao Paulo,Brazil",
+    "label": "Louveira, SP"
+  },
+  {
+    "value": "Piedade,State of Sao Paulo,Brazil",
+    "label": "Piedade, SP"
+  },
+  {
+    "value": "Serra Negra,State of Sao Paulo,Brazil",
+    "label": "Serra Negra, SP"
+  },
+  {
+    "value": "Sao Francisco,State of Minas Gerais,Brazil",
+    "label": "Sao Francisco, MG"
+  },
+  {
+    "value": "Taquarituba,State of Sao Paulo,Brazil",
+    "label": "Taquarituba, SP"
+  },
+  {
+    "value": "Pederneiras,Pederneiras,State of Sao Paulo,Brazil",
+    "label": "Pederneiras, SP"
+  },
+  {
+    "value": "Capivari,Capivari,State of Sao Paulo,Brazil",
+    "label": "Capivari, SP"
+  },
+  {
+    "value": "Monte Alegre,State of Para,Brazil",
+    "label": "Monte Alegre, PA"
+  },
+  {
+    "value": "Paracambi,State of Rio de Janeiro,Brazil",
+    "label": "Paracambi, RJ"
+  },
+  {
+    "value": "Sao Joao Batista,State of Santa Catarina,Brazil",
+    "label": "Sao Joao Batista, SC"
+  },
+  {
+    "value": "Tangua,State of Rio de Janeiro,Brazil",
+    "label": "Tangua, RJ"
+  },
+  {
+    "value": "Uruacu,State of Goias,Brazil",
+    "label": "Uruacu, GO"
+  },
+  {
+    "value": "Garca,State of Sao Paulo,Brazil",
+    "label": "Garca, SP"
+  },
+  {
+    "value": "Itamaraca,State of Pernambuco,Brazil",
+    "label": "Itamaraca, PE"
+  },
+  {
+    "value": "Panambi,State of Rio Grande do Sul,Brazil",
+    "label": "Panambi, RS"
+  },
+  {
+    "value": "Pirai,State of Rio de Janeiro,Brazil",
+    "label": "Pirai, RJ"
+  },
+  {
+    "value": "Sao Lourenco do Sul,State of Rio Grande do Sul,Brazil",
+    "label": "Sao Lourenco do Sul, RS"
+  },
+  {
+    "value": "Xinguara,State of Para,Brazil",
+    "label": "Xinguara, PA"
+  },
+  {
+    "value": "Vassouras,State of Rio de Janeiro,Brazil",
+    "label": "Vassouras, RJ"
+  },
+  {
+    "value": "Bom Jesus do Itabapoana,State of Rio de Janeiro,Brazil",
+    "label": "Bom Jesus do Itabapoana, RJ"
+  },
+  {
+    "value": "Campo Formoso,State of Bahia,Brazil",
+    "label": "Campo Formoso, BA"
+  },
+  {
+    "value": "Cangucu,State of Rio Grande do Sul,Brazil",
+    "label": "Cangucu, RS"
+  },
+  {
+    "value": "Jacutinga,State of Minas Gerais,Brazil",
+    "label": "Jacutinga, MG"
+  },
+  {
+    "value": "Pomerode,State of Santa Catarina,Brazil",
+    "label": "Pomerode, SC"
+  },
+  {
+    "value": "Rancharia,State of Sao Paulo,Brazil",
+    "label": "Rancharia, SP"
+  },
+  {
+    "value": "Tupi Paulista,State of Sao Paulo,Brazil",
+    "label": "Tupi Paulista, SP"
+  },
+  {
+    "value": "Aracoiaba da Serra,Aracoiaba da Serra,State of Sao Paulo,Brazil",
+    "label": "Aracoiaba da Serra, SP"
+  },
+  {
+    "value": "Aracruz,Aracruz,State of Espirito Santo,Brazil",
+    "label": "Aracruz, ES"
+  },
+  {
+    "value": "Arraial do Cabo,Arraial do Cabo,State of Rio de Janeiro,Brazil",
+    "label": "Arraial do Cabo, RJ"
+  },
+  {
+    "value": "Quixeramobim,Ceara,Brazil",
+    "label": "Quixeramobim, CE"
+  },
+  {
+    "value": "Santa Izabel do Para,State of Para,Brazil",
+    "label": "Santa Izabel do Para, PA"
+  },
+  {
+    "value": "Breves,State of Para,Brazil",
+    "label": "Breves, PA"
+  },
+  {
+    "value": "Iguape,State of Sao Paulo,Brazil",
+    "label": "Iguape, SP"
+  },
+  {
+    "value": "Jacarezinho,State of Parana,Brazil",
+    "label": "Jacarezinho, PR"
+  },
+  {
+    "value": "Jardinopolis,State of Sao Paulo,Brazil",
+    "label": "Jardinopolis, SP"
+  },
+  {
+    "value": "Pontes e Lacerda,State of Mato Grosso,Brazil",
+    "label": "Pontes e Lacerda, MT"
+  },
+  {
+    "value": "Chapadao do Sul,State of Mato Grosso do Sul,Brazil",
+    "label": "Chapadao do Sul, MS"
+  },
+  {
+    "value": "Joao Pinheiro,State of Minas Gerais,Brazil",
+    "label": "Joao Pinheiro, MG"
+  },
+  {
+    "value": "Moreno,Moreno,State of Pernambuco,Brazil",
+    "label": "Moreno, PE"
+  },
+  {
+    "value": "Tremembe,Tremembe,State of Sao Paulo,Brazil",
+    "label": "Tremembe, SP"
+  },
+  {
+    "value": "Manacapuru,State of Amazonas,Brazil",
+    "label": "Manacapuru, AM"
+  },
+  {
+    "value": "Nova Venecia,State of Espirito Santo,Brazil",
+    "label": "Nova Venecia, ES"
+  },
+  {
+    "value": "Quatro Barras,State of Parana,Brazil",
+    "label": "Quatro Barras, PR"
+  },
+  {
+    "value": "Sombrio,State of Santa Catarina,Brazil",
+    "label": "Sombrio, SC"
+  },
+  {
+    "value": "Sao Francisco do Conde,State of Bahia,Brazil",
+    "label": "Sao Francisco do Conde, BA"
+  },
+  {
+    "value": "Sao Joao da Barra,State of Rio de Janeiro,Brazil",
+    "label": "Sao Joao da Barra, RJ"
+  },
+  {
+    "value": "Tiete,State of Sao Paulo,Brazil",
+    "label": "Tiete, SP"
+  },
+  {
+    "value": "Aracuai,State of Minas Gerais,Brazil",
+    "label": "Aracuai, MG"
+  },
+  {
+    "value": "Campo Novo do Parecis,State of Mato Grosso,Brazil",
+    "label": "Campo Novo do Parecis, MT"
+  },
+  {
+    "value": "Mateus Leme,Mateus Leme,State of Minas Gerais,Brazil",
+    "label": "Mateus Leme, MG"
+  },
+  {
+    "value": "Lajedo,State of Pernambuco,Brazil",
+    "label": "Lajedo, PE"
+  },
+  {
+    "value": "Tefe,State of Amazonas,Brazil",
+    "label": "Tefe, AM"
+  },
+  {
+    "value": "Extremoz,State of Rio Grande do Norte,Brazil",
+    "label": "Extremoz, RN"
+  },
+  {
+    "value": "Itapemirim,State of Espirito Santo,Brazil",
+    "label": "Itapemirim, ES"
+  },
+  {
+    "value": "Prudentopolis,State of Parana,Brazil",
+    "label": "Prudentopolis, PR"
+  },
+  {
+    "value": "Santo Amaro da Imperatriz,State of Santa Catarina,Brazil",
+    "label": "Santo Amaro da Imperatriz, SC"
+  },
+  {
+    "value": "Monteiro,State of Paraiba,Brazil",
+    "label": "Monteiro, PB"
+  },
+  {
+    "value": "Santa Cruz,State of Rio Grande do Norte,Brazil",
+    "label": "Santa Cruz, RN"
+  },
+  {
+    "value": "Garca,Garca,State of Sao Paulo,Brazil",
+    "label": "Garca, SP"
+  },
+  {
+    "value": "Alem Paraiba,State of Minas Gerais,Brazil",
+    "label": "Alem Paraiba, MG"
+  },
+  {
+    "value": "Carangola,State of Minas Gerais,Brazil",
+    "label": "Carangola, MG"
+  },
+  {
+    "value": "Jaru,State of Rondonia,Brazil",
+    "label": "Jaru, RO"
+  },
+  {
+    "value": "Soledade,State of Rio Grande do Sul,Brazil",
+    "label": "Soledade, RS"
+  },
+  {
+    "value": "Fraiburgo,State of Santa Catarina,Brazil",
+    "label": "Fraiburgo, SC"
+  },
+  {
+    "value": "Santaluz,State of Bahia,Brazil",
+    "label": "Santaluz, BA"
+  },
+  {
+    "value": "Sao Miguel dos Campos,State of Alagoas,Brazil",
+    "label": "Sao Miguel dos Campos, AL"
+  },
+  {
+    "value": "Mairinque,Mairinque,State of Sao Paulo,Brazil",
+    "label": "Mairinque, SP"
+  },
+  {
+    "value": "Monte Alto,State of Sao Paulo,Brazil",
+    "label": "Monte Alto, SP"
+  },
+  {
+    "value": "Socorro,State of Sao Paulo,Brazil",
+    "label": "Socorro, SP"
+  },
+  {
+    "value": "Sao Pedro,State of Sao Paulo,Brazil",
+    "label": "Sao Pedro, SP"
+  },
+  {
+    "value": "Seabra,State of Bahia,Brazil",
+    "label": "Seabra, BA"
+  },
+  {
+    "value": "Batatais,Batatais,State of Sao Paulo,Brazil",
+    "label": "Batatais, SP"
+  },
+  {
+    "value": "Cambui,Cambui,State of Minas Gerais,Brazil",
+    "label": "Cambui, MG"
+  },
+  {
+    "value": "Ico,Ceara,Brazil",
+    "label": "Ico, CE"
+  },
+  {
+    "value": "Cachoeira Paulista,State of Sao Paulo,Brazil",
+    "label": "Cachoeira Paulista, SP"
+  },
+  {
+    "value": "Coari,State of Amazonas,Brazil",
+    "label": "Coari, AM"
+  },
+  {
+    "value": "Conchal,State of Sao Paulo,Brazil",
+    "label": "Conchal, SP"
+  },
+  {
+    "value": "Promissao,State of Sao Paulo,Brazil",
+    "label": "Promissao, SP"
+  },
+  {
+    "value": "Sao Manuel,State of Sao Paulo,Brazil",
+    "label": "Sao Manuel, SP"
+  },
+  {
+    "value": "Caete,State of Minas Gerais,Brazil",
+    "label": "Caete, MG"
+  },
+  {
+    "value": "Matozinhos,State of Minas Gerais,Brazil",
+    "label": "Matozinhos, MG"
+  },
+  {
+    "value": "Palotina,State of Parana,Brazil",
+    "label": "Palotina, PR"
+  },
+  {
+    "value": "Parintins,State of Amazonas,Brazil",
+    "label": "Parintins, AM"
+  },
+  {
+    "value": "Porangatu,State of Goias,Brazil",
+    "label": "Porangatu, GO"
+  },
+  {
+    "value": "Tremembe,State of Sao Paulo,Brazil",
+    "label": "Tremembe, SP"
+  },
+  {
+    "value": "Confins,State of Minas Gerais,Brazil",
+    "label": "Confins, MG"
+  },
+  {
+    "value": "Barra Velha,Barra Velha,State of Santa Catarina,Brazil",
+    "label": "Barra Velha, SC"
+  },
+  {
+    "value": "Aracoiaba da Serra,State of Sao Paulo,Brazil",
+    "label": "Aracoiaba da Serra, SP"
+  },
+  {
+    "value": "Guaira,State of Sao Paulo,Brazil",
+    "label": "Guaira, SP"
+  },
+  {
+    "value": "Igrejinha,State of Rio Grande do Sul,Brazil",
+    "label": "Igrejinha, RS"
+  },
+  {
+    "value": "Mandaguari,State of Parana,Brazil",
+    "label": "Mandaguari, PR"
+  },
+  {
+    "value": "Santo Amaro,State of Bahia,Brazil",
+    "label": "Santo Amaro, BA"
+  },
+  {
+    "value": "Garibaldi,Garibaldi,State of Rio Grande do Sul,Brazil",
+    "label": "Garibaldi, RS"
+  },
+  {
+    "value": "Alem Paraiba,Alem Paraiba,State of Minas Gerais,Brazil",
+    "label": "Alem Paraiba, MG"
+  },
+  {
+    "value": "Sao Benedito,Ceara,Brazil",
+    "label": "Sao Benedito, CE"
+  },
+  {
+    "value": "Catu,State of Bahia,Brazil",
+    "label": "Catu, BA"
+  },
+  {
+    "value": "Garibaldi,State of Rio Grande do Sul,Brazil",
+    "label": "Garibaldi, RS"
+  },
+  {
+    "value": "Iturama,State of Minas Gerais,Brazil",
+    "label": "Iturama, MG"
+  },
+  {
+    "value": "Jaguaruna,State of Santa Catarina,Brazil",
+    "label": "Jaguaruna, SC"
+  },
+  {
+    "value": "Jose Bonifacio,State of Sao Paulo,Brazil",
+    "label": "Jose Bonifacio, SP"
+  },
+  {
+    "value": "Orlandia,State of Sao Paulo,Brazil",
+    "label": "Orlandia, SP"
+  },
+  {
+    "value": "Pombal,State of Paraiba,Brazil",
+    "label": "Pombal, PB"
+  },
+  {
+    "value": "Regente Feijo,State of Sao Paulo,Brazil",
+    "label": "Regente Feijo, SP"
+  },
+  {
+    "value": "Santa Fe do Sul,State of Sao Paulo,Brazil",
+    "label": "Santa Fe do Sul, SP"
+  },
+  {
+    "value": "Triunfo,State of Rio Grande do Sul,Brazil",
+    "label": "Triunfo, RS"
+  },
+  {
+    "value": "Tres Passos,State of Rio Grande do Sul,Brazil",
+    "label": "Tres Passos, RS"
+  },
+  {
+    "value": "Cajati,Cajati,State of Sao Paulo,Brazil",
+    "label": "Cajati, SP"
+  },
+  {
+    "value": "Adamantina,State of Sao Paulo,Brazil",
+    "label": "Adamantina, SP"
+  },
+  {
+    "value": "Laranjal Paulista,State of Sao Paulo,Brazil",
+    "label": "Laranjal Paulista, SP"
+  },
+  {
+    "value": "Cabreuva,State of Sao Paulo,Brazil",
+    "label": "Cabreuva, SP"
+  },
+  {
+    "value": "Lapa,State of Parana,Brazil",
+    "label": "Lapa, PR"
+  },
+  {
+    "value": "Marau,State of Rio Grande do Sul,Brazil",
+    "label": "Marau, RS"
+  },
+  {
+    "value": "Santana do Paraiso,State of Minas Gerais,Brazil",
+    "label": "Santana do Paraiso, MG"
+  },
+  {
+    "value": "Xaxim,State of Santa Catarina,Brazil",
+    "label": "Xaxim, SC"
+  },
+  {
+    "value": "Canarana,State of Mato Grosso,Brazil",
+    "label": "Canarana, MT"
+  },
+  {
+    "value": "Piedade,Piedade,State of Sao Paulo,Brazil",
+    "label": "Piedade, SP"
+  },
+  {
+    "value": "Anchieta,State of Espirito Santo,Brazil",
+    "label": "Anchieta, ES"
+  },
+  {
+    "value": "Camanducaia,State of Minas Gerais,Brazil",
+    "label": "Camanducaia, MG"
+  },
+  {
+    "value": "Dias d'Avila,State of Bahia,Brazil",
+    "label": "Dias d'Avila, BA"
+  },
+  {
+    "value": "Goioere,State of Parana,Brazil",
+    "label": "Goioere, PR"
+  },
+  {
+    "value": "Laranjeiras do Sul,State of Parana,Brazil",
+    "label": "Laranjeiras do Sul, PR"
+  },
+  {
+    "value": "Moreno,State of Pernambuco,Brazil",
+    "label": "Moreno, PE"
+  },
+  {
+    "value": "Paicandu,State of Parana,Brazil",
+    "label": "Paicandu, PR"
+  },
+  {
+    "value": "Palmeira,State of Parana,Brazil",
+    "label": "Palmeira, PR"
+  },
+  {
+    "value": "Sao Luiz Gonzaga,State of Rio Grande do Sul,Brazil",
+    "label": "Sao Luiz Gonzaga, RS"
+  },
+  {
+    "value": "Buritama,State of Sao Paulo,Brazil",
+    "label": "Buritama, SP"
+  },
+  {
+    "value": "Pontal do Parana,Pontal do Parana,State of Parana,Brazil",
+    "label": "Pontal do Parana, PR"
+  },
+  {
+    "value": "Cristalina,Cristalina,State of Goias,Brazil",
+    "label": "Cristalina, GO"
+  },
+  {
+    "value": "Biritiba Mirim,State of Sao Paulo,Brazil",
+    "label": "Biritiba Mirim, SP"
+  },
+  {
+    "value": "Arcos,State of Minas Gerais,Brazil",
+    "label": "Arcos, MG"
+  },
+  {
+    "value": "Americo Brasiliense,State of Sao Paulo,Brazil",
+    "label": "Americo Brasiliense, SP"
+  },
+  {
+    "value": "Butia,State of Rio Grande do Sul,Brazil",
+    "label": "Butia, RS"
+  },
+  {
+    "value": "Estrela,State of Rio Grande do Sul,Brazil",
+    "label": "Estrela, RS"
+  },
+  {
+    "value": "Guacui,State of Espirito Santo,Brazil",
+    "label": "Guacui, ES"
+  },
+  {
+    "value": "Holambra,State of Sao Paulo,Brazil",
+    "label": "Holambra, SP"
+  },
+  {
+    "value": "Ipira,State of Bahia,Brazil",
+    "label": "Ipira, BA"
+  },
+  {
+    "value": "Itapolis,State of Sao Paulo,Brazil",
+    "label": "Itapolis, SP"
+  },
+  {
+    "value": "Lagoa Vermelha,State of Rio Grande do Sul,Brazil",
+    "label": "Lagoa Vermelha, RS"
+  },
+  {
+    "value": "Pontal,State of Sao Paulo,Brazil",
+    "label": "Pontal, SP"
+  },
+  {
+    "value": "Rio das Pedras,State of Sao Paulo,Brazil",
+    "label": "Rio das Pedras, SP"
+  },
+  {
+    "value": "Ipora,State of Goias,Brazil",
+    "label": "Ipora, GO"
+  },
+  {
+    "value": "Niquelandia,State of Goias,Brazil",
+    "label": "Niquelandia, GO"
+  },
+  {
+    "value": "Visconde do Rio Branco,State of Minas Gerais,Brazil",
+    "label": "Visconde do Rio Branco, MG"
+  }
+]
