@@ -22,6 +22,32 @@ class QuoteInputType(str, enum.Enum):
     FILE_BATCH = "FILE_BATCH"    # Lote via arquivo CSV/XLSX
 
 
+class ValidationStatus(str, enum.Enum):
+    """Status de validação de um produto durante processamento"""
+    PENDING = "PENDING"      # Ainda não validado
+    VALID = "VALID"          # Validado com sucesso
+    FAILED = "FAILED"        # Falhou na validação
+
+
+class FailureReason(str, enum.Enum):
+    """Motivo de falha na validação de um produto"""
+    NO_STORE_LINK = "NO_STORE_LINK"        # API não retornou link de loja
+    BLOCKED_DOMAIN = "BLOCKED_DOMAIN"      # Domínio bloqueado
+    FOREIGN_DOMAIN = "FOREIGN_DOMAIN"      # Domínio estrangeiro (não .br)
+    DUPLICATE_DOMAIN = "DUPLICATE_DOMAIN"  # Domínio já usado nesta cotação
+    LISTING_URL = "LISTING_URL"            # URL de listagem/busca
+    EXTRACTION_ERROR = "EXTRACTION_ERROR"  # Erro ao extrair preço
+    PRICE_MISMATCH = "PRICE_MISMATCH"      # Preço do site ≠ Google Shopping
+
+
+class BlockStatus(str, enum.Enum):
+    """Status de um bloco de variação durante processamento"""
+    PENDING = "PENDING"        # Bloco não processado
+    PROCESSING = "PROCESSING"  # Bloco em processamento
+    VALID = "VALID"            # Bloco atingiu meta de cotações
+    FAILED = "FAILED"          # Bloco não conseguiu atingir meta
+
+
 class QuoteRequest(Base):
     __tablename__ = "quote_requests"
 

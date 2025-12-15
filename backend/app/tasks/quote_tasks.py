@@ -7,7 +7,7 @@ from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
 from app.services.claude_client import ClaudeClient
 from app.services.openai_client import OpenAIClient
-from app.services.search_provider import SerpApiProvider
+from app.services.search_provider import SerpApiProvider, prices_match, PRICE_MISMATCH_TOLERANCE
 from app.services.price_extractor import PriceExtractor
 from app.services.pdf_generator import PDFGenerator
 from app.services.integration_logger import log_anthropic_call, log_serpapi_call
@@ -398,16 +398,15 @@ def process_quote_request(self, quote_request_id: int):
                                 final_method = method
                                 google_price = product.extracted_price
 
-                                # Validar preço do site contra Google Shopping
-                                # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
+                                # Validar preço do site contra Google Shopping (PRICE_MISMATCH)
                                 if google_price and google_price > Decimal("0"):
-                                    price_diff_percent = abs(float(price) - float(google_price)) / float(google_price) * 100
-                                    if price_diff_percent > 5:
+                                    if not prices_match(float(price), float(google_price)):
+                                        price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
                                         logger.warning(
                                             f"PRICE_MISMATCH for {product.domain}: "
-                                            f"R$ {price} vs Google R$ {google_price} (diff: {price_diff_percent:.1f}%)"
+                                            f"R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)"
                                         )
-                                        raise ValueError(f"PRICE_MISMATCH: {price_diff_percent:.1f}%")
+                                        raise ValueError(f"PRICE_MISMATCH: {price_diff:.1f}%")
                                     else:
                                         logger.info(f"Price validated for {product.domain}: R$ {price}")
 

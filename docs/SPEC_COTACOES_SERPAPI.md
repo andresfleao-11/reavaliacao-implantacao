@@ -272,33 +272,54 @@ Ao finalizar:
 
 ---
 
-## 6. Funções Auxiliares Necessárias
+## 6. Funções Auxiliares Implementadas
+
+### 6.1 Constantes (search_provider.py)
 
 ```python
-def normalize_domain(url_or_domain: str) -> str:
-    """Remove protocolo, www, converte lowercase"""
+# Configuração de incremento de variação (RN04)
+VARIATION_INCREMENT = 0.20  # 20% sobre o valor atual
+MAX_VARIATION_LIMIT = 0.50  # 50% limite máximo
 
-def extract_domain(url: str) -> str:
-    """Extrai domínio de URL completa"""
-
-def is_brazilian_domain(domain: str) -> bool:
-    """Verifica se TLD é .br ou .com.br"""
-
-def is_listing_url(url: str) -> bool:
-    """Verifica padrões de página de busca/categoria"""
-
-def extract_price_from_page(url: str) -> Optional[float]:
-    """Faz scraping do preço na página do produto"""
-
-def prices_match(site_price: float, google_price: float, tolerance: float = 0.05) -> bool:
-    """Compara preços com tolerância (default 5%)"""
-
-def calculate_variation(min_price: float, max_price: float) -> float:
-    """Calcula variação percentual"""
-
-def form_blocks(products: List, max_variation: float, min_size: int) -> List[QuotationBlock]:
-    """Forma blocos respeitando variação e tamanho mínimo"""
+# Tolerância de validação de preço
+PRICE_MISMATCH_TOLERANCE = 0.05  # 5% de tolerância
 ```
+
+### 6.2 Funções de Variação
+
+```python
+def calculate_next_variation(current: float, increment: float = VARIATION_INCREMENT) -> float:
+    """
+    Calcula próxima variação aplicando incremento percentual.
+    Exemplo: 0.25 * 1.20 = 0.30 (25% → 30%)
+    """
+    return current * (1 + increment)
+```
+
+### 6.3 Funções de Validação de Preço
+
+```python
+def prices_match(site_price: float, google_price: float, tolerance: float = PRICE_MISMATCH_TOLERANCE) -> bool:
+    """
+    Verifica se preços estão dentro da tolerância (default 5%).
+    Retorna False se diferença > tolerância.
+    """
+    if google_price <= 0:
+        return False
+    diff_percent = abs(site_price - google_price) / google_price
+    return diff_percent <= tolerance
+```
+
+### 6.4 Outras Funções (já implementadas)
+
+| Função | Arquivo | Descrição |
+|--------|---------|-----------|
+| `_extract_domain(url)` | search_provider.py | Extrai domínio de URL |
+| `_is_foreign_domain(domain)` | search_provider.py | Verifica se NÃO é .br |
+| `_is_listing_url(url)` | search_provider.py | Verifica padrões de listagem |
+| `_is_blocked_domain(domain)` | search_provider.py | Verifica domínios bloqueados |
+| `_create_variation_blocks(...)` | search_provider.py | Forma blocos com variação |
+| `extract_price_and_screenshot(...)` | price_extractor.py | Extrai preço via Playwright |
 
 ---
 
@@ -391,3 +412,40 @@ ALLOWED_FOREIGN_DOMAINS = {
     "acer.com",
 }
 ```
+
+---
+
+## 11. Status de Implementação
+
+### Correções Implementadas (Dez/2024)
+
+| # | Correção | Arquivo(s) | Status |
+|---|----------|------------|--------|
+| 1 | Validação de preço (5%, sem fallback) | search_provider.py, quote_tasks.py | IMPLEMENTADO |
+| 2 | Status AWAITING_REVIEW | quote_tasks.py | IMPLEMENTADO |
+| 3 | Incremento de variação ×1.20 | search_provider.py | IMPLEMENTADO |
+
+### Funções Auxiliares Criadas
+
+| Função | Local | Descrição |
+|--------|-------|-----------|
+| `calculate_next_variation()` | search_provider.py:27 | Calcula próxima variação |
+| `prices_match()` | search_provider.py:41 | Valida preços com tolerância |
+
+### Constantes Definidas
+
+| Constante | Valor | Local |
+|-----------|-------|-------|
+| `VARIATION_INCREMENT` | 0.20 | search_provider.py:20 |
+| `MAX_VARIATION_LIMIT` | 0.50 | search_provider.py:21 |
+| `PRICE_MISMATCH_TOLERANCE` | 0.05 | search_provider.py:24 |
+
+---
+
+## 12. Changelog
+
+| Data | Versão | Alterações |
+|------|--------|------------|
+| Dez/2024 | 2.0 | Especificação inicial documentada |
+| Dez/2024 | 2.1 | Correção: incremento de variação é ×1.20, não +0.20 |
+| Dez/2024 | 2.2 | Implementação completa: validação preço, AWAITING_REVIEW, incremento variação |

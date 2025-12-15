@@ -1,4 +1,11 @@
-from .quote_request import QuoteRequest, QuoteStatus, QuoteInputType
+from .quote_request import (
+    QuoteRequest,
+    QuoteStatus,
+    QuoteInputType,
+    ValidationStatus,
+    FailureReason,
+    BlockStatus,
+)
 from .quote_source import QuoteSource
 from .batch_quote import BatchQuoteJob, BatchJobStatus
 from .file import File
@@ -27,6 +34,9 @@ __all__ = [
     "QuoteRequest",
     "QuoteStatus",
     "QuoteInputType",
+    "ValidationStatus",
+    "FailureReason",
+    "BlockStatus",
     "QuoteSource",
     "BatchQuoteJob",
     "BatchJobStatus",

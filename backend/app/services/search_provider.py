@@ -15,8 +15,45 @@ MAX_RETRIES = 3
 INITIAL_BACKOFF = 2  # seconds
 
 # Variation increment configuration (RN04)
-VARIATION_INCREMENT = 0.20  # 20% increment when blocks fail
-MAX_VARIATION_LIMIT = 0.50  # 50% maximum variation allowed
+# Incremento é 20% SOBRE o valor atual (não +20 pontos percentuais)
+# Exemplo: 25% → 30% → 36% → 43.2% → 51.8% (excede limite)
+VARIATION_INCREMENT = 0.20  # 20% sobre o valor atual
+MAX_VARIATION_LIMIT = 0.50  # 50% limite máximo de variação
+
+# Price validation tolerance (seção 4.3 da spec)
+PRICE_MISMATCH_TOLERANCE = 0.05  # 5% de tolerância entre preço site e Google
+
+
+def calculate_next_variation(current: float, increment: float = VARIATION_INCREMENT) -> float:
+    """
+    Calcula próxima variação aplicando incremento percentual.
+
+    Args:
+        current: Variação atual (ex: 0.25 para 25%)
+        increment: Percentual de incremento (ex: 0.20 para 20%)
+
+    Returns:
+        Nova variação (ex: 0.25 * 1.20 = 0.30)
+    """
+    return current * (1 + increment)
+
+
+def prices_match(site_price: float, google_price: float, tolerance: float = PRICE_MISMATCH_TOLERANCE) -> bool:
+    """
+    Verifica se preços estão dentro da tolerância.
+
+    Args:
+        site_price: Preço extraído do site
+        google_price: Preço do Google Shopping (extracted_price)
+        tolerance: Tolerância percentual (default 5%)
+
+    Returns:
+        True se diferença <= tolerância, False caso contrário
+    """
+    if google_price <= 0:
+        return False
+    diff_percent = abs(site_price - google_price) / google_price
+    return diff_percent <= tolerance
 
 # Domains with anti-bot protection that cause timeouts/failures
 # These are skipped during search to avoid wasting API calls
@@ -261,8 +298,7 @@ class SerpApiProvider(SearchProvider):
             search_log.valid_blocks = len(variation_blocks)
 
             if not variation_blocks:
-                # Incremento de 20% sobre o valor atual (não +20 pontos percentuais)
-                new_variation = current_variation * (1 + VARIATION_INCREMENT)
+                new_variation = calculate_next_variation(current_variation)
                 if new_variation <= MAX_VARIATION_LIMIT:
                     logger.warning(
                         f"No blocks with variation {current_variation*100:.1f}%. "
@@ -343,9 +379,8 @@ class SerpApiProvider(SearchProvider):
             )
 
             # If no blocks, try incrementing variation (RN04)
-            # Incremento de 20% sobre o valor atual (não +20 pontos percentuais)
             if not current_blocks:
-                new_variation = current_variation * (1 + VARIATION_INCREMENT)
+                new_variation = calculate_next_variation(current_variation)
                 if new_variation <= MAX_VARIATION_LIMIT:
                     logger.warning(
                         f"  No blocks at {current_variation*100:.1f}%. "
@@ -856,12 +891,11 @@ class SerpApiProvider(SearchProvider):
                     # Obter preço da loja
                     store_extracted = store.get("extracted_price") or store.get("base_price")
 
-                    # Validar preço da loja contra preço do Google Shopping
-                    # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
+                    # Validar preço da loja contra preço do Google Shopping (PRICE_MISMATCH)
                     if store_extracted and product.extracted_price:
-                        price_diff_percent = abs(float(store_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
-                        if price_diff_percent > 5:
-                            logger.info(f"    ↳ PRICE_MISMATCH store {store_name}: R$ {store_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
+                        if not prices_match(float(store_extracted), float(product.extracted_price)):
+                            price_diff = abs(float(store_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
+                            logger.info(f"    ↳ PRICE_MISMATCH store {store_name}: R$ {store_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff:.1f}%)")
                             continue
 
                     final_price = store_extracted or product.extracted_price
@@ -899,12 +933,11 @@ class SerpApiProvider(SearchProvider):
                         # Obter preço do seller
                         seller_extracted = seller.get("extracted_price") or seller.get("base_price")
 
-                        # Validar preço do seller contra preço do Google Shopping
-                        # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
+                        # Validar preço do seller contra preço do Google Shopping (PRICE_MISMATCH)
                         if seller_extracted and product.extracted_price:
-                            price_diff_percent = abs(float(seller_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
-                            if price_diff_percent > 5:
-                                logger.info(f"    ↳ PRICE_MISMATCH seller {seller_name}: R$ {seller_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
+                            if not prices_match(float(seller_extracted), float(product.extracted_price)):
+                                price_diff = abs(float(seller_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
+                                logger.info(f"    ↳ PRICE_MISMATCH seller {seller_name}: R$ {seller_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff:.1f}%)")
                                 continue
 
                         final_price = seller_extracted or product.extracted_price
