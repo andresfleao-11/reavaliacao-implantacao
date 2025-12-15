@@ -424,6 +424,9 @@ ALLOWED_FOREIGN_DOMAINS = {
 | 1 | Validação de preço (5%, sem fallback) | search_provider.py, quote_tasks.py | IMPLEMENTADO |
 | 2 | Status AWAITING_REVIEW | quote_tasks.py | IMPLEMENTADO |
 | 3 | Incremento de variação ×1.20 | search_provider.py | IMPLEMENTADO |
+| 4 | Enums de validação | quote_request.py | IMPLEMENTADO |
+| 5 | Campo failure_reason | quote_source.py + migration | IMPLEMENTADO |
+| 6 | Códigos de erro padronizados | search_provider.py | IMPLEMENTADO |
 
 ### Funções Auxiliares Criadas
 
@@ -431,6 +434,15 @@ ALLOWED_FOREIGN_DOMAINS = {
 |--------|-------|-----------|
 | `calculate_next_variation()` | search_provider.py:27 | Calcula próxima variação |
 | `prices_match()` | search_provider.py:41 | Valida preços com tolerância |
+
+### Classes/Enums Criados
+
+| Classe/Enum | Local | Descrição |
+|-------------|-------|-----------|
+| `ValidationStatus` | quote_request.py:25 | Status de validação (PENDING/VALID/FAILED) |
+| `FailureReason` | quote_request.py:32 | Motivo de falha na validação |
+| `BlockStatus` | quote_request.py:43 | Status do bloco (PENDING/PROCESSING/VALID/FAILED) |
+| `QuoteErrorCode` | search_provider.py:59 | Códigos de erro padronizados |
 
 ### Constantes Definidas
 
@@ -440,6 +452,12 @@ ALLOWED_FOREIGN_DOMAINS = {
 | `MAX_VARIATION_LIMIT` | 0.50 | search_provider.py:21 |
 | `PRICE_MISMATCH_TOLERANCE` | 0.05 | search_provider.py:24 |
 
+### Campos Adicionados
+
+| Campo | Tabela | Tipo | Descrição |
+|-------|--------|------|-----------|
+| `failure_reason` | quote_sources | String(50) | Motivo de falha na validação |
+
 ---
 
 ## 12. Changelog
@@ -448,4 +466,5 @@ ALLOWED_FOREIGN_DOMAINS = {
 |------|--------|------------|
 | Dez/2024 | 2.0 | Especificação inicial documentada |
 | Dez/2024 | 2.1 | Correção: incremento de variação é ×1.20, não +0.20 |
-| Dez/2024 | 2.2 | Implementação completa: validação preço, AWAITING_REVIEW, incremento variação |
+| Dez/2024 | 2.2 | Correções 1-3: validação preço, AWAITING_REVIEW, incremento variação |
+| Dez/2024 | 2.3 | Correções 4-6: enums validação, campo failure_reason, códigos erro |

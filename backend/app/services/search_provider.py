@@ -55,6 +55,27 @@ def prices_match(site_price: float, google_price: float, tolerance: float = PRIC
     diff_percent = abs(site_price - google_price) / google_price
     return diff_percent <= tolerance
 
+
+class QuoteErrorCode:
+    """Códigos de erro/log padronizados para o sistema de cotações"""
+    # Erros de busca
+    SHOPPING_EMPTY = "SHOPPING_EMPTY"          # Nenhum produto retornado do Shopping
+    ALL_FILTERED = "ALL_FILTERED"              # Todos produtos filtrados (domínio/preço)
+
+    # Erros de bloco
+    NO_VALID_BLOCKS = "NO_VALID_BLOCKS"        # Impossível formar blocos com mínimo
+    BLOCK_FAILED = "BLOCK_FAILED"              # Bloco não atingiu cotações necessárias
+    VARIATION_EXCEEDED = "VARIATION_EXCEEDED"  # Atingiu limite máximo de variação
+
+    # Erros de validação
+    VALIDATION_FAILED = "VALIDATION_FAILED"    # Produto falhou em validação
+    PRICE_MISMATCH = "PRICE_MISMATCH"          # Preço do site ≠ Google Shopping
+
+    # Sucesso
+    SUCCESS = "SUCCESS"                        # Cotações obtidas com sucesso
+    AWAITING_REVIEW = "AWAITING_REVIEW"        # Cotações insuficientes
+
+
 # Domains with anti-bot protection that cause timeouts/failures
 # These are skipped during search to avoid wasting API calls
 BLOCKED_DOMAINS = {
