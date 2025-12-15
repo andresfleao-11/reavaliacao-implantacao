@@ -537,15 +537,26 @@ def process_quote_request(self, quote_request_id: int):
         # Finalizando
         _update_progress(db, quote_request, "finalizing", 95, "Salvando resultados e finalizando cotação...")
 
-        # Mark as DONE - PDF will be generated on demand when user clicks "Gerar PDF"
-        quote_request.status = QuoteStatus.DONE
-        quote_request.current_step = "completed"
+        # Determinar status final baseado na quantidade de fontes
+        # RN06: fontes >= N → DONE, 0 < fontes < N → AWAITING_REVIEW
+        num_accepted = len(accepted_sources) if accepted_sources else len(valid_sources)
+
+        if num_accepted >= num_quotes:
+            quote_request.status = QuoteStatus.DONE
+            quote_request.current_step = "completed"
+            quote_request.step_details = f"Cotação concluída! {num_accepted} fontes de preço obtidas."
+            logger.info(f"Quote request {quote_request_id} completed successfully (DONE). {num_accepted}/{num_quotes} sources.")
+        else:
+            quote_request.status = QuoteStatus.AWAITING_REVIEW
+            quote_request.current_step = "awaiting_review"
+            quote_request.step_details = f"Cotação com {num_accepted} fontes (mínimo esperado: {num_quotes}). Requer revisão."
+            logger.warning(f"Quote request {quote_request_id} completed with insufficient sources (AWAITING_REVIEW). {num_accepted}/{num_quotes} sources.")
+
         quote_request.progress_percentage = 100
-        quote_request.step_details = "Cotação concluída! Preços capturados e analisados com sucesso."
         db.commit()
         db.refresh(quote_request)
 
-        logger.info(f"Quote request {quote_request_id} completed successfully. Average price: R$ {quote_request.valor_medio}")
+        logger.info(f"Quote request {quote_request_id} finalized. Average price: R$ {quote_request.valor_medio}")
 
     except Exception as e:
         error_msg = str(e)
