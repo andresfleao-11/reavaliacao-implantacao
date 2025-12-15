@@ -3,7 +3,7 @@ API endpoints para cotacao em lote.
 Suporta 3 metodos de entrada: texto, imagens e arquivo CSV/XLSX.
 """
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Form, HTTPException, Request
-from sqlalchemy.orm import Session, joinedload, load_only
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional
 from slowapi import Limiter
@@ -545,9 +545,9 @@ def list_batches(
     db: Session = Depends(get_db)
 ):
     """Lista todos os lotes com paginacao otimizada."""
-    # Query base com joinedload otimizado para evitar N+1
+    # Query base com joinedload para evitar N+1
     query = db.query(BatchQuoteJob).options(
-        joinedload(BatchQuoteJob.project).load_only("id", "nome")
+        joinedload(BatchQuoteJob.project)
     )
 
     # Filtrar por projeto se especificado
