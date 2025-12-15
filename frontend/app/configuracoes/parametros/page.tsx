@@ -342,7 +342,6 @@ export default function ParametrosPage() {
                   onChange={(e) => setDomainForm({ ...domainForm, domain: e.target.value })}
                   className="input-field w-full"
                   placeholder="exemplo.com.br"
-                  disabled={!!editingDomain}
                 />
               </div>
 

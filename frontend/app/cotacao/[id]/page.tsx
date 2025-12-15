@@ -298,8 +298,8 @@ export default function QuoteDetailPage() {
             </button>
           )}
 
-          {/* Botão de recotar para cotações canceladas ou com erro - somente se não foi recotado */}
-          {(quote.status === 'CANCELLED' || quote.status === 'ERROR') && !quote.child_quote_id && (
+          {/* Botão de recotar para cotações canceladas, com erro ou aguardando revisão - somente se não foi recotado */}
+          {(quote.status === 'CANCELLED' || quote.status === 'ERROR' || quote.status === 'AWAITING_REVIEW') && !quote.child_quote_id && (
             <button
               onClick={handleRequote}
               disabled={requoting}
@@ -310,7 +310,7 @@ export default function QuoteDetailPage() {
           )}
 
           {/* Link para nova cotação quando já foi recotado */}
-          {(quote.status === 'CANCELLED' || quote.status === 'ERROR') && quote.child_quote_id && (
+          {(quote.status === 'CANCELLED' || quote.status === 'ERROR' || quote.status === 'AWAITING_REVIEW') && quote.child_quote_id && (
             <Link
               href={`/cotacao/${quote.child_quote_id}`}
               className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center"
