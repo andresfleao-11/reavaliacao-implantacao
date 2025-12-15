@@ -15,6 +15,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["blocked-domains"])
 
 
+def normalize_domain(domain: str) -> str:
+    """Normaliza um domínio removendo www. e convertendo para minúsculas"""
+    normalized = domain.lower().strip()
+    if normalized.startswith("www."):
+        normalized = normalized[4:]
+    return normalized
+
+
 class BlockedDomainCreate(BaseModel):
     domain: str
     display_name: str | None = None
@@ -109,19 +117,26 @@ def create_blocked_domain(
     db: Session = Depends(get_db)
 ):
     """Cria um novo domínio bloqueado"""
-    # Verificar se domínio já existe
-    existing = db.query(BlockedDomain).filter(BlockedDomain.domain == domain_data.domain).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Domínio já existe na lista de bloqueados")
+    # Normalizar domínio (remover www., converter para minúsculas)
+    normalized_domain = normalize_domain(domain_data.domain)
+
+    # Verificar se domínio já existe (comparando versão normalizada)
+    all_domains = db.query(BlockedDomain).all()
+    for existing in all_domains:
+        if normalize_domain(existing.domain) == normalized_domain:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Domínio já existe na lista de bloqueados como '{existing.domain}'"
+            )
 
     # Gerar display_name automaticamente se não fornecido
     display_name = domain_data.display_name
     if not display_name:
-        display_name = generate_display_name_from_domain(domain_data.domain)
+        display_name = generate_display_name_from_domain(normalized_domain)
 
-    # Criar novo domínio bloqueado
+    # Criar novo domínio bloqueado (salvar versão normalizada)
     new_domain = BlockedDomain(
-        domain=domain_data.domain,
+        domain=normalized_domain,
         display_name=display_name,
         reason=domain_data.reason
     )
@@ -146,11 +161,20 @@ def update_blocked_domain(
         raise HTTPException(status_code=404, detail="Domínio bloqueado não encontrado")
 
     # Verificar se novo domínio já existe (se estiver mudando o domínio)
-    if domain_data.domain and domain_data.domain != domain.domain:
-        existing = db.query(BlockedDomain).filter(BlockedDomain.domain == domain_data.domain).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Domínio já existe na lista de bloqueados")
-        domain.domain = domain_data.domain
+    if domain_data.domain:
+        normalized_new = normalize_domain(domain_data.domain)
+        normalized_current = normalize_domain(domain.domain)
+
+        if normalized_new != normalized_current:
+            # Verificar duplicatas comparando versão normalizada
+            all_domains = db.query(BlockedDomain).filter(BlockedDomain.id != domain_id).all()
+            for existing in all_domains:
+                if normalize_domain(existing.domain) == normalized_new:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Domínio já existe na lista de bloqueados como '{existing.domain}'"
+                    )
+            domain.domain = normalized_new
 
     # Atualizar campos
     if domain_data.display_name is not None:

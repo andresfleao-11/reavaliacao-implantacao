@@ -1,7 +1,7 @@
 from celery import Task
 from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
-from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog
+from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, BlockedDomain
 from app.models.quote_request import QuoteStatus
 from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
@@ -22,6 +22,12 @@ from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _get_blocked_domains(db: Session) -> set:
+    """Carrega os domínios bloqueados do banco de dados"""
+    blocked = db.query(BlockedDomain.domain).all()
+    return {d.domain for d in blocked}
 
 
 def _update_progress(db: Session, quote_request: QuoteRequest, step: str, percentage: int, details: str = None):
@@ -176,10 +182,12 @@ def process_quote_request(self, quote_request_id: int):
         config_version_id = quote_request.config_version_id
 
         serpapi_location = _get_parameter(db, "serpapi_location", "Brazil", config_version_id)
+        blocked_domains = _get_blocked_domains(db)
         search_provider = SerpApiProvider(
             api_key=serpapi_key,
             engine=settings.SERPAPI_ENGINE,
-            location=serpapi_location
+            location=serpapi_location,
+            blocked_domains=blocked_domains
         )
 
         # Get parameters for search (prioridade: projeto > global > default)

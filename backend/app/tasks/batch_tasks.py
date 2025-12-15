@@ -5,7 +5,7 @@ Implementa processamento paralelo com capacidade de retomada.
 from celery import Task, group, chord
 from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
-from app.models import QuoteRequest, QuoteSource, File, IntegrationLog
+from app.models import QuoteRequest, QuoteSource, File, IntegrationLog, BlockedDomain
 from app.models.quote_request import QuoteStatus, QuoteInputType
 from app.models.batch_quote import BatchQuoteJob, BatchJobStatus
 from app.models.file import FileType
@@ -92,6 +92,12 @@ def _get_integration_other_setting(db: Session, provider: str, setting_name: str
     if integration and integration.settings_json:
         return integration.settings_json.get(setting_name)
     return None
+
+
+def _get_blocked_domains(db: Session) -> set:
+    """Carrega os domínios bloqueados do banco de dados"""
+    blocked = db.query(BlockedDomain.domain).all()
+    return {d.domain for d in blocked}
 
 
 def _get_parameter(db: Session, param_name: str, default, config_version_id: int = None):
@@ -327,11 +333,13 @@ def process_batch_quote(self, quote_request_id: int, batch_job_id: int):
         serpapi_key = _get_integration_setting(db, "SERPAPI", "api_key") or settings.SERPAPI_API_KEY
         config_version_id = quote_request.config_version_id
         serpapi_location = _get_parameter(db, "serpapi_location", "Brazil", config_version_id)
+        blocked_domains = _get_blocked_domains(db)
 
         search_provider = SerpApiProvider(
             api_key=serpapi_key,
             engine=settings.SERPAPI_ENGINE,
-            location=serpapi_location
+            location=serpapi_location,
+            blocked_domains=blocked_domains
         )
 
         num_quotes = int(_get_parameter(db, "numero_cotacoes_por_pesquisa", 3, config_version_id))

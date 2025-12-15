@@ -228,12 +228,14 @@ class SerpApiProvider(SearchProvider):
     # Maximum valid products to process after source/price filtering
     MAX_VALID_PRODUCTS = 150
 
-    def __init__(self, api_key: str, engine: str = "google_shopping", location: str = "Brazil"):
+    def __init__(self, api_key: str, engine: str = "google_shopping", location: str = "Brazil", blocked_domains: set = None):
         self.api_key = api_key
         self.engine = engine
         self.location = location
         self.base_url = "https://serpapi.com/search"
         self.api_calls_made = []  # Track all API calls made
+        # Use provided blocked_domains or fall back to default static list
+        self._blocked_domains = blocked_domains if blocked_domains is not None else BLOCKED_DOMAINS
 
     async def search_products(
         self,
@@ -1090,16 +1092,24 @@ class SerpApiProvider(SearchProvider):
 
         return False
 
+    def _normalize_domain(self, domain: str) -> str:
+        """Normalize domain by removing www. prefix and converting to lowercase"""
+        normalized = domain.lower().strip()
+        if normalized.startswith("www."):
+            normalized = normalized[4:]
+        return normalized
+
     def _is_blocked_domain(self, domain: str) -> bool:
         """Check if domain is in the blocked list (anti-bot protection sites)"""
         if not domain:
             return False
 
-        domain_lower = domain.lower()
+        domain_normalized = self._normalize_domain(domain)
 
-        # Check exact match or subdomain match
-        for blocked in BLOCKED_DOMAINS:
-            if domain_lower == blocked or domain_lower.endswith("." + blocked):
+        # Check exact match or subdomain match (using normalized versions)
+        for blocked in self._blocked_domains:
+            blocked_normalized = self._normalize_domain(blocked)
+            if domain_normalized == blocked_normalized or domain_normalized.endswith("." + blocked_normalized):
                 return True
 
         return False
@@ -1165,17 +1175,20 @@ class SerpApiProvider(SearchProvider):
             "shoptime": "shoptime.com.br",
         }
 
+        # Normalize blocked domains for comparison
+        blocked_normalized = {self._normalize_domain(d) for d in self._blocked_domains}
+
         # Check if the source matches any blocked domain mapping
         for source_name, domain in source_to_domain_map.items():
             if source_name in source_lower:
-                # Check if this domain is in the blocked list
-                if domain in BLOCKED_DOMAINS:
+                # Check if this domain is in the blocked list (using normalized comparison)
+                if self._normalize_domain(domain) in blocked_normalized:
                     return True
 
         # Also check if the source directly contains a blocked domain
-        for blocked_domain in BLOCKED_DOMAINS:
+        for blocked_domain in self._blocked_domains:
             # Extract base domain name (e.g., "mercadolivre" from "mercadolivre.com.br")
-            base_name = blocked_domain.split('.')[0]
+            base_name = self._normalize_domain(blocked_domain).split('.')[0]
             if base_name in source_lower:
                 return True
 
