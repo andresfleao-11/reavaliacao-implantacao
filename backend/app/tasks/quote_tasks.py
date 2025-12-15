@@ -252,13 +252,13 @@ def process_quote_request(self, quote_request_id: int):
         _update_progress(db, quote_request, "extracting_prices", 60, f"Acessando {len(search_results)} lojas e capturando preços...")
 
         valid_sources = []
-        valid_sources_by_domain = {}  # {domain: source} - para reutilização
-        valid_prices = {}  # {domain: price} - preços já validados
-        failed_domains = set()  # Domínios que falharam (remover da lista)
+        valid_sources_by_url = {}  # {url: source} - para reutilização (URL única, não domínio)
+        valid_prices = {}  # {url: price} - preços já validados por URL
+        failed_urls = set()  # URLs que falharam (permite outros produtos do mesmo domínio)
 
         async def extract_prices_with_block_recalculation():
             from app.models.quote_source import ExtractionMethod
-            nonlocal valid_sources, valid_sources_by_domain, valid_prices, failed_domains
+            nonlocal valid_sources, valid_sources_by_url, valid_prices, failed_urls
 
             all_products = list(search_results)
             iteration = 0
@@ -266,7 +266,7 @@ def process_quote_request(self, quote_request_id: int):
 
             # Sistema de reserva
             reserve_sources = []
-            reserve_sources_by_domain = {}
+            reserve_sources_by_url = {}
             reserve_prices = {}
             trying_alternative = False
             alternative_failed = False
@@ -275,10 +275,10 @@ def process_quote_request(self, quote_request_id: int):
                 while len(valid_sources) < num_quotes and iteration < max_iterations:
                     iteration += 1
 
-                    # Construir lista (excluir falhas)
+                    # Construir lista (excluir falhas por URL)
                     products_for_blocks = [
                         p for p in all_products
-                        if p.domain not in failed_domains
+                        if p.url not in failed_urls
                     ]
 
                     if not products_for_blocks:
@@ -295,7 +295,7 @@ def process_quote_request(self, quote_request_id: int):
                         logger.info("No valid blocks could be created")
                         break
 
-                    valid_domains = set(valid_prices.keys())
+                    valid_urls = set(valid_prices.keys())
                     needed = num_quotes - len(valid_sources)
 
                     # Categorizar blocos
@@ -304,10 +304,10 @@ def process_quote_request(self, quote_request_id: int):
                     blocks_without_valid_big = []
 
                     for blk in blocks:
-                        block_domains = {p.domain for p in blk}
-                        valid_in_blk = len(valid_domains & block_domains)
-                        contains_all = valid_in_blk == len(valid_domains) if valid_domains else True
-                        untried = len([p for p in blk if p.domain not in valid_prices])
+                        block_urls = {p.url for p in blk}
+                        valid_in_blk = len(valid_urls & block_urls)
+                        contains_all = valid_in_blk == len(valid_urls) if valid_urls else True
+                        untried = len([p for p in blk if p.url not in valid_prices])
 
                         if contains_all:
                             if untried >= needed - valid_in_blk or len(blk) >= num_quotes:
@@ -328,18 +328,18 @@ def process_quote_request(self, quote_request_id: int):
 
                     if blocks_with_all_valid_enough:
                         block = blocks_with_all_valid_enough[0]
-                        logger.info(f"  Using block with all {len(valid_domains)} valid + untried")
+                        logger.info(f"  Using block with all {len(valid_urls)} valid + untried")
                     elif blocks_with_all_valid_not_enough and not trying_alternative:
                         if blocks_without_valid_big and not alternative_failed:
                             # Guardar como reserva e tentar alternativo
                             logger.info(f"  Block with valid doesn't have enough. Saving reserve, trying alternative.")
                             reserve_sources = list(valid_sources)
-                            reserve_sources_by_domain = dict(valid_sources_by_domain)
+                            reserve_sources_by_url = dict(valid_sources_by_url)
                             reserve_prices = dict(valid_prices)
 
                             # Limpar para tentar novo bloco
                             valid_sources = []
-                            valid_sources_by_domain = {}
+                            valid_sources_by_url = {}
                             valid_prices = {}
                             trying_alternative = True
 
@@ -360,8 +360,8 @@ def process_quote_request(self, quote_request_id: int):
                         logger.info(f"  No suitable block found")
                         break
 
-                    block_domains = {p.domain for p in block}
-                    valid_in_block = len(valid_domains & block_domains)
+                    block_urls_set = {p.url for p in block}
+                    valid_in_block = len(valid_urls & block_urls_set)
 
                     logger.info(
                         f"Iteration {iteration}: Block with {len(block)} products "
@@ -375,12 +375,12 @@ def process_quote_request(self, quote_request_id: int):
                         if len(valid_sources) >= num_quotes:
                             break
 
-                        # Reutilizar válido
-                        if product.domain in valid_sources_by_domain:
-                            logger.info(f"    ✓ Reused: {product.domain} - R$ {valid_prices[product.domain]}")
+                        # Reutilizar válido (por URL, não por domínio)
+                        if product.url in valid_sources_by_url:
+                            logger.info(f"    ✓ Reused: {product.domain} - R$ {valid_prices[product.url]}")
                             continue
 
-                        if product.domain in failed_domains:
+                        if product.url in failed_urls:
                             continue
 
                         try:
@@ -432,20 +432,20 @@ def process_quote_request(self, quote_request_id: int):
                                 )
                                 db.add(source)
                                 valid_sources.append(source)
-                                valid_sources_by_domain[product.domain] = source
-                                valid_prices[product.domain] = float(final_price)
+                                valid_sources_by_url[product.url] = source
+                                valid_prices[product.url] = float(final_price)
 
-                                logger.info(f"✓ Added [{len(valid_sources)}/{num_quotes}]: {product.domain} - R$ {final_price}")
+                                logger.info(f"✓ Added [{len(valid_sources)}/{num_quotes}]: {product.domain} ({product.url[:50]}...) - R$ {final_price}")
                             else:
                                 raise ValueError(f"Invalid price: {price}")
 
                         except Exception as e:
-                            logger.error(f"✗ Failed {product.domain}: {str(e)[:100]}")
-                            new_failures.append(product.domain)
+                            logger.error(f"✗ Failed {product.domain} ({product.url[:50]}...): {str(e)[:100]}")
+                            new_failures.append(product.url)
                             # Produto falhou - não entra na cotação (sem fallback)
 
-                    # Atualizar falhas
-                    failed_domains.update(new_failures)
+                    # Atualizar falhas (por URL)
+                    failed_urls.update(new_failures)
 
                     # Verificar resultado
                     if len(valid_sources) >= num_quotes:
@@ -455,17 +455,17 @@ def process_quote_request(self, quote_request_id: int):
                         # Bloco alternativo falhou - voltar para reserva
                         logger.info(f"  Alternative failed. Returning to reserve ({len(reserve_sources)} results)")
                         valid_sources = reserve_sources
-                        valid_sources_by_domain = reserve_sources_by_domain
+                        valid_sources_by_url = reserve_sources_by_url
                         valid_prices = reserve_prices
                         trying_alternative = False
                         alternative_failed = True
-                    elif not new_failures and len([p for p in block if p.domain not in valid_prices and p.domain not in failed_domains]) == 0:
+                    elif not new_failures and len([p for p in block if p.url not in valid_prices and p.url not in failed_urls]) == 0:
                         logger.info(f"No progress in iteration {iteration}, stopping")
                         break
                     else:
                         logger.info(
                             f"  → Iteration {iteration}: {len(valid_sources)}/{num_quotes} quotes, "
-                            f"{len(all_products) - len(failed_domains)} products remaining"
+                            f"{len(all_products) - len(failed_urls)} products remaining"
                         )
 
         def _create_variation_blocks_local(products, max_variation, min_size=1):

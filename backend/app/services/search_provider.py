@@ -367,7 +367,7 @@ class SerpApiProvider(SearchProvider):
 
         results = []
         results_by_key = {}  # {product_key: store_result} - for reusing valid results
-        domains_seen = set()
+        urls_seen = set()  # URLs únicas (não mais domínios) - permite produtos diferentes do mesmo domínio
         immersive_calls = 0
         failed_product_keys = set()  # Products that failed (remove from future blocks)
         all_products = list(products_limited)  # All products available
@@ -377,7 +377,7 @@ class SerpApiProvider(SearchProvider):
         # Reserve system: save valid results when trying alternative blocks
         reserve_results = []
         reserve_results_by_key = {}
-        reserve_domains_seen = set()
+        reserve_urls_seen = set()
         trying_alternative_block = False
         alternative_failed = False
 
@@ -467,12 +467,12 @@ class SerpApiProvider(SearchProvider):
                     logger.info(f"  Block with valid products doesn't have enough untried. Saving as reserve and trying alternative.")
                     reserve_results = list(results)
                     reserve_results_by_key = dict(results_by_key)
-                    reserve_domains_seen = set(domains_seen)
+                    reserve_urls_seen = set(urls_seen)
 
                     # Clear current results to try fresh block
                     results = []
                     results_by_key = {}
-                    domains_seen = set()
+                    urls_seen = set()
                     trying_alternative_block = True
 
                     block = blocks_without_valid_but_big[0]
@@ -509,7 +509,7 @@ class SerpApiProvider(SearchProvider):
 
             block_results_count = 0
             block_skipped = {
-                "blocked_domain": [], "foreign_domain": [], "duplicate_domain": [],
+                "blocked_domain": [], "foreign_domain": [], "duplicate_url": [],
                 "listing_url": [], "no_store_link": [], "price_mismatch": [],
                 "reused_valid": []
             }
@@ -524,11 +524,11 @@ class SerpApiProvider(SearchProvider):
                 # Check if this product already has a valid result
                 if product_key in results_by_key:
                     store_result = results_by_key[product_key]
-                    if store_result.domain not in domains_seen:
-                        domains_seen.add(store_result.domain)
+                    if store_result.url not in urls_seen:
+                        urls_seen.add(store_result.url)
                         results.append(store_result)
                         block_results_count += 1
-                        block_skipped["reused_valid"].append(store_result.domain)
+                        block_skipped["reused_valid"].append(store_result.url)
                         logger.info(
                             f"    ✓ Reused [{len(results)}/{limit}]: "
                             f"{store_result.store_name or store_result.domain} "
@@ -565,9 +565,9 @@ class SerpApiProvider(SearchProvider):
                     new_failures.append(product_key)
                     continue
 
-                if store_result.domain in domains_seen:
-                    block_skipped["duplicate_domain"].append(store_result.domain)
-                    logger.info(f"    ↳ Skipped: duplicate domain '{store_result.domain}'")
+                if store_result.url in urls_seen:
+                    block_skipped["duplicate_url"].append(store_result.url)
+                    logger.info(f"    ↳ Skipped: duplicate URL '{store_result.url[:60]}'")
                     new_failures.append(product_key)
                     continue
 
@@ -578,7 +578,7 @@ class SerpApiProvider(SearchProvider):
                     continue
 
                 # Success!
-                domains_seen.add(store_result.domain)
+                urls_seen.add(store_result.url)
                 results.append(store_result)
                 results_by_key[product_key] = store_result
                 block_results_count += 1
@@ -618,7 +618,7 @@ class SerpApiProvider(SearchProvider):
                 logger.info(f"  Alternative block failed. Returning to reserve ({len(reserve_results)} results)")
                 results = reserve_results
                 results_by_key = reserve_results_by_key
-                domains_seen = reserve_domains_seen
+                urls_seen = reserve_urls_seen
                 trying_alternative_block = False
                 alternative_failed = True
                 block_detail["result"] = "alternative_failed_returning_to_reserve"

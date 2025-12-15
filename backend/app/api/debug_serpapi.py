@@ -107,6 +107,8 @@ class BlockIteration(BaseModel):
     skipped_reasons: Dict[str, int]
     status: str  # "SUCCESS", "FAILED", "CONTINUING"
     action: str  # "completed", "recreating_blocks", "trying_next_block"
+    block_failure_reason: Optional[str] = None  # Motivo da falha do bloco
+    failed_products_details: List[Dict[str, Any]] = []  # Detalhes dos produtos que falharam
 
 
 class DebugResponse(BaseModel):
@@ -486,7 +488,17 @@ async def analyze_shopping_json(
                 "price_range": {
                     "min": products_step4[0]['extracted_price'] if products_step4 else None,
                     "max": products_step4[-1]['extracted_price'] if products_step4 else None
-                }
+                },
+                "products": [
+                    {
+                        "position": i + 1,
+                        "title": p['title'][:60],
+                        "price": p['extracted_price'],
+                        "source": p['source'],
+                        "has_immersive_api": bool(p.get('serpapi_immersive_url'))
+                    }
+                    for i, p in enumerate(products_step4)
+                ]
             }
         ))
 
@@ -595,7 +607,7 @@ async def analyze_shopping_json(
             # Estado do processamento iterativo
             failed_product_keys = set()
             results_by_key = {}
-            domains_seen = set()
+            urls_seen = set()  # URLs únicas (não mais domínios) - permite produtos diferentes do mesmo domínio
             iteration = 0
             max_iterations = 50
             validation_step = 0
@@ -657,11 +669,12 @@ async def analyze_shopping_json(
 
                     block_results_count = 0
                     block_skipped = {
-                        "blocked_domain": 0, "foreign_domain": 0, "duplicate_domain": 0,
+                        "blocked_domain": 0, "foreign_domain": 0, "duplicate_url": 0,
                         "listing_url": 0, "no_store_link": 0, "no_immersive_url": 0,
                         "api_error": 0
                     }
                     new_failures = []
+                    failed_products_details = []  # Detalhes dos produtos que falharam nesta iteração
 
                     for product in block:
                         if len(final_results) >= limit:
@@ -677,8 +690,8 @@ async def analyze_shopping_json(
                         # Verificar se ja temos resultado valido para este produto
                         if product_key in results_by_key:
                             stored = results_by_key[product_key]
-                            if stored['domain'] not in domains_seen:
-                                domains_seen.add(stored['domain'])
+                            if stored['store_link'] not in urls_seen:
+                                urls_seen.add(stored['store_link'])
                                 final_results.append(stored)
                                 block_results_count += 1
                                 product_validations.append(ProductValidation(
@@ -701,6 +714,13 @@ async def analyze_shopping_json(
                         if not product.get('serpapi_immersive_url'):
                             new_failures.append(product_key)
                             block_skipped["no_immersive_url"] += 1
+                            failed_products_details.append({
+                                "product_title": product['title'][:60],
+                                "product_price": product['extracted_price'],
+                                "product_source": product['source'],
+                                "failure_reason": "no_immersive_url",
+                                "failure_description": "Produto não possui URL da Immersive API"
+                            })
                             product_validations.append(ProductValidation(
                                 product_title=product['title'][:60],
                                 product_price=product['extracted_price'],
@@ -784,10 +804,10 @@ async def analyze_shopping_json(
                                         stores_list.append(store_info)
                                         continue
 
-                                    # Validacao 3: Dominio duplicado
-                                    if store_domain in domains_seen:
-                                        store_info["status"] = "duplicate_domain"
-                                        store_info["reason"] = "Dominio ja usado em outra cotacao"
+                                    # Validacao 3: URL duplicada (permite produtos diferentes do mesmo domínio)
+                                    if store_link in urls_seen:
+                                        store_info["status"] = "duplicate_url"
+                                        store_info["reason"] = "URL ja usada em outra cotacao"
                                         stores_list.append(store_info)
                                         continue
 
@@ -808,13 +828,13 @@ async def analyze_shopping_json(
                                 # Registrar resultado das validacoes
                                 blocked_count = sum(1 for s in stores_list if s.get("status") == "blocked_domain")
                                 foreign_count = sum(1 for s in stores_list if s.get("status") == "foreign_domain")
-                                duplicate_count = sum(1 for s in stores_list if s.get("status") == "duplicate_domain")
+                                duplicate_url_count = sum(1 for s in stores_list if s.get("status") == "duplicate_url")
                                 listing_count = sum(1 for s in stores_list if s.get("status") == "listing_url")
                                 valid_count = sum(1 for s in stores_list if s.get("status") == "valid")
 
                                 validations_list.append({"check": "blocked_domain", "blocked": blocked_count})
                                 validations_list.append({"check": "foreign_domain", "blocked": foreign_count})
-                                validations_list.append({"check": "duplicate_domain", "blocked": duplicate_count})
+                                validations_list.append({"check": "duplicate_url", "blocked": duplicate_url_count})
                                 validations_list.append({"check": "listing_url", "blocked": listing_count})
                                 validations_list.append({"check": "valid_stores", "count": valid_count})
 
@@ -826,7 +846,7 @@ async def analyze_shopping_json(
 
                         # Registrar resultado do produto
                         if selected_store:
-                            domains_seen.add(selected_store['domain'])
+                            urls_seen.add(selected_store['link'])  # URL única, não domínio
                             result_entry = {
                                 "title": product['title'],
                                 "google_price": product['extracted_price'],
@@ -872,18 +892,52 @@ async def analyze_shopping_json(
                                 # Usar variaveis locais se definidas, senao usar 0
                                 _blocked = locals().get('blocked_count', 0)
                                 _foreign = locals().get('foreign_count', 0)
-                                _duplicate = locals().get('duplicate_count', 0)
+                                _duplicate_url = locals().get('duplicate_url_count', 0)
                                 _listing = locals().get('listing_count', 0)
+
+                                # Determinar motivo específico da falha
                                 if _blocked > 0:
                                     block_skipped["blocked_domain"] += 1
+                                    fail_reason = "blocked_domain"
+                                    fail_desc = f"Todas as {len(stores_list)} lojas estão em domínios bloqueados"
                                 elif _foreign > 0:
                                     block_skipped["foreign_domain"] += 1
-                                elif _duplicate > 0:
-                                    block_skipped["duplicate_domain"] += 1
+                                    fail_reason = "foreign_domain"
+                                    fail_desc = f"Todas as {len(stores_list)} lojas são de domínios estrangeiros"
+                                elif _duplicate_url > 0:
+                                    block_skipped["duplicate_url"] += 1
+                                    fail_reason = "duplicate_url"
+                                    fail_desc = f"Todas as {len(stores_list)} URLs já foram usadas em outras cotações"
                                 elif _listing > 0:
                                     block_skipped["listing_url"] += 1
+                                    fail_reason = "listing_url"
+                                    fail_desc = f"Todas as {len(stores_list)} URLs são páginas de listagem"
                                 else:
                                     block_skipped["no_store_link"] += 1
+                                    fail_reason = "no_store_link"
+                                    fail_desc = "Nenhuma loja válida encontrada na Immersive API"
+
+                                failed_products_details.append({
+                                    "product_title": product['title'][:60],
+                                    "product_price": product['extracted_price'],
+                                    "product_source": product['source'],
+                                    "failure_reason": fail_reason,
+                                    "failure_description": fail_desc,
+                                    "stores_checked": len(stores_list),
+                                    "stores_details": [
+                                        {"name": s.get("name"), "domain": s.get("domain"), "status": s.get("status"), "reason": s.get("reason")}
+                                        for s in stores_list[:5]  # Primeiras 5 lojas
+                                    ]
+                                })
+                            else:
+                                # Erro de API
+                                failed_products_details.append({
+                                    "product_title": product['title'][:60],
+                                    "product_price": product['extracted_price'],
+                                    "product_source": product['source'],
+                                    "failure_reason": "api_error",
+                                    "failure_description": f"Erro ao chamar Immersive API: {api_error}"
+                                })
 
                             failure_reason = api_error or "no_valid_store"
                             product_validations.append(ProductValidation(
@@ -920,12 +974,21 @@ async def analyze_shopping_json(
                     if len(final_results) >= limit:
                         status = "SUCCESS"
                         action = "completed"
+                        block_failure_reason = None
                     elif new_failures:
                         status = "CONTINUING"
                         action = "recreating_blocks"
+                        # Determinar motivo da falha do bloco
+                        failure_counts = {k: v for k, v in block_skipped.items() if v > 0}
+                        if failure_counts:
+                            main_reason = max(failure_counts, key=failure_counts.get)
+                            block_failure_reason = f"Bloco falhou parcialmente: {len(new_failures)} produtos falharam. Principal motivo: {main_reason} ({failure_counts[main_reason]}x)"
+                        else:
+                            block_failure_reason = f"Bloco falhou parcialmente: {len(new_failures)} produtos falharam"
                     else:
                         status = "FAILED"
                         action = "no_progress"
+                        block_failure_reason = f"Bloco travou: nenhum produto processável restante. Produtos no bloco: {len(block)}, já processados: {len([p for p in block if f\"{p['title']}_{p['extracted_price']}\" in failed_product_keys])}"
 
                     block_iterations.append(BlockIteration(
                         iteration=iteration,
@@ -939,7 +1002,9 @@ async def analyze_shopping_json(
                         total_failures=len(failed_product_keys),
                         skipped_reasons=block_skipped,
                         status=status,
-                        action=action
+                        action=action,
+                        block_failure_reason=block_failure_reason,
+                        failed_products_details=failed_products_details
                     ))
 
                     if status == "SUCCESS" or action == "no_progress":
@@ -949,7 +1014,7 @@ async def analyze_shopping_json(
             steps.append(StepResult(
                 step_number=6,
                 step_name="Processamento Iterativo com Immersive API",
-                description="Validacoes detalhadas e recriacao de blocos em caso de falha",
+                description="Validacoes detalhadas e recriacao de blocos em caso de falha (URL unica)",
                 input_count=len(products_step4),
                 output_count=len(final_results),
                 filtered_count=len(failed_product_keys),
@@ -959,7 +1024,7 @@ async def analyze_shopping_json(
                     "api_calls_made": len(immersive_results),
                     "successful_quotes": len(final_results),
                     "failed_products": len(failed_product_keys),
-                    "domains_used": list(domains_seen),
+                    "urls_used": list(urls_seen),
                     "final_status": "SUCCESS" if len(final_results) >= limit else "PARTIAL"
                 }
             ))
