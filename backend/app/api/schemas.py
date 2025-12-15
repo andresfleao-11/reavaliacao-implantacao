@@ -93,6 +93,8 @@ class QuoteDetailResponse(BaseModel):
     child_quote_id: Optional[int] = None
     # Lote (se pertence a um lote)
     batch_job_id: Optional[int] = None
+    # JSON do Google Shopping (para debug e consulta)
+    google_shopping_response_json: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True

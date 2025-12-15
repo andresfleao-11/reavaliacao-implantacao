@@ -105,6 +105,8 @@ export interface QuoteDetail {
   child_quote_id: number | null
   // Lote (se pertence a um lote)
   batch_job_id: number | null
+  // JSON do Google Shopping (para debug e consulta)
+  google_shopping_response_json: any | null
 }
 
 export interface QuoteListItem {

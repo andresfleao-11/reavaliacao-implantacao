@@ -23,6 +23,7 @@ export default function QuoteDetailPage() {
   const [anthropicExpanded, setAnthropicExpanded] = useState(true)
   const [serpApiExpanded, setSerpApiExpanded] = useState(true)
   const [searchLogExpanded, setSearchLogExpanded] = useState(true)
+  const [googleShoppingExpanded, setGoogleShoppingExpanded] = useState(false)
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null)
   const [quoteCosts, setQuoteCosts] = useState<{
@@ -1092,6 +1093,53 @@ export default function QuoteDetailPage() {
                         ))}
                     </tbody>
                   </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Google Shopping JSON Response */}
+          {quote.google_shopping_response_json && (
+            <div className="mb-6">
+              <button
+                onClick={() => setGoogleShoppingExpanded(!googleShoppingExpanded)}
+                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+              >
+                <span>🛒 JSON Google Shopping</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const dataStr = JSON.stringify(quote.google_shopping_response_json, null, 2)
+                      const blob = new Blob([dataStr], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `cotacao_${quote.id}_google_shopping.json`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                    }}
+                    className="px-3 py-1 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+                  >
+                    Download JSON
+                  </button>
+                  <svg
+                    className={`w-5 h-5 transform transition-transform ${googleShoppingExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+              {googleShoppingExpanded && (
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto max-h-96">
+                  <pre className="text-xs text-gray-700 dark:text-gray-300 font-mono whitespace-pre-wrap">
+                    {JSON.stringify(quote.google_shopping_response_json, null, 2)}
+                  </pre>
                 </div>
               )}
             </div>

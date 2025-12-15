@@ -279,7 +279,8 @@ def get_quote(
         original_quote_id=quote_request.original_quote_id,
         attempt_history=attempt_history,
         child_quote_id=child_quote_id,
-        batch_job_id=quote_request.batch_job_id
+        batch_job_id=quote_request.batch_job_id,
+        google_shopping_response_json=quote_request.google_shopping_response_json
     )
 
 
