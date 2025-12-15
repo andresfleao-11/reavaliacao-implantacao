@@ -814,12 +814,12 @@ class SerpApiProvider(SearchProvider):
                     # Obter preço da loja
                     store_extracted = store.get("extracted_price") or store.get("base_price")
 
-                    # Validar preço da loja contra preço do bloco
-                    # Se diferença > 15%, descartar esta loja e tentar próxima
+                    # Validar preço da loja contra preço do Google Shopping
+                    # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
                     if store_extracted and product.extracted_price:
                         price_diff_percent = abs(float(store_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
-                        if price_diff_percent > 15:
-                            logger.info(f"    ↳ Skipped store {store_name}: price mismatch R$ {store_extracted} vs block R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
+                        if price_diff_percent > 5:
+                            logger.info(f"    ↳ PRICE_MISMATCH store {store_name}: R$ {store_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
                             continue
 
                     final_price = store_extracted or product.extracted_price
@@ -857,12 +857,12 @@ class SerpApiProvider(SearchProvider):
                         # Obter preço do seller
                         seller_extracted = seller.get("extracted_price") or seller.get("base_price")
 
-                        # Validar preço do seller contra preço do bloco
-                        # Se diferença > 15%, descartar este seller e tentar próximo
+                        # Validar preço do seller contra preço do Google Shopping
+                        # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
                         if seller_extracted and product.extracted_price:
                             price_diff_percent = abs(float(seller_extracted) - float(product.extracted_price)) / float(product.extracted_price) * 100
-                            if price_diff_percent > 15:
-                                logger.info(f"    ↳ Skipped seller {seller_name}: price mismatch R$ {seller_extracted} vs block R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
+                            if price_diff_percent > 5:
+                                logger.info(f"    ↳ PRICE_MISMATCH seller {seller_name}: R$ {seller_extracted} vs Google R$ {product.extracted_price} (diff: {price_diff_percent:.1f}%)")
                                 continue
 
                         final_price = seller_extracted or product.extracted_price

@@ -398,15 +398,16 @@ def process_quote_request(self, quote_request_id: int):
                                 final_method = method
                                 google_price = product.extracted_price
 
+                                # Validar preço do site contra Google Shopping
+                                # Se diferença > 5%, produto FALHA (PRICE_MISMATCH)
                                 if google_price and google_price > Decimal("0"):
                                     price_diff_percent = abs(float(price) - float(google_price)) / float(google_price) * 100
-                                    if price_diff_percent > 15:
+                                    if price_diff_percent > 5:
                                         logger.warning(
-                                            f"Price mismatch for {product.domain}: "
-                                            f"R$ {price} vs Google R$ {google_price} (diff: {price_diff_percent:.1f}%). Using Google."
+                                            f"PRICE_MISMATCH for {product.domain}: "
+                                            f"R$ {price} vs Google R$ {google_price} (diff: {price_diff_percent:.1f}%)"
                                         )
-                                        final_price = google_price
-                                        final_method = ExtractionMethod.LLM
+                                        raise ValueError(f"PRICE_MISMATCH: {price_diff_percent:.1f}%")
                                     else:
                                         logger.info(f"Price validated for {product.domain}: R$ {price}")
 
@@ -442,38 +443,7 @@ def process_quote_request(self, quote_request_id: int):
                         except Exception as e:
                             logger.error(f"✗ Failed {product.domain}: {str(e)[:100]}")
                             new_failures.append(product.domain)
-
-                            # Fallback: usar preço do Google
-                            if product.extracted_price and product.extracted_price > Decimal("0"):
-                                fallback_price = float(product.extracted_price)
-                                if valid_prices:
-                                    min_valid = min(valid_prices.values())
-                                    max_valid = max(valid_prices.values())
-                                    price_lower = max_valid / (1 + variacao_maxima)
-                                    price_upper = min_valid * (1 + variacao_maxima)
-
-                                    if fallback_price < price_lower or fallback_price > price_upper:
-                                        logger.info(f"Fallback price R$ {fallback_price} outside range, skipping")
-                                        continue
-
-                                source = QuoteSource(
-                                    quote_request_id=quote_request_id,
-                                    url=product.url,
-                                    domain=product.domain,
-                                    page_title=product.title,
-                                    price_value=product.extracted_price,
-                                    currency="BRL",
-                                    extraction_method=ExtractionMethod.LLM,
-                                    screenshot_file_id=None,
-                                    is_accepted=True
-                                )
-                                db.add(source)
-                                valid_sources.append(source)
-                                valid_sources_by_domain[product.domain] = source
-                                valid_prices[product.domain] = fallback_price
-
-                                new_failures.remove(product.domain)
-                                logger.info(f"✓ Added fallback [{len(valid_sources)}/{num_quotes}]: {product.domain} - R$ {product.extracted_price}")
+                            # Produto falhou - não entra na cotação (sem fallback)
 
                     # Atualizar falhas
                     failed_domains.update(new_failures)

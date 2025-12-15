@@ -1,7 +1,8 @@
 # Especificação: Sistema de Cotações via SerpAPI
 
-> **Versão:** 1.0  
-> **Data:** Dezembro/2024  
+> **Versão:** 2.0
+> **Data:** Dezembro/2024
+> **Atualizado:** Dezembro/2024
 > **Objetivo:** Obter cotações válidas de produtos via Google Shopping + Google Immersive API
 
 ---
@@ -39,8 +40,8 @@ class FailureReason(Enum):
     FOREIGN_DOMAIN = "foreign_domain"
     DUPLICATE_DOMAIN = "duplicate_domain"
     LISTING_URL = "listing_url"
-    PRICE_MISMATCH = "price_mismatch"
     EXTRACTION_ERROR = "extraction_error"
+    PRICE_MISMATCH = "price_mismatch"  # Preço do site diferente do Google Shopping
 
 class BlockStatus(Enum):
     PENDING = "pending"
@@ -55,16 +56,17 @@ class BlockStatus(Enum):
 @dataclass
 class ShoppingProduct:
     """Produto extraído do Google Shopping"""
-    position: int
     title: str
-    serpapi_immersive_product_api: str
-    source: str
+    price: str
     extracted_price: Optional[float]
+    source: str
+    serpapi_immersive_product_api: Optional[str]
+    product_link: Optional[str]
+    link: Optional[str]
 
 @dataclass
 class ProcessedProduct:
     """Produto com dados de validação"""
-    position: int
     title: str
     immersive_api_url: str
     source: str
@@ -90,7 +92,7 @@ class QuotationBlock:
 
 ### 3.1 Extração de Dados
 - **Entrada:** JSON da resposta SerpAPI
-- **Campos:** `position`, `title`, `serpapi_immersive_product_api`, `source`, `extracted_price`
+- **Campos:** `title`, `price`, `extracted_price`, `source`, `serpapi_immersive_product_api`, `product_link`, `link`
 
 ### 3.2 Filtro de Domínios Bloqueados
 - Verificar `source` contra `blocked_domains`
@@ -142,29 +144,78 @@ Cada produto deve passar por **TODAS** as validações na ordem:
 | 4 | Domínio duplicado | Já existe cotação deste domínio | `DUPLICATE_DOMAIN` |
 | 5 | URL de listagem | URL contém padrões de busca | `LISTING_URL` |
 | 6 | Extração de preço | Não conseguiu extrair preço | `EXTRACTION_ERROR` |
-| 7 | Conferência de preço | Preço difere do `extracted_price` | `PRICE_MISMATCH` |
+| 7 | Conferência de preço | Preço do site ≠ extracted_price | `PRICE_MISMATCH` |
 
 ### 4.2 Padrões de URL de Listagem
 
-URLs rejeitadas se contiverem:
-- `/busca/`
-- `/search/`
-- `?q=`
-- `/categoria/`
-- `/colecao/`
-- Domínio `buscape.com.br`
-- Domínio `zoom.com.br`
+URLs rejeitadas se contiverem qualquer um dos padrões abaixo:
 
-### 4.3 Processamento de Bloco
+**Padrões de busca/pesquisa:**
+- `/busca/`, `/busca?`
+- `/search/`, `/search?`
+- `/s?`, `/s/`
+- `?q=`, `&q=`, `query=`
+- `/pesquisa/`, `/pesquisa?`
+- `/resultado`
+
+**Padrões de categoria/listagem:**
+- `/categoria/`, `/categorias/`, `/category/`
+- `/colecao/`, `/collection/`
+- `/produtos?`
+- `/list/`, `/listing/`, `/browse/`
+- `/ofertas?`
+
+**Padrões de comparação:**
+- `/compare/`, `/comparar/`
+
+**Domínios de comparadores (sempre rejeitados):**
+- `buscape.com.br`
+- `zoom.com.br`
+- `bondfaro.com.br`
+
+**Regex para categorias genéricas:**
+```regex
+/(notebooks|celulares|eletronicos|informatica|tv|audio)/?(\?|$)
+```
+
+### 4.3 Validação de Preço - IMPORTANTE
+
+**O preço extraído do site DEVE ser igual ao `extracted_price` do Google Shopping.**
+
+Quando há diferença entre:
+- Preço do Google Shopping (`extracted_price`)
+- Preço extraído da página do produto (via Playwright)
+
+→ **O produto FALHA na validação** (`PRICE_MISMATCH`)
+
+**Tolerância:** Diferença de até **5%** é aceitável para compensar:
+- Arredondamentos
+- Variações de exibição (com/sem centavos)
+- Atualizações recentes de preço
+
+```python
+def prices_match(site_price: float, google_price: float, tolerance: float = 0.05) -> bool:
+    """Retorna True se os preços estão dentro da tolerância"""
+    if google_price == 0:
+        return False
+    diff_percent = abs(site_price - google_price) / google_price
+    return diff_percent <= tolerance
+```
+
+**Exemplo:**
+- Google: R$ 100,00 | Site: R$ 102,00 → **OK** (2% diferença)
+- Google: R$ 100,00 | Site: R$ 110,00 → **FALHA** (10% diferença)
+
+### 4.4 Processamento de Bloco
 
 ```
 PARA cada produto no bloco:
     SE produto.validation_status == VALID:
         contar como válido (já validado antes)
         CONTINUAR
-    
+
     validar_produto(produto)
-    
+
     SE produto válido:
         válidos++
         SE válidos >= quotes_per_search:
@@ -207,6 +258,12 @@ Quando não é possível formar blocos válidos:
 variacao = (preco_maximo - preco_minimo) / preco_minimo
 ```
 
+### RN06 - Status da Cotação
+Ao finalizar:
+- Se `fontes_validas >= quotes_per_search` → `QuoteStatus.DONE`
+- Se `fontes_validas > 0 AND fontes_validas < quotes_per_search` → `QuoteStatus.AWAITING_REVIEW`
+- Se `fontes_validas == 0` → `QuoteStatus.ERROR`
+
 ---
 
 ## 6. Funções Auxiliares Necessárias
@@ -227,7 +284,7 @@ def is_listing_url(url: str) -> bool:
 def extract_price_from_page(url: str) -> Optional[float]:
     """Faz scraping do preço na página do produto"""
 
-def prices_match(price1: float, price2: float, tolerance: float = 0.05) -> bool:
+def prices_match(site_price: float, google_price: float, tolerance: float = 0.05) -> bool:
     """Compara preços com tolerância (default 5%)"""
 
 def calculate_variation(min_price: float, max_price: float) -> float:
@@ -249,13 +306,18 @@ def form_blocks(products: List, max_variation: float, min_size: int) -> List[Quo
 
 5. LOOP principal:
    5.1 Processar bloco atual
-   5.2 Validar produtos até atingir 3 válidos
+   5.2 Validar produtos até atingir N válidos
    5.3 Se bloco OK → SUCESSO
    5.4 Se bloco falha → reformar com validados + pendentes
    5.5 Se sem blocos → aumentar variação +20%
    5.6 Se variação > limite → FALHA FINAL
 
-6. Retornar cotações válidas
+6. Determinar status final:
+   - fontes >= N → DONE
+   - fontes > 0 e < N → AWAITING_REVIEW
+   - fontes == 0 → ERROR
+
+7. Retornar cotações válidas
 ```
 
 ---
@@ -270,4 +332,56 @@ def form_blocks(products: List, max_variation: float, min_size: int) -> List[Quo
 | `VALIDATION_FAILED` | Produto falhou em validação específica |
 | `BLOCK_FAILED` | Bloco não atingiu cotações necessárias |
 | `VARIATION_EXCEEDED` | Atingiu limite máximo de variação |
+| `PRICE_MISMATCH` | Preço do site diferente do Google Shopping |
 | `SUCCESS` | Cotações obtidas com sucesso |
+| `AWAITING_REVIEW` | Cotações insuficientes, requer revisão manual |
+
+---
+
+## 9. Domínios Bloqueados
+
+```python
+BLOCKED_DOMAINS = {
+    # Marketplaces com proteção anti-bot forte
+    "mercadolivre.com.br",
+    "mercadoshops.com.br",
+    "amazon.com.br",
+    "amazon.com",
+    "aliexpress.com",
+    "aliexpress.com.br",
+    "shopee.com.br",
+    "shein.com",
+    "shein.com.br",
+    "wish.com",
+    "temu.com",
+    # Grandes varejistas com Cloudflare/anti-bot
+    "carrefour.com.br",
+    "casasbahia.com.br",
+    "pontofrio.com.br",
+    "extra.com.br",
+    "magazineluiza.com.br",
+    "magalu.com.br",
+    "americanas.com.br",
+    "submarino.com.br",
+    "shoptime.com.br",
+}
+```
+
+---
+
+## 10. Domínios Estrangeiros Permitidos
+
+Exceções ao filtro de domínios estrangeiros (fabricantes que vendem no Brasil):
+
+```python
+ALLOWED_FOREIGN_DOMAINS = {
+    "lenovo.com",
+    "dell.com",
+    "hp.com",
+    "samsung.com",
+    "lg.com",
+    "apple.com",
+    "asus.com",
+    "acer.com",
+}
+```
