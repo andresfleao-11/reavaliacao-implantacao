@@ -34,5 +34,8 @@ class QuoteSource(Base):
     is_outlier = Column(Boolean, default=False)
     is_accepted = Column(Boolean, default=True)
 
+    # Motivo de falha na validação (quando is_accepted=False)
+    failure_reason = Column(String(50), nullable=True)  # FailureReason enum value
+
     quote_request = relationship("QuoteRequest", back_populates="sources")
     screenshot = relationship("File", foreign_keys=[screenshot_file_id])
