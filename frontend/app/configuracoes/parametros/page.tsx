@@ -131,8 +131,9 @@ export default function ParametrosPage() {
       setTimeout(() => {
         handleCloseDomainModal()
       }, 1500)
-    } catch (err) {
-      setDomainMessage('Erro ao salvar domínio')
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.detail || 'Erro ao salvar domínio'
+      setDomainMessage(errorMsg)
     } finally {
       setSavingDomain(false)
     }
