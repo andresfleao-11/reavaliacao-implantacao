@@ -1,26 +1,79 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { quotesApi } from '@/lib/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
+interface Project {
+  id: number
+  nome: string
+}
+
 export default function HistoricoPage() {
   const [page, setPage] = useState(1)
   const perPage = 20
 
+  // Filtros
+  const [quoteId, setQuoteId] = useState('')
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [projectId, setProjectId] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [projects, setProjects] = useState<Project[]>([])
+
+  // Debounce para busca
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+      setPage(1) // Reset página ao buscar
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  // Carregar projetos para o dropdown
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await fetch('/api/projects', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setProjects(data.items || data || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar projetos:', error)
+      }
+    }
+    loadProjects()
+  }, [])
+
+  // Construir filtros
+  const filters = {
+    quote_id: quoteId ? parseInt(quoteId) : undefined,
+    search: debouncedSearch || undefined,
+    status: statusFilter || undefined,
+    project_id: projectId ? parseInt(projectId) : undefined,
+    date_from: dateFrom || undefined,
+    date_to: dateTo || undefined,
+  }
+
   const { data, error, mutate } = useSWR(
-    `/quotes?page=${page}`,
-    () => quotesApi.list(page, perPage),
+    ['/quotes', page, filters],
+    () => quotesApi.list(page, perPage, filters),
     {
-      // Atualiza a cada 5 segundos se houver alguma cotação em processamento
       refreshInterval: (data) => {
         const hasProcessing = data?.items?.some((q: any) => q.status === 'PROCESSING')
         return hasProcessing ? 5000 : 0
       },
-      // Também atualiza quando a janela recebe foco
       revalidateOnFocus: true,
     }
   )
@@ -37,15 +90,150 @@ export default function HistoricoPage() {
     return format(new Date(dateString), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
   }
 
+  const clearFilters = () => {
+    setQuoteId('')
+    setSearch('')
+    setStatusFilter('')
+    setProjectId('')
+    setDateFrom('')
+    setDateTo('')
+    setPage(1)
+  }
+
+  const hasActiveFilters = quoteId || search || statusFilter || projectId || dateFrom || dateTo
+
   const totalPages = data ? Math.ceil(data.total / perPage) : 0
+
+  const getStatusBadge = (status: string) => {
+    const config: Record<string, { bg: string; text: string; label: string }> = {
+      DONE: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-800 dark:text-green-300', label: 'Concluída' },
+      PROCESSING: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-800 dark:text-blue-300', label: 'Processando' },
+      CANCELLED: { bg: 'bg-gray-100 dark:bg-gray-900/30', text: 'text-gray-800 dark:text-gray-300', label: 'Cancelada' },
+      ERROR: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-800 dark:text-red-300', label: 'Erro' },
+      AWAITING_REVIEW: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-800 dark:text-yellow-300', label: 'Aguardando Revisão' },
+    }
+    const c = config[status] || config.ERROR
+    return (
+      <span className={`px-2 py-1 text-xs rounded-full ${c.bg} ${c.text}`}>
+        {c.label}
+      </span>
+    )
+  }
 
   return (
     <div className="max-w-7xl">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Histórico de Cotações</h1>
         <Link href="/cotacao" className="btn-primary">
           Nova Cotação
         </Link>
+      </div>
+
+      {/* Filtros */}
+      <div className="card mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {/* Número da Cotação */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Nº Cotação
+            </label>
+            <input
+              type="number"
+              value={quoteId}
+              onChange={(e) => { setQuoteId(e.target.value); setPage(1) }}
+              placeholder="Ex: 123"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            />
+          </div>
+
+          {/* Descrição */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Descrição
+            </label>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Status
+            </label>
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            >
+              <option value="">Todos</option>
+              <option value="DONE">Concluída</option>
+              <option value="PROCESSING">Processando</option>
+              <option value="AWAITING_REVIEW">Aguardando Revisão</option>
+              <option value="ERROR">Erro</option>
+              <option value="CANCELLED">Cancelada</option>
+            </select>
+          </div>
+
+          {/* Projeto */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Projeto
+            </label>
+            <select
+              value={projectId}
+              onChange={(e) => { setProjectId(e.target.value); setPage(1) }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            >
+              <option value="">Todos</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Data Inicial */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Data Inicial
+            </label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => { setDateFrom(e.target.value); setPage(1) }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            />
+          </div>
+
+          {/* Data Final */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Data Final
+            </label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => { setDateTo(e.target.value); setPage(1) }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Botão Limpar Filtros */}
+        {hasActiveFilters && (
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={clearFilters}
+              className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -62,15 +250,28 @@ export default function HistoricoPage() {
 
       {data && data.items.length === 0 && (
         <div className="card text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Nenhuma cotação encontrada</p>
-          <Link href="/cotacao" className="btn-primary">
-            Criar primeira cotação
-          </Link>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {hasActiveFilters ? 'Nenhuma cotação encontrada com os filtros aplicados' : 'Nenhuma cotação encontrada'}
+          </p>
+          {hasActiveFilters ? (
+            <button onClick={clearFilters} className="btn-primary">
+              Limpar filtros
+            </button>
+          ) : (
+            <Link href="/cotacao" className="btn-primary">
+              Criar primeira cotação
+            </Link>
+          )}
         </div>
       )}
 
       {data && data.items.length > 0 && (
         <>
+          {/* Contador de resultados */}
+          <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            {data.total} cotação(ões) encontrada(s)
+          </div>
+
           <div className="card overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900">
@@ -135,19 +336,7 @@ export default function HistoricoPage() {
                       {formatCurrency(quote.valor_medio)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          quote.status === 'DONE'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                            : quote.status === 'PROCESSING'
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                            : quote.status === 'CANCELLED'
-                            ? 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                        }`}
-                      >
-                        {quote.status === 'DONE' ? 'Concluída' : quote.status === 'PROCESSING' ? 'Processando' : quote.status === 'CANCELLED' ? 'Cancelada' : 'Erro'}
-                      </span>
+                      {getStatusBadge(quote.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <Link

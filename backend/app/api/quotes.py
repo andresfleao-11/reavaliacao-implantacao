@@ -287,22 +287,82 @@ def get_quote(
 def list_quotes(
     page: int = 1,
     per_page: int = 20,
+    quote_id: Optional[int] = None,
+    search: Optional[str] = None,
+    status: Optional[str] = None,
     project_id: Optional[int] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """
+    Lista cotações com filtros.
+
+    Parâmetros:
+    - quote_id: Filtrar por número/ID da cotação
+    - search: Buscar na descrição (input_text)
+    - status: Filtrar por status (PROCESSING, DONE, ERROR, CANCELLED, AWAITING_REVIEW)
+    - project_id: Filtrar por projeto
+    - date_from: Data inicial (formato: YYYY-MM-DD)
+    - date_to: Data final (formato: YYYY-MM-DD)
+    """
+    from datetime import datetime
+
     offset = (page - 1) * per_page
 
     query = db.query(QuoteRequest).options(
         joinedload(QuoteRequest.project).joinedload(Project.client)
     )
 
+    count_query = db.query(QuoteRequest)
+
+    # Filtro por ID da cotação
+    if quote_id is not None:
+        query = query.filter(QuoteRequest.id == quote_id)
+        count_query = count_query.filter(QuoteRequest.id == quote_id)
+
+    # Filtro por busca na descrição
+    if search:
+        search_filter = QuoteRequest.input_text.ilike(f"%{search}%")
+        query = query.filter(search_filter)
+        count_query = count_query.filter(search_filter)
+
+    # Filtro por status
+    if status:
+        try:
+            status_enum = QuoteStatus(status)
+            query = query.filter(QuoteRequest.status == status_enum)
+            count_query = count_query.filter(QuoteRequest.status == status_enum)
+        except ValueError:
+            pass  # Status inválido, ignorar
+
+    # Filtro por projeto
     if project_id is not None:
         query = query.filter(QuoteRequest.project_id == project_id)
+        count_query = count_query.filter(QuoteRequest.project_id == project_id)
 
-    total = db.query(QuoteRequest).filter(
-        QuoteRequest.project_id == project_id if project_id is not None else True
-    ).count()
+    # Filtro por período
+    if date_from:
+        try:
+            date_from_parsed = datetime.strptime(date_from, "%Y-%m-%d")
+            query = query.filter(QuoteRequest.created_at >= date_from_parsed)
+            count_query = count_query.filter(QuoteRequest.created_at >= date_from_parsed)
+        except ValueError:
+            pass  # Data inválida, ignorar
+
+    if date_to:
+        try:
+            date_to_parsed = datetime.strptime(date_to, "%Y-%m-%d")
+            # Adicionar 1 dia para incluir o dia inteiro
+            from datetime import timedelta
+            date_to_parsed = date_to_parsed + timedelta(days=1)
+            query = query.filter(QuoteRequest.created_at < date_to_parsed)
+            count_query = count_query.filter(QuoteRequest.created_at < date_to_parsed)
+        except ValueError:
+            pass  # Data inválida, ignorar
+
+    total = count_query.count()
 
     quotes = query.order_by(
         QuoteRequest.created_at.desc()
