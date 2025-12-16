@@ -34,7 +34,7 @@ export default function FatorReavaliacaoPage() {
   useEffect(() => {
     const fetchParams = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('access_token')
         const response = await fetch(`${API_URL}/api/settings/revaluation`, {
           headers: { Authorization: `Bearer ${token}` }
         })
@@ -62,7 +62,7 @@ export default function FatorReavaliacaoPage() {
     setSuccess('')
 
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('access_token')
       const response = await fetch(`${API_URL}/api/settings/revaluation`, {
         method: 'PUT',
         headers: {
