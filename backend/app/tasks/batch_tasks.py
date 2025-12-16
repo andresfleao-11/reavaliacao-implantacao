@@ -15,6 +15,7 @@ from app.services.openai_client import OpenAIClient
 from app.services.search_provider import SerpApiProvider
 from app.services.price_extractor import PriceExtractor
 from app.services.integration_logger import log_anthropic_call, log_serpapi_call
+from app.tasks.quote_tasks import _process_fipe_quote, _update_progress
 from app.core.config import settings
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
@@ -325,7 +326,23 @@ def process_batch_quote(self, quote_request_id: int, batch_job_id: int):
         if analysis_result.total_tokens_used > 0:
             _register_ai_cost(db, quote_request, model, analysis_result.total_tokens_used, ai_provider)
 
-        # Verificar query valida
+        # Verificar se é veículo (processamento via FIPE)
+        if analysis_result.tipo_processamento == "FIPE" and analysis_result.fipe_api:
+            logger.info(f"[Batch] Detected vehicle - using FIPE API flow for quote {quote_request_id}")
+            use_fallback = _process_fipe_quote(db, quote_request, analysis_result)
+            if not use_fallback:
+                # FIPE processou com sucesso, atualizar status do batch e retornar
+                quote_request.status = QuoteStatus.DONE
+                quote_request.current_step = "completed"
+                quote_request.progress_percentage = 100
+                quote_request.step_details = "Cotação FIPE concluída com sucesso"
+                db.commit()
+                logger.info(f"[Batch] FIPE quote {quote_request_id} completed successfully")
+                return {"status": "completed", "quote_id": quote_request_id, "source": "FIPE"}
+            # FIPE falhou, continuar com Google Shopping usando query de fallback
+            logger.info(f"[Batch] FIPE failed, falling back to Google Shopping with query: {analysis_result.query_principal}")
+
+        # Verificar query valida (para fluxo Google Shopping)
         if not analysis_result.query_principal or not analysis_result.query_principal.strip():
             raise ValueError("IA nao conseguiu gerar query de busca valida")
 

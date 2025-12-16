@@ -25,6 +25,9 @@ export default function QuoteDetailPage() {
   const [searchLogExpanded, setSearchLogExpanded] = useState(true)
   const [googleShoppingExpanded, setGoogleShoppingExpanded] = useState(false)
   const [fipeExpanded, setFipeExpanded] = useState(true)
+  const [fipeApiCallsExpanded, setFipeApiCallsExpanded] = useState(false)
+  const [searchStatsExpanded, setSearchStatsExpanded] = useState(true)
+  const [expandedFailures, setExpandedFailures] = useState<Set<number>>(new Set())
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null)
   const [quoteCosts, setQuoteCosts] = useState<{
@@ -384,20 +387,43 @@ export default function QuoteDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Médio</h3>
-          <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{formatCurrency(quote.valor_medio)}</p>
-        </div>
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Mínimo</h3>
-          <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_minimo)}</p>
-        </div>
-        <div className="card">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Máximo</h3>
-          <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_maximo)}</p>
-        </div>
-      </div>
+      {/* Detectar se é cotação FIPE (veículo) */}
+      {(() => {
+        const isFipeQuote = quote.sources?.some(s => s.domain === 'fipe.org.br') ||
+                           quote.claude_payload_json?.fipe_result?.success ||
+                           quote.claude_payload_json?.natureza?.includes('veiculo');
+        const fipeRefMonth = quote.claude_payload_json?.fipe_result?.price?.referenceMonth;
+
+        if (isFipeQuote) {
+          return (
+            <div className="mb-6">
+              <div className="card bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Valor Tabela FIPE {fipeRefMonth && <span className="text-sm font-normal text-gray-500 dark:text-gray-400">({fipeRefMonth})</span>}
+                </h3>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{formatCurrency(quote.valor_medio)}</p>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Médio</h3>
+              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{formatCurrency(quote.valor_medio)}</p>
+            </div>
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Mínimo</h3>
+              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_minimo)}</p>
+            </div>
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Máximo</h3>
+              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_maximo)}</p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Informações do Projeto */}
       {quote.project && (
@@ -545,23 +571,30 @@ export default function QuoteDetailPage() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Cotações Encontradas</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-900">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Loja</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {quote.sources.map((source) => (
-                  <tr key={source.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {source.domain || 'N/A'}
-                    </td>
+          {(() => {
+            const isFipeQuote = quote.sources?.some(s => s.domain === 'fipe.org.br') ||
+                               quote.claude_payload_json?.fipe_result?.success ||
+                               quote.claude_payload_json?.natureza?.includes('veiculo');
+            return (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                        {isFipeQuote ? 'Fonte' : 'Loja'}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {quote.sources.map((source) => (
+                      <tr key={source.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {source.domain === 'fipe.org.br' ? 'Tabela FIPE' : (source.domain || 'N/A')}
+                        </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {formatCurrency(source.price_value)}
                     </td>
@@ -595,9 +628,11 @@ export default function QuoteDetailPage() {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
+                    </tbody>
+                  </table>
+                </div>
+              );
+            })()}
 
           {quote.sources.some((s) => s.screenshot_url) && (
             <div className="mt-6">
@@ -607,7 +642,9 @@ export default function QuoteDetailPage() {
                   .filter((s) => s.screenshot_url)
                   .map((source) => (
                     <div key={source.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{source.domain}</p>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {source.domain === 'fipe.org.br' ? 'Tabela FIPE' : source.domain}
+                      </p>
                       <img
                         src={`${process.env.NEXT_PUBLIC_API_URL}${source.screenshot_url}`}
                         alt={`Screenshot ${source.domain}`}
@@ -640,50 +677,78 @@ export default function QuoteDetailPage() {
       </div>
 
       {/* Variação da Cotação */}
-      {(quote.status === 'DONE' || quote.status === 'AWAITING_REVIEW') && quote.variacao_percentual !== null && (
+      {(quote.status === 'DONE' || quote.status === 'AWAITING_REVIEW') && (
         <div className="card mt-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Variação da Cotação</h2>
-          <div className={`border rounded-lg p-4 ${
-            quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-          }`}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className={`text-sm font-medium ${
+          {(() => {
+            const isFipeQuote = quote.sources?.some(s => s.domain === 'fipe.org.br') ||
+                               quote.claude_payload_json?.fipe_result?.success ||
+                               quote.claude_payload_json?.natureza?.includes('veiculo');
+
+            if (isFipeQuote) {
+              return (
+                <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3">
+                    <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-blue-700 dark:text-blue-300 font-medium">
+                      Não se aplica para veículos
+                    </p>
+                  </div>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+                    Cotações de veículos utilizam a Tabela FIPE como referência única de preço.
+                  </p>
+                </div>
+              );
+            }
+
+            if (quote.variacao_percentual === null) return null;
+
+            return (
+              <div className={`border rounded-lg p-4 ${
+                quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              }`}>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className={`text-sm font-medium ${
+                      quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-red-700 dark:text-red-300'
+                    }`}>Variação Calculada</p>
+                    <p className={`text-2xl font-bold ${
+                      quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
+                        ? 'text-green-900 dark:text-green-100'
+                        : 'text-red-900 dark:text-red-100'
+                    }`}>{quote.variacao_percentual.toFixed(2)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Variação Máxima Configurada</p>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{quote.variacao_maxima_percent || 25}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Cotações Configuradas</p>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{quote.numero_cotacoes_configurado || 3}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Fórmula</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">(MAX / MIN - 1) × 100</p>
+                  </div>
+                </div>
+                <p className={`text-xs mt-3 ${
                   quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-red-700 dark:text-red-300'
-                }`}>Variação Calculada</p>
-                <p className={`text-2xl font-bold ${
-                  quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
-                    ? 'text-green-900 dark:text-green-100'
-                    : 'text-red-900 dark:text-red-100'
-                }`}>{quote.variacao_percentual.toFixed(2)}%</p>
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
+                    ? '✓ Variação dentro do limite aceitável'
+                    : '⚠ Variação acima do limite configurado'}
+                </p>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Variação Máxima Configurada</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{quote.variacao_maxima_percent || 25}%</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Cotações Configuradas</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{quote.numero_cotacoes_configurado || 3}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Fórmula</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">(MAX / MIN - 1) × 100</p>
-              </div>
-            </div>
-            <p className={`text-xs mt-3 ${
-              quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
-                ? 'text-green-600 dark:text-green-400'
-                : 'text-red-600 dark:text-red-400'
-            }`}>
-              {quote.variacao_percentual <= (quote.variacao_maxima_percent || 25)
-                ? '✓ Variação dentro do limite aceitável'
-                : '⚠ Variação acima do limite configurado'}
-            </p>
-          </div>
+            );
+          })()}
         </div>
       )}
 
@@ -1021,6 +1086,218 @@ export default function QuoteDetailPage() {
             </div>
           )}
 
+          {/* Log de Busca Detalhado (from google_shopping_response_json.search_stats) */}
+          {quote?.google_shopping_response_json?.search_stats && (
+            <div className="mb-6">
+              <button
+                onClick={() => setSearchStatsExpanded(!searchStatsExpanded)}
+                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+              >
+                <span>📊 Log de Busca Detalhado</span>
+                <svg
+                  className={`w-5 h-5 transform transition-transform ${searchStatsExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {searchStatsExpanded && (() => {
+                const searchStats = quote.google_shopping_response_json.search_stats
+                const shoppingLog = quote.google_shopping_response_json.shopping_log || {}
+                return (
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    {/* Statistics Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Retornados</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.total_raw_products || 0}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Após Filtro Fontes</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.after_source_filter || 0}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Testados</p>
+                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{searchStats.products_tested || 0}</p>
+                      </div>
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Blocos Calculados</p>
+                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{searchStats.blocks_recalculated || 0}</p>
+                      </div>
+                    </div>
+
+                    {/* Summary Stats */}
+                    <div className="flex flex-wrap gap-4 mb-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                        <span className="text-gray-600 dark:text-gray-400">Sucesso: {searchStats.final_valid_sources || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                        <span className="text-gray-600 dark:text-gray-400">Falhas: {searchStats.final_failed_products || 0}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                        <span className="text-gray-600 dark:text-gray-400">Immersive API: {searchStats.immersive_api_calls || 0} chamadas</span>
+                      </div>
+                    </div>
+
+                    {/* Validation Failures Table */}
+                    {searchStats.validation_failures && searchStats.validation_failures.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          ❌ Produtos que Falharam ({searchStats.validation_failures.length}):
+                        </p>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-100 dark:bg-gray-700">
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Fonte</th>
+                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
+                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Detalhes</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                              {searchStats.validation_failures.map((failure: any, idx: number) => {
+                                const isExpanded = expandedFailures.has(idx)
+                                const stepLabels: Record<string, string> = {
+                                  'IMMERSIVE_API': 'Immersive API',
+                                  'URL_VALIDATION': 'Validação URL',
+                                  'PRICE_EXTRACTION': 'Extração Preço',
+                                  'PRICE_VALIDATION': 'Validação Preço',
+                                  'SCREENSHOT_CAPTURE': 'Captura Screenshot',
+                                  'PAGE_LOAD': 'Carregamento Página',
+                                  'UNKNOWN': 'Desconhecido'
+                                }
+                                return (
+                                  <>
+                                    <tr key={idx} className={isExpanded ? 'bg-red-50 dark:bg-red-900/20' : ''}>
+                                      <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
+                                      <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={failure.title}>
+                                        {failure.title?.substring(0, 50)}...
+                                      </td>
+                                      <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{failure.source}</td>
+                                      <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                                        {failure.google_price ? `R$ ${failure.google_price.toFixed(2)}` : '-'}
+                                      </td>
+                                      <td className="px-3 py-2 text-sm text-center">
+                                        <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                          ✗ Inválido
+                                        </span>
+                                      </td>
+                                      <td className="px-3 py-2 text-sm text-center">
+                                        <button
+                                          onClick={() => {
+                                            const newSet = new Set(expandedFailures)
+                                            if (isExpanded) {
+                                              newSet.delete(idx)
+                                            } else {
+                                              newSet.add(idx)
+                                            }
+                                            setExpandedFailures(newSet)
+                                          }}
+                                          className="text-primary-600 hover:text-primary-800 dark:text-primary-400 underline"
+                                        >
+                                          {isExpanded ? 'ocultar' : 'ver'}
+                                        </button>
+                                      </td>
+                                    </tr>
+                                    {isExpanded && (
+                                      <tr key={`${idx}-detail`} className="bg-red-50 dark:bg-red-900/20">
+                                        <td colSpan={6} className="px-3 py-3">
+                                          <div className="space-y-2 text-sm">
+                                            <div className="flex items-center gap-2">
+                                              <span className="font-medium text-gray-700 dark:text-gray-300">Etapa da Falha:</span>
+                                              <span className="px-2 py-1 text-xs rounded bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
+                                                {stepLabels[failure.failure_step] || failure.failure_step}
+                                              </span>
+                                            </div>
+                                            {failure.domain && (
+                                              <div>
+                                                <span className="font-medium text-gray-700 dark:text-gray-300">Domínio:</span>{' '}
+                                                <span className="text-gray-600 dark:text-gray-400">{failure.domain}</span>
+                                              </div>
+                                            )}
+                                            {failure.url && (
+                                              <div>
+                                                <span className="font-medium text-gray-700 dark:text-gray-300">URL:</span>{' '}
+                                                <a href={failure.url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline break-all">
+                                                  {failure.url.substring(0, 80)}...
+                                                </a>
+                                              </div>
+                                            )}
+                                            <div>
+                                              <span className="font-medium text-gray-700 dark:text-gray-300">Erro:</span>{' '}
+                                              <span className="text-red-600 dark:text-red-400 font-mono text-xs">{failure.error_message}</span>
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    )}
+                                  </>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Successful Products */}
+                    {searchStats.successful_products && searchStats.successful_products.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          ✓ Produtos com Sucesso ({searchStats.successful_products.length}):
+                        </p>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-100 dark:bg-gray-700">
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Domínio</th>
+                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
+                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Extraído</th>
+                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                              {searchStats.successful_products.map((product: any, idx: number) => (
+                                <tr key={idx}>
+                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
+                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={product.title}>
+                                    {product.title?.substring(0, 50)}...
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{product.domain}</td>
+                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                                    {product.google_price ? `R$ ${product.google_price.toFixed(2)}` : '-'}
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-right font-medium text-green-600 dark:text-green-400">
+                                    R$ {product.extracted_price?.toFixed(2)}
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-center">
+                                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                      ✓ OK
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
           {/* SerpAPI Logs */}
           {integrationLogs.some(log => log.integration_type === 'serpapi') && (
             <div>
@@ -1099,7 +1376,101 @@ export default function QuoteDetailPage() {
             </div>
           )}
 
-          {/* FIPE API Logs (for vehicles) */}
+          {/* Banco de Preço de Veículos (from cache) */}
+          {integrationLogs.some(log => log.integration_type === 'vehicle_price_bank') && (
+            <div className="mb-6">
+              <button
+                onClick={() => setFipeExpanded(!fipeExpanded)}
+                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+              >
+                <span>🏦 Banco de Preço de Veículos</span>
+                <svg
+                  className={`w-5 h-5 transform transition-transform ${fipeExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {fipeExpanded && integrationLogs
+                .filter(log => log.integration_type === 'vehicle_price_bank')
+                .map(log => {
+                  const bankData = log.response_summary || {}
+                  return (
+                    <div key={log.id} className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-4 border border-blue-200 dark:border-blue-800">
+                      {/* Status e Resumo */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            💾 Cache Vigente
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            0 chamadas à API (dados do cache)
+                          </span>
+                        </div>
+                        {bankData.price && (
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                              {bankData.price.price}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Ref: {bankData.price.referenceMonth}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Informações do Cache */}
+                      {bankData.cached_at && (
+                        <div className="p-2 bg-blue-100 dark:bg-blue-800/30 rounded text-sm text-blue-700 dark:text-blue-300">
+                          📅 Cotação em cache desde: {new Date(bankData.cached_at).toLocaleString('pt-BR')}
+                        </div>
+                      )}
+
+                      {/* Dados do Veículo */}
+                      {bankData.price && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-white dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Código FIPE</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {bankData.codigo_fipe || bankData.price.codeFipe}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Marca</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {bankData.brand_name || bankData.price.brand}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Modelo</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {bankData.model_name || bankData.price.model}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Ano/Combustível</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {bankData.year_model || bankData.price.modelYear} - {bankData.fuel_type || bankData.price.fuel}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Screenshot do cache */}
+                      {bankData.screenshot_path && (
+                        <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-sm text-green-700 dark:text-green-300">
+                          📸 Screenshot disponível no cache
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+            </div>
+          )}
+
+          {/* FIPE API Logs (for vehicles - when called API directly) */}
           {integrationLogs.some(log => log.integration_type === 'fipe') && (
             <div className="mb-6">
               <button
@@ -1180,21 +1551,34 @@ export default function QuoteDetailPage() {
                         </div>
                       )}
 
-                      {/* Caminho da Busca */}
+                      {/* Caminho da Busca - Retratil */}
                       {fipeData.search_path && fipeData.search_path.length > 0 && (
                         <div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Chamadas à API ({fipeData.search_path.length}):
-                          </p>
-                          <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-3 max-h-48 overflow-y-auto">
-                            <ol className="list-decimal list-inside space-y-1">
-                              {fipeData.search_path.map((call: string, idx: number) => (
-                                <li key={idx} className="text-xs font-mono text-gray-600 dark:text-gray-400">
-                                  {call}
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
+                          <button
+                            onClick={() => setFipeApiCallsExpanded(!fipeApiCallsExpanded)}
+                            className="w-full flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                          >
+                            <span>Chamadas à API ({fipeData.search_path.length})</span>
+                            <svg
+                              className={`w-4 h-4 transform transition-transform ${fipeApiCallsExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          {fipeApiCallsExpanded && (
+                            <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-3 max-h-48 overflow-y-auto">
+                              <ol className="list-decimal list-inside space-y-1">
+                                {fipeData.search_path.map((call: string, idx: number) => (
+                                  <li key={idx} className="text-xs font-mono text-gray-600 dark:text-gray-400">
+                                    {call}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          )}
                         </div>
                       )}
 

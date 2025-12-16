@@ -5,6 +5,7 @@ import base64
 import json
 import logging
 import time
+from app.services.prompts import PROMPT_ANALISE_PATRIMONIAL
 
 logger = logging.getLogger(__name__)
 
@@ -18,20 +19,47 @@ class OpenAICallLog(BaseModel):
     prompt: Optional[str] = None  # Prompt enviado para a IA
 
 
+class FipeApiParams(BaseModel):
+    """Parâmetros para consulta na API FIPE"""
+    vehicle_type: Optional[str] = None  # cars | motorcycles | trucks
+    codigo_fipe: Optional[str] = None
+    busca_marca: Optional[Dict[str, Any]] = None
+    busca_modelo: Optional[Dict[str, Any]] = None
+    year_id_estimado: Optional[str] = None
+    fluxo_recomendado: Optional[str] = None  # por_hierarquia | por_codigo_fipe
+    endpoints: Optional[Dict[str, str]] = None
+
+
 class ItemAnalysisResult(BaseModel):
+    # Tipo de processamento: FIPE para veículos, GOOGLE_SHOPPING para demais
+    tipo_processamento: str = "GOOGLE_SHOPPING"  # FIPE | GOOGLE_SHOPPING
+
+    # Dados do bem
     nome_canonico: str
     marca: Optional[str] = None
     modelo: Optional[str] = None
+    categoria: Optional[str] = None  # Veículos, Eletrônicos, Mobiliário, etc.
+    natureza: Optional[str] = None  # veiculo_carro, veiculo_moto, veiculo_caminhao, eletronico, etc.
+
+    # Campos legados (mantidos para compatibilidade)
     part_number: Optional[str] = None
     codigo_interno: Optional[str] = None
     especificacoes_tecnicas: Dict[str, Any] = {}
     palavras_chave: List[str] = []
     sinonimos: List[str] = []
-    query_principal: str
+    query_principal: str = ""
     query_alternativas: List[str] = []
     termos_excluir: List[str] = []
     observacoes: Optional[str] = None
     nivel_confianca: float = 0.0
+
+    # Campos para API FIPE (veículos)
+    fipe_api: Optional[FipeApiParams] = None
+    fallback_google_shopping: Optional[Dict[str, Any]] = None
+    dados_faltantes: List[str] = []
+    especificacoes: Dict[str, Any] = {}  # Especificações no formato {essenciais: {}, complementares: {}}
+
+    # Metadados
     total_tokens_used: int = 0
     call_logs: List[OpenAICallLog] = []
 
@@ -481,287 +509,11 @@ Retorne APENAS o JSON válido.
 """
 
     async def _analyze_text_only(self, input_text: str) -> ItemAnalysisResult:
-        """Analisa apenas texto (sem imagem) de forma direta"""
+        """Analisa apenas texto (sem imagem) de forma direta - usa mesmo prompt do Claude"""
         logger.info(f"Analisando texto puro com {self.model}")
 
-        prompt = f'''# AGENTE: Especialista em Pesquisa de Preços para Reavaliação Patrimonial
-
-## CONTEXTO
-
-Você é um especialista em pesquisa de preços de mercado para **reavaliação de bens patrimoniais** de órgãos públicos brasileiros. Sua função é analisar descrições de bens móveis permanentes e gerar queries otimizadas para o **Google Shopping**, buscando o **valor justo de reposição**.
-
-### Base normativa:
-- NBC TSP 07 (Ativo Imobilizado)
-- MCASP (Manual de Contabilidade Aplicada ao Setor Público)
-- Lei 14.133/2021 (Licitações e Contratos)
-
-### Princípio de busca:
-> Encontrar o **valor de mercado atual** de bens equivalentes (mesmas especificações funcionais), independente da marca/fabricante original.
-
----
-
-## DADO DE ENTRADA
-```
-Descrição do bem: "{input_text}"
-```
-
----
-
-## PROCESSO DE ANÁLISE
-
-### Etapa 1: Identificação do bem
-- Extrair tipo/categoria do bem
-- Identificar marca e modelo (se presentes)
-- Classificar natureza: eletrônico | mobiliário | equipamento | instrumento | veículo
-
-### Etapa 2: Extração de especificações
-- Separar especificações **essenciais** (definem equivalência funcional)
-- Separar especificações **complementares** (refinam a busca)
-- Priorizar atributos conforme categoria:
-
-| Categoria | Especificações prioritárias |
-|-----------|----------------------------|
-| **Eletrônicos/TI** | processador, memória, armazenamento, tela, conectividade |
-| **Mobiliário** | material, dimensões, tipo de uso, capacidade |
-| **Equipamentos** | potência, capacidade, voltagem, função |
-| **Instrumentos** | tipo, faixa de medição, precisão, certificação |
-| **Veículos** | tipo, capacidade, motorização, ano |
-
-### Etapa 3: Construção da query
-- Estrutura: `[TIPO] + [SPECS ESSENCIAIS] + [QUALIFICADORES]`
-- Limite: 4-8 termos por query
-- Usar linguagem de e-commerce (não técnica)
-- Abreviações padrão de mercado (gb, cm, pol, w)
-
----
-
-## REGRAS OBRIGATÓRIAS
-
-| # | Regra | Motivo |
-|---|-------|--------|
-| 1 | `query_principal` **NUNCA** pode ser vazia | Garantir funcionalidade da busca |
-| 2 | Priorizar especificações sobre marca | Encontrar equivalentes de qualquer fabricante |
-| 3 | Omitir marca na `query_principal` | Ampliar resultados para valor justo |
-| 4 | Incluir marca apenas em `query_com_marca` | Referência de preço do item original |
-| 5 | Usar termos comerciais | Melhor indexação no Google Shopping |
-| 6 | Buscar sempre bem NOVO | Base para cálculo de valor de reposição |
-
----
-
-## FORMATO DE SAÍDA
-
-Retorne **APENAS** o JSON abaixo, sem texto adicional:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Descrição padronizada do bem",
-    "marca": "marca identificada ou null",
-    "modelo": "modelo identificado ou null",
-    "categoria": "Eletrônicos | Mobiliário | Equipamentos | Instrumentos | Veículos",
-    "natureza": "eletronico | mobiliario | equipamento | instrumento | veiculo"
-  }},
-  "especificacoes": {{
-    "essenciais": {{}},
-    "complementares": {{}}
-  }},
-  "queries": {{
-    "principal": "query otimizada SEM marca (OBRIGATÓRIO - nunca vazio)",
-    "alternativas": ["variação 1", "variação 2"],
-    "com_marca": "query incluindo marca original para referência"
-  }},
-  "busca": {{
-    "palavras_chave": ["termo1", "termo2", "termo3"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.0,
-    "completude_dados": "alta | media | baixa",
-    "observacoes": "notas relevantes para a reavaliação"
-  }}
-}}
-```
-
----
-
-## EXEMPLOS
-
-### Entrada 1:
-```
-"Notebook Dell Inspiron 15, processador Intel Core i5, 8GB RAM, SSD 256GB, tela 15.6 polegadas"
-```
-
-### Saída 1:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Notebook Intel Core i5 8GB SSD 256GB 15.6 polegadas",
-    "marca": "Dell",
-    "modelo": "Inspiron 15",
-    "categoria": "Eletrônicos",
-    "natureza": "eletronico"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "processador": "Intel Core i5",
-      "memoria_ram": "8GB",
-      "armazenamento": "SSD 256GB",
-      "tela": "15.6 polegadas"
-    }},
-    "complementares": {{}}
-  }},
-  "queries": {{
-    "principal": "notebook i5 8gb ssd 256gb 15.6 polegadas",
-    "alternativas": [
-      "notebook intel core i5 8gb ssd 256",
-      "laptop i5 8gb ram ssd 256gb"
-    ],
-    "com_marca": "notebook dell inspiron i5 8gb ssd 256gb"
-  }},
-  "busca": {{
-    "palavras_chave": ["notebook", "i5", "8gb", "ssd", "256gb", "15.6"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.95,
-    "completude_dados": "alta",
-    "observacoes": "Especificações completas permitem busca precisa de equivalentes"
-  }}
-}}
-```
-
----
-
-### Entrada 2:
-```
-"Cadeira giratória tipo presidente, couro sintético preto, braços reguláveis, base cromada"
-```
-
-### Saída 2:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Cadeira Presidente Giratória Couro Sintético",
-    "marca": null,
-    "modelo": null,
-    "categoria": "Mobiliário",
-    "natureza": "mobiliario"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "tipo": "presidente",
-      "material": "couro sintético",
-      "base": "giratória"
-    }},
-    "complementares": {{
-      "cor": "preto",
-      "bracos": "reguláveis",
-      "acabamento_base": "cromada"
-    }}
-  }},
-  "queries": {{
-    "principal": "cadeira presidente giratoria couro sintetico",
-    "alternativas": [
-      "cadeira escritorio presidente braco regulavel",
-      "poltrona executiva giratoria couro"
-    ],
-    "com_marca": ""
-  }},
-  "busca": {{
-    "palavras_chave": ["cadeira", "presidente", "giratoria", "couro", "sintetico", "escritorio"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.85,
-    "completude_dados": "media",
-    "observacoes": "Sem marca identificada. Dimensões auxiliariam na precisão"
-  }}
-}}
-```
-
----
-
-### Entrada 3:
-```
-"Ar condicionado split 12000 BTUs inverter 220V quente/frio"
-```
-
-### Saída 3:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Ar-condicionado Split 12000 BTUs Inverter 220V",
-    "marca": null,
-    "modelo": null,
-    "categoria": "Equipamentos",
-    "natureza": "equipamento"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "tipo": "split",
-      "capacidade": "12000 BTUs",
-      "tecnologia": "inverter",
-      "voltagem": "220V"
-    }},
-    "complementares": {{
-      "funcao": "quente/frio"
-    }}
-  }},
-  "queries": {{
-    "principal": "ar condicionado split 12000 btus inverter 220v",
-    "alternativas": [
-      "split 12000 btus inverter quente frio",
-      "ar condicionado 12000 btus 220v inverter"
-    ],
-    "com_marca": ""
-  }},
-  "busca": {{
-    "palavras_chave": ["ar condicionado", "split", "12000", "btus", "inverter", "220v"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet", "instalacao"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.92,
-    "completude_dados": "alta",
-    "observacoes": "Especificações técnicas completas para equivalência"
-  }}
-}}
-```
-
----
-
-## TRATAMENTO DE DADOS INCOMPLETOS
-
-Se a descrição for insuficiente:
-
-1. **Extrair o máximo possível** da descrição fornecida
-2. **Gerar query genérica** baseada no tipo identificado
-3. **Indicar baixa confiança** no campo `confianca`
-4. **Documentar limitações** em `observacoes`
-
-Exemplo para entrada vaga como `"computador antigo"`:
-```json
-{{
-  "queries": {{
-    "principal": "computador desktop",
-    "alternativas": ["pc desktop", "computador completo"]
-  }},
-  "avaliacao": {{
-    "confianca": 0.30,
-    "completude_dados": "baixa",
-    "observacoes": "Descrição insuficiente. Necessário complementar com especificações técnicas (processador, memória, armazenamento)"
-  }}
-}}
-```
-
----
-
-## INSTRUÇÃO FINAL
-
-Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JSON conforme formato especificado. A `query_principal` é OBRIGATÓRIA e nunca pode estar vazia.
-'''
+        # Usar o mesmo prompt compartilhado do Claude para consistência
+        prompt = PROMPT_ANALISE_PATRIMONIAL.replace("{input_text}", input_text)
 
         response = self._call_with_retry(
             lambda: self.client.chat.completions.create(
@@ -807,22 +559,35 @@ Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JS
         queries = raw_data.get('queries', {})
         busca = raw_data.get('busca', {})
         avaliacao = raw_data.get('avaliacao', {})
+        fipe_api = raw_data.get('fipe_api', {})
+        fallback = raw_data.get('fallback_google_shopping', {})
+        dados_faltantes = raw_data.get('dados_faltantes', [])
 
-        # Combinar especificações essenciais e complementares
+        # Combinar especificações essenciais e complementares (formato legado)
         especificacoes_tecnicas = {}
         especificacoes_tecnicas.update(specs.get('essenciais', {}))
         especificacoes_tecnicas.update(specs.get('complementares', {}))
 
-        # Adicionar categoria e natureza às especificações
+        # Adicionar categoria e natureza às especificações (formato legado)
         if bem.get('categoria'):
             especificacoes_tecnicas['categoria'] = bem.get('categoria')
         if bem.get('natureza'):
             especificacoes_tecnicas['natureza'] = bem.get('natureza')
 
-        return {
+        # Determinar tipo de processamento baseado na natureza do bem
+        natureza = bem.get('natureza', '')
+        tipo_processamento = "GOOGLE_SHOPPING"
+        if natureza and natureza.startswith('veiculo_'):
+            tipo_processamento = "FIPE"
+
+        # Montar resposta transformada
+        result = {
+            'tipo_processamento': tipo_processamento,
             'nome_canonico': bem.get('nome_canonico', ''),
             'marca': bem.get('marca'),
             'modelo': bem.get('modelo'),
+            'categoria': bem.get('categoria'),
+            'natureza': natureza,
             'part_number': None,
             'codigo_interno': None,
             'especificacoes_tecnicas': especificacoes_tecnicas,
@@ -836,7 +601,28 @@ Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JS
             # Campos extras para referência
             'query_com_marca': queries.get('com_marca', ''),
             'completude_dados': avaliacao.get('completude_dados', ''),
+            # Campos FIPE
+            'dados_faltantes': dados_faltantes,
+            'especificacoes': specs,  # Manter estrutura original para FIPE
         }
+
+        # Adicionar fipe_api se presente
+        if fipe_api:
+            result['fipe_api'] = FipeApiParams(
+                vehicle_type=fipe_api.get('vehicle_type'),
+                codigo_fipe=fipe_api.get('codigo_fipe'),
+                busca_marca=fipe_api.get('busca_marca'),
+                busca_modelo=fipe_api.get('busca_modelo'),
+                year_id_estimado=fipe_api.get('year_id_estimado'),
+                fluxo_recomendado=fipe_api.get('fluxo_recomendado'),
+                endpoints=fipe_api.get('endpoints'),
+            )
+
+        # Adicionar fallback_google_shopping se presente
+        if fallback:
+            result['fallback_google_shopping'] = fallback
+
+        return result
 
     def _parse_json(self, text: str) -> Dict[str, Any]:
         """Extrai e parseia JSON de uma string"""

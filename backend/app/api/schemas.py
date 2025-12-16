@@ -136,6 +136,7 @@ class ParametersResponse(BaseModel):
     pesquisador_padrao: str
     local_padrao: str
     serpapi_location: str  # SerpAPI location for search (e.g., "Brazil", "Sao Paulo,State of Sao Paulo,Brazil")
+    vigencia_cotacao_veiculos: int = 6  # Vigencia em meses para cotacoes de veiculos
 
 
 class ParametersUpdateRequest(BaseModel):
@@ -144,6 +145,7 @@ class ParametersUpdateRequest(BaseModel):
     pesquisador_padrao: Optional[str] = None
     local_padrao: Optional[str] = None
     serpapi_location: Optional[str] = None
+    vigencia_cotacao_veiculos: Optional[int] = None  # Vigencia em meses para cotacoes de veiculos
 
 
 # Mapeamento de estados brasileiros para siglas

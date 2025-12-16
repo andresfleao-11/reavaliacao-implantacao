@@ -1,13 +1,13 @@
 from celery import Task
 from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
-from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, BlockedDomain
+from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, BlockedDomain, QuoteSourceFailure, CaptureFailureReason
 from app.models.quote_request import QuoteStatus
 from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
 from app.services.claude_client import ClaudeClient, FipeApiParams
 from app.services.openai_client import OpenAIClient
-from app.services.search_provider import SerpApiProvider, prices_match, PRICE_MISMATCH_TOLERANCE
+from app.services.search_provider import SerpApiProvider, prices_match, PRICE_MISMATCH_TOLERANCE, ShoppingProduct
 from app.services.price_extractor import PriceExtractor
 from app.services.pdf_generator import PDFGenerator
 from app.services.fipe_client import FipeClient, FipeSearchResult
@@ -211,109 +211,98 @@ def process_quote_request(self, quote_request_id: int):
         if not analysis_result.query_principal or not analysis_result.query_principal.strip():
             raise ValueError("Claude não conseguiu gerar uma query de busca válida. Verifique a descrição do item e tente novamente.")
 
-        # Buscando produtos
-        _update_progress(db, quote_request, "searching_products", 50, f"Buscando '{analysis_result.query_principal}' em marketplaces...")
+        # Buscando produtos no Google Shopping (sem chamar Immersive API ainda)
+        _update_progress(db, quote_request, "searching_products", 50, f"Buscando '{analysis_result.query_principal}' no Google Shopping...")
 
-        # Search products with variation filter
-        # This optimizes API calls: 1 Shopping + N Immersive = N+1 total calls
-        search_results, search_log = asyncio.run(
-            search_provider.search_products(
-                query=analysis_result.query_principal,
-                limit=num_quotes,
-                variacao_maxima=variacao_maxima
+        # NOVO FLUXO: Buscar produtos do Google Shopping SEM chamar Immersive API
+        # A Immersive API será chamada durante o loop de extração, produto por produto
+        shopping_products, shopping_log = asyncio.run(
+            search_provider.get_shopping_products(
+                query=analysis_result.query_principal
             )
         )
 
-        logger.info(f"Found {len(search_results)} search results")
-        logger.info(f"Search log: {search_log.model_dump_json()}")
+        logger.info(f"Found {len(shopping_products)} shopping products (filtered)")
+        logger.info(f"Shopping log: {shopping_log.model_dump_json()}")
+
+        # Registrar chamada inicial do Google Shopping
+        log_serpapi_call(
+            db=db,
+            quote_request_id=quote_request.id,
+            api_used="google_shopping",
+            search_url=f"https://serpapi.com/search?engine=google_shopping&q={analysis_result.query_principal}",
+            activity=f"Busca inicial no Google Shopping: {analysis_result.query_principal}",
+            request_data={"query": analysis_result.query_principal},
+            response_summary={
+                "total_raw_products": shopping_log.total_raw_products,
+                "after_source_filter": shopping_log.after_source_filter,
+                "after_price_filter": shopping_log.after_price_filter
+            },
+            product_link=None
+        )
 
         # Salvar resposta bruta do Google Shopping para consulta
-        # Usar raw_shopping_response que contém o JSON original da API SerpAPI
-        search_log_dict = search_log.model_dump()
-        raw_response = search_log_dict.pop('raw_shopping_response', None)  # Remove from search_log to avoid duplication
-
         quote_request.google_shopping_response_json = {
-            "raw_api_response": raw_response,  # JSON original da primeira chamada SerpAPI
+            "raw_api_response": shopping_log.raw_shopping_response,
             "processed_results": {
-                "results_count": len(search_results),
+                "results_count": len(shopping_products),
                 "products": [
                     {
                         "title": p.title,
                         "price": p.price,
                         "extracted_price": float(p.extracted_price) if p.extracted_price else None,
-                        "store_name": p.store_name,
-                        "domain": p.domain,
-                        "url": p.url
-                    } for p in search_results
+                        "source": p.source,
+                        "has_immersive_api": bool(p.serpapi_immersive_product_api)
+                    } for p in shopping_products
                 ]
             },
-            "search_log": search_log_dict,
+            "shopping_log": shopping_log.model_dump(),
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         db.commit()
 
-        # Salvar o log detalhado da pesquisa no banco
-        search_log_entry = IntegrationLog(
-            quote_request_id=quote_request.id,
-            integration_type="search_log",
-            activity="Log detalhado da busca de produtos",
-            response_summary=search_log.model_dump()
-        )
-        log_db = SessionLocal()
-        try:
-            log_db.add(search_log_entry)
-            log_db.commit()
-        except Exception as e:
-            logger.error(f"Error saving search log: {e}")
-            log_db.rollback()
-        finally:
-            log_db.close()
-
-        # Registrar todas as chamadas da SerpAPI (Google Shopping + Immersive API)
-        for api_call in search_provider.api_calls_made:
-            log_serpapi_call(
-                db=db,
-                quote_request_id=quote_request.id,
-                api_used=api_call["api_used"],
-                search_url=api_call["search_url"],
-                activity=api_call["activity"],
-                request_data={"query": analysis_result.query_principal, "limit": num_quotes},
-                response_summary={"results_found": len(search_results)} if api_call["api_used"] == "google_shopping" else None,
-                product_link=api_call.get("product_link")
-            )
-
-        # Extraindo preços usando lógica de blocos com recálculo
-        # Lógica:
-        # 1. Manter produtos válidos na lista (participam do cálculo de blocos)
-        # 2. Marcar produtos que falharam (remover da lista)
-        # 3. Recalcular blocos após cada falha
-        # 4. Priorizar blocos que contêm todos os produtos válidos
-        # 5. Se não houver bloco com válidos e produtos suficientes:
-        #    - Guardar válidos como "reserva"
-        #    - Tentar novo bloco sem os produtos da reserva
-        #    - Se novo bloco falhar, voltar para reserva
-        # 6. Continuar até N resultados ou esgotar produtos
-        _update_progress(db, quote_request, "extracting_prices", 60, f"Acessando {len(search_results)} lojas e capturando preços...")
+        # Extraindo preços usando lógica de blocos com recálculo INTEGRADO
+        # NOVO FLUXO: Para cada produto do bloco:
+        # 1. Chamar Immersive API para obter URL da loja
+        # 2. Validar URL (domínio bloqueado, estrangeiro, listagem, duplicado)
+        # 3. Capturar screenshot e extrair preço
+        # 4. Validar PRICE_MISMATCH
+        # 5. Se falhar, próximo produto; se bloco esgota, recalcular bloco
+        _update_progress(db, quote_request, "extracting_prices", 60, f"Processando {len(shopping_products)} produtos...")
 
         valid_sources = []
-        valid_sources_by_url = {}  # {url: source} - para reutilização (URL única, não domínio)
-        valid_prices = {}  # {url: price} - preços já validados por URL
-        failed_urls = set()  # URLs que falharam (permite outros produtos do mesmo domínio)
+        valid_sources_by_url = {}  # {url: source} - para reutilização
+        valid_prices = {}  # {product_key: price} - preços já validados
+        failed_product_keys = set()  # Produtos que falharam (title_price como key)
+        urls_seen = set()  # URLs já usadas (evitar duplicatas)
 
-        async def extract_prices_with_block_recalculation():
+        # Estatísticas para o log detalhado de busca
+        search_stats = {
+            "products_tested": 0,
+            "blocks_recalculated": 0,
+            "immersive_api_calls": 0,
+            "validation_failures": [],  # Lista de falhas com detalhes
+            "successful_products": [],  # Lista de produtos com sucesso
+        }
+
+        async def extract_prices_integrated():
             """
-            Lógica simplificada de extração com recálculo de bloco único:
-            1. Calcula 1 bloco por vez baseado nos produtos disponíveis
-            2. Se um produto falha, recalcula o bloco excluindo o produto
-            3. Produtos já validados só participam do novo bloco se estiverem na faixa de variação
-            4. Sistema de reserva: se o bloco atual não tem potencial, guarda resultado e tenta outro
+            NOVO FLUXO INTEGRADO: Immersive API + validações + captura em um único loop.
+            Para cada produto do bloco:
+            1. Chamar Immersive API para obter URL da loja
+            2. Validar URL (domínio bloqueado, estrangeiro, listagem, duplicado)
+            3. Capturar screenshot e extrair preço
+            4. Validar PRICE_MISMATCH
+            5. Se passar tudo → cotação válida
+            6. Se falhar → marcar como falho, próximo produto
+            7. Se bloco esgota sem N cotações → recalcular bloco
             """
             from app.models.quote_source import ExtractionMethod
-            nonlocal valid_sources, valid_sources_by_url, valid_prices, failed_urls
+            nonlocal valid_sources, valid_sources_by_url, valid_prices, failed_product_keys, urls_seen
 
-            all_products = list(search_results)
+            all_products = list(shopping_products)
             iteration = 0
-            max_iterations = 20
+            max_iterations = 30  # Mais iterações pois agora processa produto por produto
 
             # Sistema de reserva para quando precisamos tentar bloco alternativo
             reserve_sources = []
@@ -328,7 +317,7 @@ def process_quote_request(self, quote_request_id: int):
                     # Construir lista de produtos disponíveis (excluir falhas)
                     available_products = [
                         p for p in all_products
-                        if p.url not in failed_urls
+                        if f"{p.title}_{p.extracted_price}" not in failed_product_keys
                     ]
 
                     if not available_products:
@@ -339,7 +328,7 @@ def process_quote_request(self, quote_request_id: int):
                     available_products.sort(key=lambda p: float(p.extracted_price) if p.extracted_price else 0)
 
                     # Calcular UM bloco único
-                    block = _calculate_best_block(
+                    block = _calculate_best_block_shopping(
                         available_products,
                         valid_prices,
                         variacao_maxima,
@@ -351,25 +340,24 @@ def process_quote_request(self, quote_request_id: int):
                         break
 
                     # Verificar quantos produtos validados estão no bloco
-                    block_urls = {p.url for p in block}
-                    valid_in_block = [url for url in valid_prices.keys() if url in block_urls]
-                    valid_outside_block = [url for url in valid_prices.keys() if url not in block_urls]
-                    untried_in_block = [p for p in block if p.url not in valid_prices and p.url not in failed_urls]
+                    block_keys = {f"{p.title}_{p.extracted_price}" for p in block}
+                    valid_keys = set(valid_prices.keys())
+                    valid_in_block = len(valid_keys & block_keys)
+                    valid_outside_block = len(valid_keys - block_keys)
+                    untried_in_block = [p for p in block if f"{p.title}_{p.extracted_price}" not in valid_prices and f"{p.title}_{p.extracted_price}" not in failed_product_keys]
                     needed = num_quotes - len(valid_sources)
 
                     logger.info(
                         f"Iteration {iteration}: Block with {len(block)} products "
                         f"(R$ {block[0].extracted_price} - R$ {block[-1].extracted_price}), "
-                        f"{len(valid_in_block)} valid in block, {len(valid_outside_block)} valid outside, "
+                        f"{valid_in_block} valid in block, {valid_outside_block} valid outside, "
                         f"{len(untried_in_block)} untried, need {needed} more"
                     )
 
                     # Se há validados fora do bloco, decidir o que fazer
                     if valid_outside_block and not has_reserve:
-                        # Verificar se o bloco atual tem potencial para N cotações
-                        potential = len(valid_in_block) + len(untried_in_block)
+                        potential = valid_in_block + len(untried_in_block)
                         if potential < num_quotes:
-                            # Bloco atual não tem potencial - guardar como reserva e tentar outro
                             logger.info(
                                 f"  Block potential ({potential}) < required ({num_quotes}). "
                                 f"Saving {len(valid_sources)} as reserve, trying fresh block."
@@ -379,88 +367,223 @@ def process_quote_request(self, quote_request_id: int):
                             reserve_prices = dict(valid_prices)
                             has_reserve = True
 
-                            # Limpar validados para tentar bloco fresco
                             valid_sources = []
                             valid_sources_by_url = {}
                             valid_prices = {}
                             continue
 
-                    # Extrair preços dos produtos do bloco
+                    # Incrementar contador de recalculo de blocos
+                    search_stats["blocks_recalculated"] += 1
+
+                    # Processar produtos do bloco UM POR UM
                     new_failures = []
 
                     for product in block:
                         if len(valid_sources) >= num_quotes:
                             break
 
-                        # Reutilizar válido
-                        if product.url in valid_sources_by_url:
+                        product_key = f"{product.title}_{product.extracted_price}"
+
+                        # Já processado?
+                        if product_key in valid_prices or product_key in failed_product_keys:
                             continue
 
-                        if product.url in failed_urls:
-                            continue
+                        logger.info(f"    → Processing: {product.source} - R$ {product.extracted_price}")
 
-                        logger.info(f"    → Extracting: {product.domain} ({product.url[:60]}...)")
+                        # Incrementar contador de produtos testados
+                        search_stats["products_tested"] += 1
 
                         try:
+                            # PASSO 1: Chamar Immersive API para obter URL da loja
+                            store_result = await search_provider.get_store_link_for_product(product)
+                            search_stats["immersive_api_calls"] += 1
+
+                            if not store_result:
+                                raise ValueError("NO_STORE_LINK: Immersive API não retornou URL de loja")
+
+                            # Registrar chamada Immersive API
+                            log_serpapi_call(
+                                db=db,
+                                quote_request_id=quote_request.id,
+                                api_used="google_immersive_product",
+                                search_url="",
+                                activity=f"Busca de loja para: {product.title[:50]}...",
+                                request_data={"product_title": product.title, "price": str(product.extracted_price)},
+                                response_summary={"url": store_result.url, "domain": store_result.domain} if store_result else None,
+                                product_link=store_result.url if store_result else None
+                            )
+
+                            # PASSO 2: Validar URL
+                            if search_provider._is_blocked_domain(store_result.domain):
+                                raise ValueError(f"BLOCKED_DOMAIN: {store_result.domain}")
+
+                            if search_provider._is_foreign_domain(store_result.domain):
+                                raise ValueError(f"FOREIGN_DOMAIN: {store_result.domain}")
+
+                            if search_provider._is_listing_url(store_result.url):
+                                raise ValueError(f"LISTING_URL: {store_result.url[:50]}")
+
+                            if store_result.url in urls_seen:
+                                raise ValueError(f"DUPLICATE_URL: {store_result.url[:50]}")
+
+                            # PASSO 3: Capturar screenshot e extrair preço
                             screenshot_filename = f"screenshot_{quote_request_id}_{len(valid_sources)}.png"
                             screenshot_path = os.path.join(settings.STORAGE_PATH, "screenshots", screenshot_filename)
                             os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
 
                             price, method = await extractor.extract_price_and_screenshot(
-                                product.url,
+                                store_result.url,
                                 screenshot_path
                             )
 
-                            if price and price > Decimal("1"):
-                                final_price = price
-                                final_method = method
-                                google_price = product.extracted_price
+                            if not price or price <= Decimal("1"):
+                                raise ValueError(f"INVALID_PRICE: {price}")
 
-                                # Validar preço do site contra Google Shopping
-                                if google_price and google_price > Decimal("0"):
-                                    if not prices_match(float(price), float(google_price)):
-                                        price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
-                                        logger.warning(
-                                            f"PRICE_MISMATCH for {product.domain}: "
-                                            f"R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)"
-                                        )
-                                        raise ValueError(f"PRICE_MISMATCH: {price_diff:.1f}%")
+                            # PASSO 4: Validar PRICE_MISMATCH
+                            google_price = product.extracted_price
+                            if google_price and google_price > 0:
+                                if not prices_match(float(price), float(google_price)):
+                                    price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
+                                    raise ValueError(f"PRICE_MISMATCH: Site R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)")
 
-                                screenshot_file = File(
-                                    type=FileType.SCREENSHOT,
-                                    mime_type="image/png",
-                                    storage_path=screenshot_path,
-                                    sha256=_calculate_sha256(screenshot_path)
-                                )
-                                db.add(screenshot_file)
-                                db.flush()
+                            # PASSO 5: Tudo OK - criar cotação válida
+                            urls_seen.add(store_result.url)
 
-                                source = QuoteSource(
-                                    quote_request_id=quote_request_id,
-                                    url=product.url,
-                                    domain=product.domain,
-                                    page_title=product.title,
-                                    price_value=final_price,
-                                    currency="BRL",
-                                    extraction_method=final_method,
-                                    screenshot_file_id=screenshot_file.id,
-                                    is_accepted=True
-                                )
-                                db.add(source)
-                                valid_sources.append(source)
-                                valid_sources_by_url[product.url] = source
-                                valid_prices[product.url] = float(final_price)
+                            screenshot_file = File(
+                                type=FileType.SCREENSHOT,
+                                mime_type="image/png",
+                                storage_path=screenshot_path,
+                                sha256=_calculate_sha256(screenshot_path)
+                            )
+                            db.add(screenshot_file)
+                            db.flush()
 
-                                logger.info(f"    ✓ Added [{len(valid_sources)}/{num_quotes}]: {product.domain} - R$ {final_price}")
-                            else:
-                                raise ValueError(f"Invalid price: {price}")
+                            source = QuoteSource(
+                                quote_request_id=quote_request_id,
+                                url=store_result.url,
+                                domain=store_result.domain,
+                                page_title=product.title,
+                                price_value=price,
+                                currency="BRL",
+                                extraction_method=method,
+                                screenshot_file_id=screenshot_file.id,
+                                is_accepted=True
+                            )
+                            db.add(source)
+                            valid_sources.append(source)
+                            valid_sources_by_url[store_result.url] = source
+                            valid_prices[product_key] = float(price)
+
+                            logger.info(f"    ✓ Added [{len(valid_sources)}/{num_quotes}]: {store_result.domain} - R$ {price}")
+
+                            # Registrar produto bem-sucedido
+                            search_stats["successful_products"].append({
+                                "title": product.title,
+                                "source": product.source,
+                                "google_price": float(product.extracted_price) if product.extracted_price else None,
+                                "extracted_price": float(price),
+                                "url": store_result.url,
+                                "domain": store_result.domain
+                            })
 
                         except Exception as e:
-                            logger.error(f"    ✗ Failed {product.domain}: {str(e)[:100]}")
-                            new_failures.append(product.url)
+                            error_msg = str(e)
+                            logger.error(f"    ✗ Failed: {error_msg[:100]}")
+                            new_failures.append(product_key)
+
+                            # Determinar tipo de falha e registrar
+                            failure_reason = CaptureFailureReason.OTHER
+                            extracted_price_value = None
+                            failure_url = ""
+                            failure_domain = ""
+                            failure_step = "UNKNOWN"  # Passo em que falhou
+
+                            try:
+                                if store_result:
+                                    failure_url = store_result.url
+                                    failure_domain = store_result.domain
+                            except:
+                                pass
+
+                            # Determinar passo da falha baseado na mensagem de erro
+                            if "NO_STORE_LINK" in error_msg:
+                                failure_step = "IMMERSIVE_API"
+                            elif "BLOCKED_DOMAIN" in error_msg:
+                                failure_step = "URL_VALIDATION"
+                            elif "FOREIGN_DOMAIN" in error_msg:
+                                failure_step = "URL_VALIDATION"
+                            elif "LISTING_URL" in error_msg:
+                                failure_step = "URL_VALIDATION"
+                            elif "DUPLICATE_URL" in error_msg:
+                                failure_step = "URL_VALIDATION"
+                            elif "INVALID_PRICE" in error_msg:
+                                failure_step = "PRICE_EXTRACTION"
+                            elif "PRICE_MISMATCH" in error_msg:
+                                failure_step = "PRICE_VALIDATION"
+                            elif "timeout" in error_msg.lower() or "screenshot" in error_msg.lower():
+                                failure_step = "SCREENSHOT_CAPTURE"
+                            elif "load" in error_msg.lower() or "navigate" in error_msg.lower():
+                                failure_step = "PAGE_LOAD"
+
+                            # Registrar falha nas estatísticas
+                            search_stats["validation_failures"].append({
+                                "title": product.title,
+                                "source": product.source,
+                                "google_price": float(product.extracted_price) if product.extracted_price else None,
+                                "url": failure_url,
+                                "domain": failure_domain,
+                                "failure_step": failure_step,
+                                "error_message": error_msg[:200]
+                            })
+
+                            if "NO_STORE_LINK" in error_msg:
+                                failure_reason = CaptureFailureReason.OTHER
+                            elif "BLOCKED_DOMAIN" in error_msg:
+                                failure_reason = CaptureFailureReason.OTHER
+                            elif "FOREIGN_DOMAIN" in error_msg:
+                                failure_reason = CaptureFailureReason.OTHER
+                            elif "LISTING_URL" in error_msg:
+                                failure_reason = CaptureFailureReason.OTHER
+                            elif "DUPLICATE_URL" in error_msg:
+                                failure_reason = CaptureFailureReason.OTHER
+                            elif "PRICE_MISMATCH" in error_msg:
+                                failure_reason = CaptureFailureReason.PRICE_MISMATCH
+                                try:
+                                    extracted_price_value = price if 'price' in dir() and price else None
+                                except:
+                                    pass
+                            elif "INVALID_PRICE" in error_msg:
+                                failure_reason = CaptureFailureReason.INVALID_PRICE
+                            elif "timeout" in error_msg.lower():
+                                failure_reason = CaptureFailureReason.TIMEOUT
+                            elif "403" in error_msg or "captcha" in error_msg.lower() or "blocked" in error_msg.lower():
+                                failure_reason = CaptureFailureReason.BLOCKED_BY_SITE
+                            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                                failure_reason = CaptureFailureReason.NETWORK_ERROR
+                            elif "screenshot" in error_msg.lower():
+                                failure_reason = CaptureFailureReason.SCREENSHOT_ERROR
+                            elif "load" in error_msg.lower() or "navigate" in error_msg.lower():
+                                failure_reason = CaptureFailureReason.PAGE_LOAD_ERROR
+
+                            # Registrar falha no banco
+                            try:
+                                failure_record = QuoteSourceFailure(
+                                    quote_request_id=quote_request_id,
+                                    url=failure_url or f"product:{product.source}",
+                                    domain=failure_domain or product.source,
+                                    product_title=product.title,
+                                    google_price=Decimal(str(product.extracted_price)) if product.extracted_price else None,
+                                    extracted_price=extracted_price_value,
+                                    failure_reason=failure_reason,
+                                    error_message=error_msg[:1000]
+                                )
+                                db.add(failure_record)
+                                db.flush()
+                            except Exception as save_error:
+                                logger.warning(f"Failed to save capture failure record: {save_error}")
 
                     # Atualizar falhas
-                    failed_urls.update(new_failures)
+                    failed_product_keys.update(new_failures)
 
                     # Verificar resultado
                     if len(valid_sources) >= num_quotes:
@@ -468,7 +591,7 @@ def process_quote_request(self, quote_request_id: int):
                         break
 
                     # Verificar produtos restantes
-                    untried_global = [p for p in all_products if p.url not in valid_prices and p.url not in failed_urls]
+                    untried_global = [p for p in all_products if f"{p.title}_{p.extracted_price}" not in valid_prices and f"{p.title}_{p.extracted_price}" not in failed_product_keys]
 
                     logger.info(
                         f"  End iteration {iteration}: {len(valid_sources)}/{num_quotes} quotes, "
@@ -476,9 +599,7 @@ def process_quote_request(self, quote_request_id: int):
                     )
 
                     if not untried_global:
-                        # Não há mais produtos para tentar
                         if has_reserve and len(reserve_sources) > len(valid_sources):
-                            # Reserva é melhor - usar ela
                             logger.info(
                                 f"  No more products. Reserve ({len(reserve_sources)}) > current ({len(valid_sources)}). Using reserve."
                             )
@@ -488,28 +609,24 @@ def process_quote_request(self, quote_request_id: int):
 
                         logger.info(
                             f"All products tested. Final: {len(valid_sources)}/{num_quotes} quotes, "
-                            f"{len(failed_urls)} failed"
+                            f"{len(failed_product_keys)} failed"
                         )
                         break
 
-                    # Há produtos restantes - recalcular bloco na próxima iteração
                     if new_failures:
                         logger.info(f"  {len(new_failures)} failures. Recalculating block...")
 
-        def _calculate_best_block(products, valid_prices, max_variation, num_quotes):
+        def _calculate_best_block_shopping(products, valid_prices, max_variation, num_quotes):
             """
-            Calcula o melhor bloco único baseado nos produtos disponíveis.
-            Prioriza blocos que:
-            1. Contêm todos os produtos já validados
-            2. Têm produtos não-testados suficientes para completar N cotações
-            3. Têm o menor preço base
+            Calcula o melhor bloco baseado em ShoppingProducts (sem URL ainda).
+            Usa title_price como chave única.
             """
             if not products:
                 return None
 
-            valid_urls = set(valid_prices.keys())
+            valid_keys = set(valid_prices.keys())
             best_block = None
-            best_score = (-1, -1, float('inf'))  # (contains_all_valid, untried_count, min_price)
+            best_score = (-1, -1, float('inf'))
 
             for start_idx, start_product in enumerate(products):
                 if not start_product.extracted_price:
@@ -518,7 +635,6 @@ def process_quote_request(self, quote_request_id: int):
                 min_price = float(start_product.extracted_price)
                 max_allowed = min_price * (1 + max_variation)
 
-                # Construir bloco
                 block = []
                 for product in products[start_idx:]:
                     if product.extracted_price and float(product.extracted_price) <= max_allowed:
@@ -529,16 +645,15 @@ def process_quote_request(self, quote_request_id: int):
                 if not block:
                     continue
 
-                # Calcular score do bloco
-                block_urls = {p.url for p in block}
-                valid_in_block = len(valid_urls & block_urls)
-                contains_all_valid = valid_in_block == len(valid_urls) if valid_urls else True
-                untried = len([p for p in block if p.url not in valid_prices])
+                block_keys = {f"{p.title}_{p.extracted_price}" for p in block}
+                valid_in_block = len(valid_keys & block_keys)
+                contains_all_valid = valid_in_block == len(valid_keys) if valid_keys else True
+                untried = len([p for p in block if f"{p.title}_{p.extracted_price}" not in valid_prices])
 
                 score = (
-                    1 if contains_all_valid else 0,  # Prioridade 1: contém todos validados
-                    untried,                          # Prioridade 2: mais produtos não-testados
-                    -min_price                        # Prioridade 3: menor preço (negativo para ordenar desc->asc)
+                    1 if contains_all_valid else 0,
+                    untried,
+                    -min_price
                 )
 
                 if score > best_score:
@@ -571,10 +686,20 @@ def process_quote_request(self, quote_request_id: int):
 
             return blocks
 
-        asyncio.run(extract_prices_with_block_recalculation())
+        asyncio.run(extract_prices_integrated())
+
+        # Salvar estatísticas detalhadas de busca no JSON da cotação
+        if quote_request.google_shopping_response_json:
+            quote_request.google_shopping_response_json["search_stats"] = search_stats
+            quote_request.google_shopping_response_json["search_stats"]["final_valid_sources"] = len(valid_sources)
+            quote_request.google_shopping_response_json["search_stats"]["final_failed_products"] = len(failed_product_keys)
+            from sqlalchemy.orm.attributes import flag_modified
+            flag_modified(quote_request, "google_shopping_response_json")
+
         db.commit()
 
         logger.info(f"Extracted {len(valid_sources)} valid prices")
+        logger.info(f"Search stats: products_tested={search_stats['products_tested']}, blocks_recalculated={search_stats['blocks_recalculated']}, immersive_api_calls={search_stats['immersive_api_calls']}")
 
         # Calculando estatísticas
         _update_progress(db, quote_request, "calculating_stats", 80, f"Analisando {len(valid_sources)} preços coletados e calculando média...")
@@ -939,15 +1064,158 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
     """
     Processa cotação de veículo usando API FIPE.
 
+    Fluxo otimizado (REQ-FIPE-003):
+    1. Consulta Banco de Preços local primeiro
+    2. Se encontrar cotação VIGENTE, reutiliza
+    3. Se não encontrar ou EXPIRADA, consulta API FIPE
+    4. Atualiza/cria registro no Banco de Preços (UPSERT)
+
     Returns:
         bool: True se deve usar fallback para Google Shopping, False se concluiu com sucesso
     """
     import asyncio
     from app.services.fipe_client import FipeClient
     from app.services.fipe_pdf_generator import FipePDFGenerator
+    from app.models import VehiclePriceBank, Setting
+    from dateutil.relativedelta import relativedelta
 
     try:
         fipe_params = analysis_result.fipe_api
+
+        _update_progress(db, quote_request, "checking_price_bank", 45,
+                        f"Verificando Banco de Preços de Veículos...")
+
+        # ========== PASSO 1: Consultar Banco de Preços Local ==========
+        # Obter parâmetro de vigência (default: 6 meses)
+        vigencia_meses = 6
+        setting = db.query(Setting).filter(Setting.key == "parameters").first()
+        if setting and setting.value_json:
+            vigencia_meses = setting.value_json.get("vigencia_cotacao_veiculos", 6)
+
+        # Calcular data limite para vigência
+        limite_vigencia = datetime.now() - relativedelta(months=vigencia_meses)
+
+        # Buscar no banco de preços por codigo_fipe (se disponível)
+        existing_price = None
+        codigo_fipe_busca = fipe_params.codigo_fipe if fipe_params and fipe_params.codigo_fipe else None
+
+        if codigo_fipe_busca:
+            existing_price = db.query(VehiclePriceBank).filter(
+                VehiclePriceBank.codigo_fipe == codigo_fipe_busca
+            ).order_by(VehiclePriceBank.updated_at.desc()).first()
+            logger.info(f"[FIPE] Buscando por codigo_fipe={codigo_fipe_busca}: {'encontrado' if existing_price else 'não encontrado'}")
+
+        # Verificar se cotação está vigente
+        if existing_price:
+            updated_at = existing_price.updated_at
+            if updated_at and updated_at.tzinfo:
+                updated_at = updated_at.replace(tzinfo=None)
+
+            is_vigente = updated_at >= limite_vigencia if updated_at else False
+
+            if is_vigente:
+                logger.info(f"[FIPE] Reutilizando cotação VIGENTE do banco de preços: {existing_price.vehicle_name} - R$ {existing_price.price_value}")
+                _update_progress(db, quote_request, "using_cached_price", 60,
+                                f"Utilizando cotação vigente do banco de preços: R$ {existing_price.price_value:,.2f}")
+
+                # Usar cotação existente - criar QuoteSource
+                from app.models.quote_source import ExtractionMethod
+
+                fipe_source = QuoteSource(
+                    quote_request_id=quote_request.id,
+                    url=f"https://veiculos.fipe.org.br/?codigoTipoVeiculo={existing_price.vehicle_type}&codigoFipe={existing_price.codigo_fipe}",
+                    domain="fipe.org.br",
+                    page_title=f"Tabela FIPE - {existing_price.vehicle_name} (Banco de Preços)",
+                    price_value=existing_price.price_value,
+                    currency="BRL",
+                    extraction_method=ExtractionMethod.API_FIPE,
+                    is_accepted=True
+                )
+                db.add(fipe_source)
+                db.flush()
+
+                # Salvar resultado no JSON da cotação
+                import copy
+                from sqlalchemy.orm.attributes import flag_modified
+                payload = copy.deepcopy(quote_request.claude_payload_json or {})
+                payload["fipe_result"] = {
+                    "success": True,
+                    "source": "price_bank",
+                    "api_calls": 0,
+                    "vehicle_name": existing_price.vehicle_name,
+                    "codigo_fipe": existing_price.codigo_fipe,
+                    "price": {
+                        "price": f"R$ {existing_price.price_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                        "price_value": float(existing_price.price_value),
+                        "brand": existing_price.brand_name,
+                        "model": existing_price.model_name,
+                        "modelYear": existing_price.year_model,
+                        "fuel": existing_price.fuel_type,
+                        "codeFipe": existing_price.codigo_fipe,
+                        "referenceMonth": existing_price.reference_month,
+                        "vehicleType": existing_price.vehicle_type
+                    }
+                }
+                quote_request.claude_payload_json = payload
+                flag_modified(quote_request, "claude_payload_json")
+
+                # Definir valores de preço
+                quote_request.valor_medio = fipe_source.price_value
+                quote_request.valor_minimo = fipe_source.price_value
+                quote_request.valor_maximo = fipe_source.price_value
+                quote_request.variacao_percentual = Decimal("0")
+
+                # Registrar log de integração como Banco de Preço de Veículos
+                bank_log = IntegrationLog(
+                    quote_request_id=quote_request.id,
+                    integration_type="vehicle_price_bank",
+                    activity=f"Cotação do Banco de Preços de Veículos (vigente)",
+                    response_summary={
+                        "source": "vehicle_price_bank",
+                        "success": True,
+                        "api_calls": 0,
+                        "vehicle_name": existing_price.vehicle_name,
+                        "codigo_fipe": existing_price.codigo_fipe,
+                        "brand_name": existing_price.brand_name,
+                        "model_name": existing_price.model_name,
+                        "year_model": existing_price.year_model,
+                        "fuel_type": existing_price.fuel_type,
+                        "reference_month": existing_price.reference_month,
+                        "cached_at": existing_price.updated_at.isoformat() if existing_price.updated_at else None,
+                        "screenshot_path": existing_price.screenshot_path,
+                        "price": {
+                            "price": f"R$ {existing_price.price_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                            "price_value": float(existing_price.price_value),
+                            "brand": existing_price.brand_name,
+                            "model": existing_price.model_name,
+                            "modelYear": existing_price.year_model,
+                            "fuel": existing_price.fuel_type,
+                            "codeFipe": existing_price.codigo_fipe,
+                            "referenceMonth": existing_price.reference_month,
+                            "vehicleType": existing_price.vehicle_type
+                        }
+                    }
+                )
+                db.add(bank_log)
+
+                # Finalizar cotação
+                _update_progress(db, quote_request, "finalizing", 95, "Finalizando cotação...")
+
+                quote_request.status = QuoteStatus.DONE
+                quote_request.current_step = "completed"
+                quote_request.step_details = f"Cotação concluída via Banco de Preços! Valor: R$ {existing_price.price_value:,.2f}"
+                quote_request.progress_percentage = 100
+
+                db.commit()
+                db.refresh(quote_request)
+
+                # Gerar PDF (usando screenshot do cache se disponível)
+                _generate_fipe_pdf(db, quote_request, fipe_source, existing_price)
+
+                logger.info(f"[FIPE] Quote {quote_request.id} completed from cache. Price: R$ {existing_price.price_value}")
+                return False  # Concluído com sucesso
+            else:
+                logger.info(f"[FIPE] Cotação EXPIRADA ({(datetime.now() - updated_at).days} dias). Atualizando via API FIPE...")
 
         _update_progress(db, quote_request, "searching_fipe", 50,
                         f"Consultando Tabela FIPE para {analysis_result.marca} {analysis_result.modelo}...")
@@ -955,15 +1223,44 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
         # Criar cliente FIPE
         fipe_client = FipeClient()
 
-        # Executar busca na FIPE
+        # Extrair ano modelo e combustivel (texto) do retorno da IA
+        ano_modelo = None
+        combustivel = None
+        if hasattr(analysis_result, 'especificacoes') and analysis_result.especificacoes:
+            essenciais = analysis_result.especificacoes.get("essenciais", {})
+            ano_modelo = str(essenciais.get("ano_modelo", "")) if essenciais.get("ano_modelo") else None
+            combustivel = essenciais.get("combustivel", "")
+
+        logger.info(f"[FIPE] Dados da IA - Ano: {ano_modelo}, Combustível: {combustivel}")
+
+        # Executar busca na FIPE com fluxo OTIMIZADO
+        # Novo fluxo: brands -> years -> models -> price
         async def search_fipe():
-            return await fipe_client.search_vehicle(
+            # Enriquecer busca_modelo com o modelo completo do analysis_result
+            busca_modelo = fipe_params.busca_modelo.copy() if fipe_params.busca_modelo else {}
+
+            # Se analysis_result.modelo existir e for diferente do termo_principal, adicionar como variação
+            modelo_completo = analysis_result.modelo if hasattr(analysis_result, 'modelo') else None
+            if modelo_completo:
+                # Garantir que o modelo completo esteja nas variações
+                variacoes = list(busca_modelo.get('variacoes', []))
+                if modelo_completo not in variacoes and modelo_completo != busca_modelo.get('termo_principal'):
+                    variacoes.append(modelo_completo)
+                busca_modelo['variacoes'] = variacoes
+
+                # Se termo_principal for muito curto (ex: "ASX"), usar o modelo completo como termo principal
+                termo_principal = busca_modelo.get('termo_principal', '')
+                if len(termo_principal) < len(modelo_completo) and len(termo_principal.split()) <= 1:
+                    busca_modelo['termo_principal'] = modelo_completo
+                    logger.info(f"[FIPE] Usando modelo completo como termo principal: {modelo_completo}")
+
+            return await fipe_client.search_vehicle_optimized(
                 vehicle_type=fipe_params.vehicle_type,
                 busca_marca=fipe_params.busca_marca or {},
-                busca_modelo=fipe_params.busca_modelo or {},
+                busca_modelo=busca_modelo,
                 year_id_estimado=fipe_params.year_id_estimado,
-                codigo_fipe=fipe_params.codigo_fipe,
-                ano_modelo=analysis_result.especificacoes.get("essenciais", {}).get("ano_modelo") if hasattr(analysis_result, 'especificacoes') else None
+                ano_modelo=ano_modelo,
+                combustivel=combustivel
             )
 
         fipe_result = asyncio.run(search_fipe())
@@ -998,9 +1295,13 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
             }
 
         # Atualizar claude_payload_json com dados da FIPE
-        payload = quote_request.claude_payload_json or {}
+        # Usar copia para garantir que SQLAlchemy detecte a mudanca
+        import copy
+        from sqlalchemy.orm.attributes import flag_modified
+        payload = copy.deepcopy(quote_request.claude_payload_json or {})
         payload["fipe_result"] = fipe_data
         quote_request.claude_payload_json = payload
+        flag_modified(quote_request, "claude_payload_json")
         db.commit()
 
         if not fipe_result.success:
@@ -1043,7 +1344,132 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
         quote_request.valor_maximo = fipe_source.price_value
         quote_request.variacao_percentual = Decimal("0")
 
-        _update_progress(db, quote_request, "generating_pdf", 85, "Gerando PDF da cotação FIPE...")
+        _update_progress(db, quote_request, "capturing_screenshot", 75, "Capturando comprovação do site FIPE...")
+
+        # Capturar screenshot do site FIPE para comprovação
+        screenshot_path = None
+        screenshot_file_id = None
+        try:
+            from app.services.fipe_screenshot import capture_fipe_screenshot
+
+            # Extrair combustivel do resultado FIPE
+            combustivel = fipe_result.price.fuel if fipe_result.price else "Gasolina"
+
+            # Determinar tipo de veiculo
+            vehicle_type_map = {1: "cars", 2: "motorcycles", 3: "trucks"}
+            vtype = vehicle_type_map.get(fipe_result.price.vehicleType, "cars") if fipe_result.price else "cars"
+
+            screenshot_path = asyncio.run(capture_fipe_screenshot(
+                codigo_fipe=fipe_result.price.codeFipe,
+                ano_modelo=fipe_result.price.modelYear,
+                combustivel=combustivel,
+                vehicle_type=vtype,
+                quote_id=quote_request.id
+            ))
+
+            if screenshot_path:
+                logger.info(f"Screenshot FIPE capturado: {screenshot_path}")
+                # Criar registro de File para o screenshot
+                screenshot_file = File(
+                    type=FileType.SCREENSHOT,
+                    mime_type="image/png",
+                    storage_path=screenshot_path,
+                    sha256=_calculate_sha256(screenshot_path)
+                )
+                db.add(screenshot_file)
+                db.flush()
+                screenshot_file_id = screenshot_file.id
+                logger.info(f"Screenshot file registrado: ID={screenshot_file_id}")
+            else:
+                logger.warning("Screenshot FIPE não capturado (operação não bloqueante)")
+
+        except Exception as screenshot_error:
+            logger.warning(f"Erro ao capturar screenshot FIPE (não bloqueante): {screenshot_error}")
+
+        _update_progress(db, quote_request, "saving_price_bank", 80, "Salvando no Banco de Preços de Veículos...")
+
+        # Salvar/Atualizar no Banco de Precos de Veiculos (UPSERT - REQ-FIPE-003) com screenshot
+        try:
+            from app.models import VehiclePriceBank
+            from datetime import date
+            from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+            # Parse reference month (ex: "dezembro de 2024" -> date(2024, 12, 1))
+            months_map = {
+                "janeiro": 1, "fevereiro": 2, "março": 3, "marco": 3,
+                "abril": 4, "maio": 5, "junho": 6,
+                "julho": 7, "agosto": 8, "setembro": 9,
+                "outubro": 10, "novembro": 11, "dezembro": 12
+            }
+            ref_month_str = fipe_result.price.referenceMonth.lower()
+            try:
+                parts = ref_month_str.replace(" de ", " ").split()
+                month_num = months_map.get(parts[0], 1)
+                year_num = int(parts[1])
+                ref_date = date(year_num, month_num, 1)
+            except Exception:
+                ref_date = date.today().replace(day=1)
+
+            # Parse fuel code from year_id (ex: "2020-1" -> 1)
+            fuel_code = 1
+            if fipe_result.year_id and "-" in fipe_result.year_id:
+                try:
+                    fuel_code = int(fipe_result.year_id.split("-")[1])
+                except Exception:
+                    pass
+
+            # Mapear fuel acronym para fuel type
+            fuel_map = {"G": "Gasolina", "A": "Alcool", "D": "Diesel", "F": "Flex"}
+            fuel_type = fuel_map.get(fipe_result.price.fuelAcronym, fipe_result.price.fuel or "Gasolina")
+
+            # Dados para inserção/atualização (incluindo screenshot)
+            vehicle_data = {
+                "codigo_fipe": fipe_result.price.codeFipe,
+                "year_id": fipe_result.year_id or "",
+                "brand_id": int(fipe_result.brand_id) if fipe_result.brand_id else 0,
+                "brand_name": fipe_result.price.brand,
+                "model_id": int(fipe_result.model_id) if fipe_result.model_id else 0,
+                "model_name": fipe_result.price.model,
+                "year_model": fipe_result.price.modelYear,
+                "fuel_type": fuel_type,
+                "fuel_code": fuel_code,
+                "vehicle_type": fipe_result.price.vehicleType or "cars",
+                "vehicle_name": f"{fipe_result.price.brand} {fipe_result.price.model} {fipe_result.price.modelYear}",
+                "price_value": Decimal(str(fipe_result.price.price_value)),
+                "reference_month": fipe_result.price.referenceMonth,
+                "reference_date": ref_date,
+                "quote_request_id": quote_request.id,
+                "api_response_json": fipe_data.get("price"),
+                "last_api_call": datetime.utcnow(),
+                "screenshot_file_id": screenshot_file_id,
+                "screenshot_path": screenshot_path
+            }
+
+            # UPSERT: INSERT ... ON CONFLICT (codigo_fipe, year_id) DO UPDATE
+            stmt = pg_insert(VehiclePriceBank).values(**vehicle_data)
+            stmt = stmt.on_conflict_do_update(
+                constraint='uq_vehicle_fipe_year',
+                set_={
+                    "brand_name": stmt.excluded.brand_name,
+                    "model_name": stmt.excluded.model_name,
+                    "price_value": stmt.excluded.price_value,
+                    "reference_month": stmt.excluded.reference_month,
+                    "reference_date": stmt.excluded.reference_date,
+                    "quote_request_id": stmt.excluded.quote_request_id,
+                    "api_response_json": stmt.excluded.api_response_json,
+                    "last_api_call": stmt.excluded.last_api_call,
+                    "screenshot_file_id": stmt.excluded.screenshot_file_id,
+                    "screenshot_path": stmt.excluded.screenshot_path,
+                    "updated_at": datetime.utcnow()
+                }
+            )
+            db.execute(stmt)
+            db.flush()
+            logger.info(f"[FIPE] Banco de Preços atualizado (UPSERT): {vehicle_data['vehicle_name']} - R$ {vehicle_data['price_value']} (screenshot: {screenshot_path})")
+        except Exception as vpb_error:
+            logger.warning(f"Failed to save to VehiclePriceBank: {vpb_error}")
+
+        _update_progress(db, quote_request, "generating_pdf", 90, "Gerando PDF da cotação FIPE...")
 
         # Gerar PDF da cotação FIPE
         try:
@@ -1056,7 +1482,8 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
                 output_path=pdf_path,
                 quote_request=quote_request,
                 fipe_result=fipe_result,
-                analysis_result=analysis_result
+                analysis_result=analysis_result,
+                screenshot_path=screenshot_path
             )
 
             # Registrar documento gerado
@@ -1121,3 +1548,88 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
             db.commit()
 
         raise
+
+
+def _generate_fipe_pdf(db: Session, quote_request: QuoteRequest, fipe_source: QuoteSource, vehicle_price):
+    """
+    Gera PDF para cotação FIPE usando dados do Banco de Preços (cache).
+    Versão simplificada sem captura de screenshot.
+    """
+    from app.services.fipe_pdf_generator import FipePDFGenerator
+
+    try:
+        # Criar objeto FipeResult simulado para o gerador de PDF
+        class CachedFipePrice:
+            def __init__(self, vp):
+                self.price = f"R$ {vp.price_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+                self.price_value = float(vp.price_value)
+                self.brand = vp.brand_name
+                self.model = vp.model_name
+                self.modelYear = vp.year_model
+                self.fuel = vp.fuel_type
+                self.codeFipe = vp.codigo_fipe
+                self.referenceMonth = vp.reference_month
+                self.vehicleType = vp.vehicle_type
+                self.fuelAcronym = vp.fuel_type[0].upper() if vp.fuel_type else "G"
+
+        class CachedFipeResult:
+            def __init__(self, vp):
+                self.success = True
+                self.price = CachedFipePrice(vp)
+                self.api_calls = 0
+                self.brand_id = vp.brand_id
+                self.brand_name = vp.brand_name
+                self.model_id = vp.model_id
+                self.model_name = vp.model_name
+                self.year_id = vp.year_id
+
+        fipe_result = CachedFipeResult(vehicle_price)
+
+        pdf_generator = FipePDFGenerator()
+        pdf_filename = f"cotacao_fipe_{quote_request.id}.pdf"
+        pdf_path = os.path.join(settings.STORAGE_PATH, "documents", pdf_filename)
+        os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+
+        # Gerar PDF usando screenshot do cache se disponível
+        cached_screenshot = vehicle_price.screenshot_path if hasattr(vehicle_price, 'screenshot_path') else None
+        if cached_screenshot:
+            # Verificar se o arquivo existe
+            import os as os_check
+            if not os_check.path.exists(cached_screenshot):
+                logger.warning(f"Screenshot do cache não encontrado: {cached_screenshot}")
+                cached_screenshot = None
+            else:
+                logger.info(f"Usando screenshot do cache: {cached_screenshot}")
+
+        pdf_generator.generate(
+            output_path=pdf_path,
+            quote_request=quote_request,
+            fipe_result=fipe_result,
+            analysis_result=None,
+            screenshot_path=cached_screenshot
+        )
+
+        # Registrar documento gerado
+        pdf_file = File(
+            type=FileType.GENERATED_DOCUMENT,
+            mime_type="application/pdf",
+            storage_path=pdf_path,
+            sha256=_calculate_sha256(pdf_path)
+        )
+        db.add(pdf_file)
+        db.flush()
+
+        doc = GeneratedDocument(
+            quote_request_id=quote_request.id,
+            file_id=pdf_file.id,
+            document_type="fipe_quote_pdf",
+            title=f"Cotação Tabela FIPE - {vehicle_price.vehicle_name} (Banco de Preços)"
+        )
+        db.add(doc)
+        db.commit()
+
+        logger.info(f"Generated cached FIPE PDF: {pdf_path}")
+
+    except Exception as pdf_error:
+        logger.error(f"Error generating cached FIPE PDF: {pdf_error}")
+        # Não falhar a cotação por erro no PDF

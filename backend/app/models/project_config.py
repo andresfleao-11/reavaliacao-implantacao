@@ -42,6 +42,10 @@ class ProjectConfigVersion(Base):
     # Local padrão
     local_padrao = Column(String(200), nullable=True)
 
+    # ========== BANCO DE PREÇO DE VEÍCULOS ==========
+    # Vigência de cotação em meses (padrão: 6 meses)
+    vigencia_cotacao_veiculos = Column(Integer, nullable=True, default=6)
+
     # ========== PARÂMETROS DE BUSCA ==========
     # Configurações da SerpAPI
     serpapi_location = Column(String(200), nullable=True)

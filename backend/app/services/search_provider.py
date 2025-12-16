@@ -184,6 +184,17 @@ class ShoppingProduct(BaseModel):
     link: Optional[str]
 
 
+class ShoppingSearchLog(BaseModel):
+    """Log simplificado da busca no Google Shopping (sem Immersive API)"""
+    query: str
+    total_raw_products: int = 0
+    after_source_filter: int = 0
+    blocked_sources: int = 0
+    after_price_filter: int = 0
+    invalid_prices: int = 0
+    raw_shopping_response: Optional[dict] = None
+
+
 class SearchProvider(ABC):
     @abstractmethod
     async def search_products(
@@ -193,6 +204,29 @@ class SearchProvider(ABC):
         variacao_maxima: float = 0.25
     ) -> Tuple[List[SearchResult], SearchLog]:
         """Returns (results, search_log) tuple"""
+        pass
+
+    @abstractmethod
+    async def get_shopping_products(
+        self,
+        query: str
+    ) -> Tuple[List[ShoppingProduct], ShoppingSearchLog]:
+        """
+        Busca produtos no Google Shopping SEM chamar Immersive API.
+        Retorna produtos filtrados (sem fontes bloqueadas, com preço válido).
+        A chamada Immersive API deve ser feita pelo chamador para cada produto.
+        """
+        pass
+
+    @abstractmethod
+    async def get_store_link_for_product(
+        self,
+        product: ShoppingProduct
+    ) -> Optional[SearchResult]:
+        """
+        Chama Immersive API para obter URL da loja de um produto específico.
+        Retorna SearchResult com URL, domínio, etc. ou None se não encontrar.
+        """
         pass
 
 
@@ -1208,3 +1242,225 @@ class SerpApiProvider(SearchProvider):
             return urlparse(url).netloc
         except:
             return ""
+
+    async def get_shopping_products(
+        self,
+        query: str
+    ) -> Tuple[List[ShoppingProduct], ShoppingSearchLog]:
+        """
+        Busca produtos no Google Shopping SEM chamar Immersive API.
+        Retorna produtos filtrados (sem fontes bloqueadas, com preço válido),
+        ordenados por preço.
+        """
+        logger.info(f"=== Getting shopping products: '{query}' ===")
+
+        search_log = ShoppingSearchLog(query=query)
+
+        # Buscar no Google Shopping
+        all_products = await self._search_google_shopping_raw(query)
+        search_log.raw_shopping_response = self.raw_shopping_response
+
+        if not all_products:
+            logger.warning("No products found from Google Shopping")
+            return [], search_log
+
+        search_log.total_raw_products = len(all_products)
+        logger.info(f"Got {len(all_products)} raw products from Google Shopping")
+
+        # Filtrar por fontes bloqueadas
+        products_after_source_filter = [
+            p for p in all_products if not self._is_blocked_source(p.source)
+        ]
+        blocked_count = len(all_products) - len(products_after_source_filter)
+        search_log.after_source_filter = len(products_after_source_filter)
+        search_log.blocked_sources = blocked_count
+        logger.info(f"{len(products_after_source_filter)} products after source filter ({blocked_count} blocked)")
+
+        if not products_after_source_filter:
+            logger.warning("All products were from blocked sources")
+            return [], search_log
+
+        # Filtrar por preços válidos
+        products_with_valid_prices = [
+            p for p in products_after_source_filter
+            if p.extracted_price is not None and p.extracted_price > 0
+        ]
+        invalid_price_count = len(products_after_source_filter) - len(products_with_valid_prices)
+        search_log.after_price_filter = len(products_with_valid_prices)
+        search_log.invalid_prices = invalid_price_count
+        logger.info(f"{len(products_with_valid_prices)} products with valid prices ({invalid_price_count} without price)")
+
+        if not products_with_valid_prices:
+            logger.warning("No products with valid prices found")
+            return [], search_log
+
+        # Ordenar por preço e limitar
+        products_with_valid_prices.sort(key=lambda x: x.extracted_price)
+        if len(products_with_valid_prices) > self.MAX_VALID_PRODUCTS:
+            products_with_valid_prices = products_with_valid_prices[:self.MAX_VALID_PRODUCTS]
+
+        logger.info(f"=== Returning {len(products_with_valid_prices)} filtered products ===")
+        return products_with_valid_prices, search_log
+
+    async def get_store_link_for_product(
+        self,
+        product: ShoppingProduct
+    ) -> Optional[SearchResult]:
+        """
+        Chama Immersive API para obter URL da loja de um produto específico.
+        NÃO faz validação de PRICE_MISMATCH aqui - isso deve ser feito pelo chamador
+        após extrair o preço do site.
+        """
+        logger.info(f"Getting store link for: {product.title[:50]}... (R$ {product.extracted_price})")
+
+        # Registrar chamada API
+        api_call_entry = {
+            "api_used": "google_immersive_product",
+            "search_url": "",
+            "activity": f"Busca de loja para produto: {product.title[:50]}...",
+            "product_link": None
+        }
+
+        # Prioridade 1: Usar Immersive API
+        if product.serpapi_immersive_product_api:
+            result = await self._call_immersive_api_simple(product)
+            if result:
+                api_call_entry["product_link"] = result.url
+                self.api_calls_made.append(api_call_entry)
+                return result
+            logger.info(f"  Immersive API returned no store link, trying fallback...")
+
+        # Prioridade 2: Fallback para link direto
+        direct_link = product.product_link or product.link
+        if direct_link and "google.com" not in direct_link:
+            cleaned_url = self._clean_tracking_params(direct_link)
+            domain = self._extract_domain(cleaned_url)
+            logger.info(f"  Using fallback direct link: {cleaned_url[:80]}...")
+
+            api_call_entry["product_link"] = cleaned_url
+            self.api_calls_made.append(api_call_entry)
+
+            return SearchResult(
+                url=cleaned_url,
+                title=product.title,
+                domain=domain,
+                snippet=product.source,
+                price=product.price,
+                extracted_price=Decimal(str(product.extracted_price)) if product.extracted_price else None,
+                store_name=product.source
+            )
+
+        self.api_calls_made.append(api_call_entry)
+        logger.warning(f"  No store link found for '{product.title[:40]}...'")
+        return None
+
+    async def _call_immersive_api_simple(self, product: ShoppingProduct) -> Optional[SearchResult]:
+        """
+        Chama Immersive API e retorna primeira loja válida SEM validar PRICE_MISMATCH.
+        A validação de preço deve ser feita pelo chamador após extrair preço do site.
+        """
+        if not product.serpapi_immersive_product_api:
+            return None
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    url = product.serpapi_immersive_product_api
+                    separator = "&" if "?" in url else "?"
+                    url_with_key = f"{url}{separator}api_key={self.api_key}"
+
+                    response = await client.get(url_with_key)
+
+                    if response.status_code == 429:
+                        if attempt < MAX_RETRIES - 1:
+                            backoff = INITIAL_BACKOFF * (2 ** attempt)
+                            logger.warning(f"  Rate limited. Retry in {backoff}s")
+                            await asyncio.sleep(backoff)
+                            continue
+                        return None
+
+                    response.raise_for_status()
+                    data = response.json()
+
+                # Buscar em product_results.stores
+                product_results = data.get("product_results", {})
+                stores = product_results.get("stores", [])
+
+                for store in stores:
+                    url = store.get("link", "")
+                    if not url or "google.com" in url:
+                        continue
+
+                    domain = self._extract_domain(url)
+                    store_name = store.get("name", "")
+                    store_price = store.get("price", "")
+                    store_extracted = store.get("extracted_price") or store.get("base_price")
+                    final_price = store_extracted or product.extracted_price
+
+                    cleaned_url = self._clean_tracking_params(url)
+
+                    return SearchResult(
+                        url=cleaned_url,
+                        title=product.title,
+                        domain=domain,
+                        snippet=store_name,
+                        price=store_price or product.price,
+                        extracted_price=Decimal(str(final_price)) if final_price else None,
+                        store_name=store_name
+                    )
+
+                # Tentar online_sellers como fallback
+                sellers = data.get("online_sellers", [])
+                for seller in sellers:
+                    url = seller.get("link", "") or seller.get("direct_link", "")
+                    if not url or "google.com" in url:
+                        continue
+
+                    domain = self._extract_domain(url)
+                    seller_name = seller.get("name", "")
+                    seller_price = seller.get("base_price", "") or seller.get("price", "")
+                    seller_extracted = seller.get("extracted_price") or seller.get("base_price")
+                    final_price = seller_extracted or product.extracted_price
+
+                    cleaned_url = self._clean_tracking_params(url)
+
+                    return SearchResult(
+                        url=cleaned_url,
+                        title=product.title,
+                        domain=domain,
+                        snippet=seller_name,
+                        price=seller_price or product.price,
+                        extracted_price=Decimal(str(final_price)) if final_price else None,
+                        store_name=seller_name
+                    )
+
+                # Tentar product_results.link como último fallback
+                direct_link = product_results.get("link", "")
+                if direct_link and "google.com" not in direct_link:
+                    cleaned_url = self._clean_tracking_params(direct_link)
+                    domain = self._extract_domain(cleaned_url)
+
+                    return SearchResult(
+                        url=cleaned_url,
+                        title=product.title,
+                        domain=domain,
+                        snippet=product.source,
+                        price=product.price,
+                        extracted_price=Decimal(str(product.extracted_price)) if product.extracted_price else None,
+                        store_name=product.source
+                    )
+
+                return None
+
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 429 and attempt < MAX_RETRIES - 1:
+                    backoff = INITIAL_BACKOFF * (2 ** attempt)
+                    await asyncio.sleep(backoff)
+                    continue
+                logger.error(f"  Immersive API error: {e}")
+                return None
+            except Exception as e:
+                logger.error(f"  Immersive API error: {e}")
+                return None
+
+        return None

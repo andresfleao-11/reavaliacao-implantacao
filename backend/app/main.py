@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-from app.api import quotes, settings, clients, projects, materials, project_config, users, financial, blocked_domains, financial_v2, batch_quotes, debug_serpapi
+from app.api import quotes, settings, clients, projects, materials, project_config, users, financial, blocked_domains, financial_v2, batch_quotes, debug_serpapi, vehicle_prices
 from app.core.database import engine, Base
 from app.core.logging import setup_logging
 import logging
@@ -73,6 +73,7 @@ app.include_router(financial_v2.router)
 app.include_router(blocked_domains.router)
 app.include_router(batch_quotes.router)
 app.include_router(debug_serpapi.router)
+app.include_router(vehicle_prices.router)
 
 
 @app.on_event("startup")

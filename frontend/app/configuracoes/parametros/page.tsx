@@ -218,6 +218,27 @@ export default function ParametrosPage() {
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Banco de Preços de Veículos</h3>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Vigência de Cotação (meses)
+            </label>
+            <input
+              type="number"
+              defaultValue={data.vigencia_cotacao_veiculos || 6}
+              onChange={(e) => setFormData({...formData, vigencia_cotacao_veiculos: parseInt(e.target.value)})}
+              className="input-field w-full"
+              min="1"
+              max="24"
+            />
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Define por quantos meses uma cotação de veículo permanece vigente. Cotações com idade superior serão consideradas expiradas e atualizadas na próxima consulta.
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Parâmetros de Busca (SerpAPI)</h3>
 
           <div>

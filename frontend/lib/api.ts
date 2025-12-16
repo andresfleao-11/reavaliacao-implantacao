@@ -128,6 +128,7 @@ export interface Parameters {
   pesquisador_padrao: string
   local_padrao: string
   serpapi_location: string
+  vigencia_cotacao_veiculos: number  // Vigência em meses para cotações de veículos
 }
 
 export interface SerpApiLocationOption {
@@ -668,4 +669,105 @@ export interface BatchCosts {
   }
   total_cost_usd: number
   total_cost_brl: number
+}
+
+// ==================== VEHICLE PRICES API ====================
+
+export interface VehiclePrice {
+  id: number
+  created_at: string
+  updated_at: string
+  codigo_fipe: string
+  brand_id: number
+  brand_name: string
+  model_id: number
+  model_name: string
+  year_id: string
+  year_model: number
+  fuel_type: string
+  fuel_code: number
+  vehicle_type: string
+  vehicle_name: string
+  price_value: number
+  reference_month: string
+  reference_date: string
+  status: 'Vigente' | 'Expirada'  // Status calculado baseado na vigência
+  quote_request_id: number | null
+  last_api_call: string | null
+}
+
+export interface VehiclePriceListResponse {
+  items: VehiclePrice[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export interface RefreshPriceResponse {
+  success: boolean
+  message: string
+  vehicle?: VehiclePrice
+  new_price?: number
+  old_price?: number
+  reference_month?: string
+}
+
+export interface BulkRefreshResponse {
+  total: number
+  success_count: number
+  error_count: number
+  errors: string[]
+}
+
+export const vehiclePricesApi = {
+  list: async (params: {
+    page?: number
+    page_size?: number
+    brand_name?: string
+    model_name?: string
+    year_model?: number
+    codigo_fipe?: string
+    reference_month?: string
+    vehicle_type?: string
+    status?: 'Vigente' | 'Expirada'  // Filtro por status de vigência
+    sort_by?: string
+    sort_order?: string
+  }): Promise<VehiclePriceListResponse> => {
+    const response = await api.get('/api/vehicle-prices', { params })
+    return response.data
+  },
+
+  get: async (id: number): Promise<VehiclePrice> => {
+    const response = await api.get(`/api/vehicle-prices/${id}`)
+    return response.data
+  },
+
+  refresh: async (id: number): Promise<RefreshPriceResponse> => {
+    const response = await api.post(`/api/vehicle-prices/${id}/refresh`)
+    return response.data
+  },
+
+  refreshAll: async (params?: {
+    vehicle_type?: string
+    brand_name?: string
+  }): Promise<BulkRefreshResponse> => {
+    const response = await api.post('/api/vehicle-prices/refresh-all', null, { params })
+    return response.data
+  },
+
+  getBrands: async (): Promise<string[]> => {
+    const response = await api.get('/api/vehicle-prices/filters/brands')
+    return response.data
+  },
+
+  getYears: async (): Promise<number[]> => {
+    const response = await api.get('/api/vehicle-prices/filters/years')
+    return response.data
+  },
+
+  getReferenceMonths: async (): Promise<string[]> => {
+    const response = await api.get('/api/vehicle-prices/filters/reference-months')
+    return response.data
+  },
 }

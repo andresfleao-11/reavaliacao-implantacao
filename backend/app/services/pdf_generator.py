@@ -32,6 +32,9 @@ class PDFGenerator:
         data_pesquisa: datetime,
         variacao_percentual: Optional[Decimal] = None,
         variacao_maxima_percent: Optional[float] = None,
+        # Parâmetros para veículos FIPE
+        is_vehicle: bool = False,
+        fipe_data: Optional[Dict] = None,
     ):
         doc = SimpleDocTemplate(
             output_path,
@@ -74,22 +77,39 @@ class PDFGenerator:
         story.append(Spacer(1, 4*mm))
 
         # Cabeçalho com informações resumidas
-        header_data = [
-            ['Código (Material):', codigo or 'N/A'],
-            ['Item (Query de Busca):', item_name],
-            ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
-            ['Pesquisador:', pesquisador or 'N/A'],
-            ['Local da Pesquisa:', local or 'N/A'],
-            ['Valor da Média:', f"R$ {valor_medio:.2f}".replace('.', ',')],
-        ]
+        if is_vehicle and fipe_data:
+            # Layout específico para veículos FIPE
+            header_data = [
+                ['Código (Material):', codigo or 'N/A'],
+                ['Item (Query de Busca):', item_name],
+                ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
+                ['Pesquisador:', pesquisador or 'N/A'],
+                ['Local da Pesquisa:', local or 'N/A'],
+                ['Código FIPE:', fipe_data.get('codigo_fipe', 'N/A')],
+                ['Marca:', fipe_data.get('marca', 'N/A')],
+                ['Modelo:', fipe_data.get('modelo', 'N/A')],
+                ['Ano/Combustível:', fipe_data.get('ano_combustivel', 'N/A')],
+                ['Valor FIPE:', f"R$ {valor_medio:.2f}".replace('.', ',')],
+            ]
+            # Não adicionar variação para veículos FIPE
+        else:
+            # Layout padrão para outros itens
+            header_data = [
+                ['Código (Material):', codigo or 'N/A'],
+                ['Item (Query de Busca):', item_name],
+                ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
+                ['Pesquisador:', pesquisador or 'N/A'],
+                ['Local da Pesquisa:', local or 'N/A'],
+                ['Valor da Média:', f"R$ {valor_medio:.2f}".replace('.', ',')],
+            ]
 
-        # Adicionar variação se disponível
-        if variacao_percentual is not None:
-            variacao_str = f"{float(variacao_percentual):.2f}%".replace('.', ',')
-            header_data.append(['Variação Calculada:', variacao_str])
+            # Adicionar variação se disponível (apenas para não-veículos)
+            if variacao_percentual is not None:
+                variacao_str = f"{float(variacao_percentual):.2f}%".replace('.', ',')
+                header_data.append(['Variação Calculada:', variacao_str])
 
-        if variacao_maxima_percent is not None:
-            header_data.append(['Variação Máx. Configurada:', f"{variacao_maxima_percent:.1f}%".replace('.', ',')])
+            if variacao_maxima_percent is not None:
+                header_data.append(['Variação Máx. Configurada:', f"{variacao_maxima_percent:.1f}%".replace('.', ',')])
 
         header_table = Table(header_data, colWidths=[55*mm, 125*mm])
 
@@ -109,13 +129,18 @@ class PDFGenerator:
             ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
         ]
 
-        # Colorir linha de variação calculada
-        if variacao_percentual is not None:
+        # Colorir linha de variação calculada (apenas para não-veículos)
+        if not is_vehicle and variacao_percentual is not None:
             variacao_row = len(header_data) - 2 if variacao_maxima_percent else len(header_data) - 1
             if variacao_ok:
                 header_table_style.append(('BACKGROUND', (1, variacao_row), (1, variacao_row), colors.HexColor('#90EE90')))  # Verde
             else:
                 header_table_style.append(('BACKGROUND', (1, variacao_row), (1, variacao_row), colors.HexColor('#FF6B6B')))  # Vermelho
+
+        # Para veículos, destacar linha do Valor FIPE em verde
+        if is_vehicle:
+            valor_fipe_row = len(header_data) - 1  # Última linha é Valor FIPE
+            header_table_style.append(('BACKGROUND', (1, valor_fipe_row), (1, valor_fipe_row), colors.HexColor('#90EE90')))
 
         header_table.setStyle(TableStyle(header_table_style))
         story.append(header_table)

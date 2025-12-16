@@ -7,6 +7,7 @@ from .quote_request import (
     BlockStatus,
 )
 from .quote_source import QuoteSource
+from .quote_source_failure import QuoteSourceFailure, CaptureFailureReason
 from .batch_quote import BatchQuoteJob, BatchJobStatus
 from .file import File
 from .generated_document import GeneratedDocument
@@ -29,6 +30,7 @@ from .user import User, UserRole
 from .financial import ApiCostConfig, FinancialTransaction
 from .blocked_domain import BlockedDomain
 from .integration_log import IntegrationLog
+from .vehicle_price import VehiclePriceBank
 
 __all__ = [
     "QuoteRequest",
@@ -38,6 +40,8 @@ __all__ = [
     "FailureReason",
     "BlockStatus",
     "QuoteSource",
+    "QuoteSourceFailure",
+    "CaptureFailureReason",
     "BatchQuoteJob",
     "BatchJobStatus",
     "File",
@@ -63,4 +67,5 @@ __all__ = [
     "FinancialTransaction",
     "BlockedDomain",
     "IntegrationLog",
+    "VehiclePriceBank",
 ]

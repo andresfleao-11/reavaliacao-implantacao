@@ -105,3 +105,4 @@ class QuoteRequest(Base):
     financial_transactions = relationship("FinancialTransaction", back_populates="quote", cascade="all, delete-orphan")
     integration_logs = relationship("IntegrationLog", back_populates="quote_request", cascade="all, delete-orphan")
     batch_job = relationship("BatchQuoteJob", back_populates="quote_requests")
+    capture_failures = relationship("QuoteSourceFailure", back_populates="quote_request", cascade="all, delete-orphan")

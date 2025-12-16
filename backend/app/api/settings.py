@@ -68,7 +68,8 @@ def get_parameters(db: Session = Depends(get_db)):
         "variacao_maxima_percent": 25.0,
         "pesquisador_padrao": "Sistema",
         "local_padrao": "Online",
-        "serpapi_location": "Sao Paulo,State of Sao Paulo,Brazil"  # Use city-level for better results
+        "serpapi_location": "Sao Paulo,State of Sao Paulo,Brazil",  # Use city-level for better results
+        "vigencia_cotacao_veiculos": 6  # Vigencia em meses para cotacoes de veiculos
     }
 
     if not setting:

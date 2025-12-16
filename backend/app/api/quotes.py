@@ -7,7 +7,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, Setting, User
+from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, Setting, User, VehiclePriceBank
 from app.models.quote_request import QuoteStatus, QuoteInputType
 from app.models.file import FileType
 from app.models.project import Project
@@ -478,6 +478,51 @@ def generate_pdf(quote_id: int, db: Session = Depends(get_db)):
     if quote_request.claude_payload_json and "nome_canonico" in quote_request.claude_payload_json:
         item_name = quote_request.claude_payload_json["nome_canonico"]
 
+    # Detectar se é veículo (FIPE)
+    is_vehicle = False
+    fipe_data = None
+
+    # Verificar se é cotação de veículo pela natureza do item
+    if quote_request.claude_payload_json:
+        natureza = quote_request.claude_payload_json.get("natureza", "")
+        if natureza and natureza.startswith("veiculo_"):
+            is_vehicle = True
+
+    # Se for veículo, buscar dados FIPE
+    if is_vehicle:
+        vehicle_price = db.query(VehiclePriceBank).filter(
+            VehiclePriceBank.quote_request_id == quote_id
+        ).first()
+
+        if vehicle_price:
+            fipe_data = {
+                "codigo_fipe": vehicle_price.codigo_fipe,
+                "marca": vehicle_price.brand_name,
+                "modelo": vehicle_price.model_name,
+                "ano_combustivel": f"{vehicle_price.year_model} {vehicle_price.fuel_type or ''}".strip()
+            }
+
+        # Para veículos FIPE, usar APENAS a fonte FIPE (não duplicar com sources normais)
+        # Limpar sources_data e adicionar apenas a fonte FIPE
+        sources_data = []
+
+        # Buscar screenshot FIPE se existir
+        fipe_screenshot_dir = os.path.join(settings.STORAGE_PATH, "screenshots", "fipe")
+        fipe_screenshot_path = None
+        if os.path.exists(fipe_screenshot_dir):
+            # Procurar screenshot para esta cotação
+            for filename in os.listdir(fipe_screenshot_dir):
+                if f"fipe_screenshot_{quote_id}_" in filename:
+                    fipe_screenshot_path = os.path.join(fipe_screenshot_dir, filename)
+                    break
+
+        # Adicionar fonte FIPE única (com ou sem screenshot)
+        sources_data.append({
+            "url": "https://veiculos.fipe.org.br/",
+            "price_value": quote_request.valor_medio,
+            "screenshot_path": fipe_screenshot_path
+        })
+
     # Get variation settings - prioridade: config do projeto > global > default
     variacao_maxima = 25.0
 
@@ -505,7 +550,9 @@ def generate_pdf(quote_id: int, db: Session = Depends(get_db)):
         pesquisador=quote_request.pesquisador or "Sistema",
         data_pesquisa=datetime.now(),
         variacao_percentual=quote_request.variacao_percentual,
-        variacao_maxima_percent=variacao_maxima
+        variacao_maxima_percent=variacao_maxima,
+        is_vehicle=is_vehicle,
+        fipe_data=fipe_data
     )
 
     # Calculate SHA256
