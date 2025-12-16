@@ -539,7 +539,10 @@ def resume_batch(
 def list_batches(
     page: int = 1,
     per_page: int = 20,
+    batch_id: Optional[int] = None,
     project_id: Optional[int] = None,
+    client_id: Optional[int] = None,
+    input_type: Optional[str] = None,
     status: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -547,12 +550,26 @@ def list_batches(
     """Lista todos os lotes com paginacao otimizada."""
     # Query base com joinedload para evitar N+1
     query = db.query(BatchQuoteJob).options(
-        joinedload(BatchQuoteJob.project)
+        joinedload(BatchQuoteJob.project).joinedload(Project.client)
     )
+
+    # Filtrar por ID do lote
+    if batch_id:
+        query = query.filter(BatchQuoteJob.id == batch_id)
 
     # Filtrar por projeto se especificado
     if project_id:
         query = query.filter(BatchQuoteJob.project_id == project_id)
+
+    # Filtrar por cliente (através do projeto)
+    if client_id:
+        query = query.join(Project, BatchQuoteJob.project_id == Project.id).filter(
+            Project.client_id == client_id
+        )
+
+    # Filtrar por tipo de entrada
+    if input_type:
+        query = query.filter(BatchQuoteJob.input_type == input_type)
 
     # Filtrar por status se especificado
     if status:
@@ -568,8 +585,16 @@ def list_batches(
     # Otimização: Usar subquery para contagem total evitando carregamento duplo
     from sqlalchemy import func as sql_func
     count_query = db.query(sql_func.count(BatchQuoteJob.id))
+    if batch_id:
+        count_query = count_query.filter(BatchQuoteJob.id == batch_id)
     if project_id:
         count_query = count_query.filter(BatchQuoteJob.project_id == project_id)
+    if client_id:
+        count_query = count_query.join(Project, BatchQuoteJob.project_id == Project.id).filter(
+            Project.client_id == client_id
+        )
+    if input_type:
+        count_query = count_query.filter(BatchQuoteJob.input_type == input_type)
     if status:
         try:
             status_enum = BatchJobStatus(status)

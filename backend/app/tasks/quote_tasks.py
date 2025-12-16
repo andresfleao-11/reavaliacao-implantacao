@@ -5,11 +5,12 @@ from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, Integ
 from app.models.quote_request import QuoteStatus
 from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
-from app.services.claude_client import ClaudeClient
+from app.services.claude_client import ClaudeClient, FipeApiParams
 from app.services.openai_client import OpenAIClient
 from app.services.search_provider import SerpApiProvider, prices_match, PRICE_MISMATCH_TOLERANCE
 from app.services.price_extractor import PriceExtractor
 from app.services.pdf_generator import PDFGenerator
+from app.services.fipe_client import FipeClient, FipeSearchResult
 from app.services.integration_logger import log_anthropic_call, log_serpapi_call
 from app.core.config import settings
 from sqlalchemy.orm import Session
@@ -174,6 +175,16 @@ def process_quote_request(self, quote_request_id: int):
         if analysis_result.total_tokens_used > 0:
             _register_ai_cost(db, quote_request, model, analysis_result.total_tokens_used, ai_provider)
 
+        # Verificar se é veículo (processamento via FIPE)
+        if analysis_result.tipo_processamento == "FIPE" and analysis_result.fipe_api:
+            logger.info(f"Detected vehicle - using FIPE API flow")
+            use_fallback = _process_fipe_quote(db, quote_request, analysis_result)
+            if not use_fallback:
+                return
+            # FIPE falhou, continuar com Google Shopping usando query de fallback
+            logger.info(f"FIPE failed, falling back to Google Shopping with query: {analysis_result.query_principal}")
+
+        # Fluxo padrão: Google Shopping via SerpAPI
         serpapi_key = _get_integration_setting(db, "SERPAPI", "api_key")
         if not serpapi_key:
             serpapi_key = settings.SERPAPI_API_KEY
@@ -215,6 +226,31 @@ def process_quote_request(self, quote_request_id: int):
 
         logger.info(f"Found {len(search_results)} search results")
         logger.info(f"Search log: {search_log.model_dump_json()}")
+
+        # Salvar resposta bruta do Google Shopping para consulta
+        # Usar raw_shopping_response que contém o JSON original da API SerpAPI
+        search_log_dict = search_log.model_dump()
+        raw_response = search_log_dict.pop('raw_shopping_response', None)  # Remove from search_log to avoid duplication
+
+        quote_request.google_shopping_response_json = {
+            "raw_api_response": raw_response,  # JSON original da primeira chamada SerpAPI
+            "processed_results": {
+                "results_count": len(search_results),
+                "products": [
+                    {
+                        "title": p.title,
+                        "price": p.price,
+                        "extracted_price": float(p.extracted_price) if p.extracted_price else None,
+                        "store_name": p.store_name,
+                        "domain": p.domain,
+                        "url": p.url
+                    } for p in search_results
+                ]
+            },
+            "search_log": search_log_dict,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        db.commit()
 
         # Salvar o log detalhado da pesquisa no banco
         search_log_entry = IntegrationLog(
@@ -265,131 +301,105 @@ def process_quote_request(self, quote_request_id: int):
         failed_urls = set()  # URLs que falharam (permite outros produtos do mesmo domínio)
 
         async def extract_prices_with_block_recalculation():
+            """
+            Lógica simplificada de extração com recálculo de bloco único:
+            1. Calcula 1 bloco por vez baseado nos produtos disponíveis
+            2. Se um produto falha, recalcula o bloco excluindo o produto
+            3. Produtos já validados só participam do novo bloco se estiverem na faixa de variação
+            4. Sistema de reserva: se o bloco atual não tem potencial, guarda resultado e tenta outro
+            """
             from app.models.quote_source import ExtractionMethod
             nonlocal valid_sources, valid_sources_by_url, valid_prices, failed_urls
 
             all_products = list(search_results)
             iteration = 0
-            max_iterations = 15
+            max_iterations = 20
 
-            # Sistema de reserva
+            # Sistema de reserva para quando precisamos tentar bloco alternativo
             reserve_sources = []
             reserve_sources_by_url = {}
             reserve_prices = {}
-            trying_alternative = False
-            alternative_failed = False
+            has_reserve = False
 
             async with PriceExtractor() as extractor:
                 while len(valid_sources) < num_quotes and iteration < max_iterations:
                     iteration += 1
 
-                    # Construir lista (excluir falhas por URL)
-                    products_for_blocks = [
+                    # Construir lista de produtos disponíveis (excluir falhas)
+                    available_products = [
                         p for p in all_products
                         if p.url not in failed_urls
                     ]
 
-                    if not products_for_blocks:
+                    if not available_products:
                         logger.info(f"Iteration {iteration}: No products remaining")
                         break
 
                     # Ordenar por preço
-                    products_for_blocks.sort(key=lambda p: float(p.extracted_price) if p.extracted_price else 0)
+                    available_products.sort(key=lambda p: float(p.extracted_price) if p.extracted_price else 0)
 
-                    # Criar blocos
-                    blocks = _create_variation_blocks_local(products_for_blocks, variacao_maxima, min_size=1)
-
-                    if not blocks:
-                        logger.info("No valid blocks could be created")
-                        break
-
-                    valid_urls = set(valid_prices.keys())
-                    needed = num_quotes - len(valid_sources)
-
-                    # Categorizar blocos
-                    blocks_with_all_valid_enough = []
-                    blocks_with_all_valid_not_enough = []
-                    blocks_without_valid_big = []
-
-                    for blk in blocks:
-                        block_urls = {p.url for p in blk}
-                        valid_in_blk = len(valid_urls & block_urls)
-                        contains_all = valid_in_blk == len(valid_urls) if valid_urls else True
-                        untried = len([p for p in blk if p.url not in valid_prices])
-
-                        if contains_all:
-                            if untried >= needed - valid_in_blk or len(blk) >= num_quotes:
-                                blocks_with_all_valid_enough.append(blk)
-                            else:
-                                blocks_with_all_valid_not_enough.append(blk)
-                        elif len(blk) >= num_quotes:
-                            blocks_without_valid_big.append(blk)
-
-                    # Ordenar
-                    sort_key = lambda b: (-len(b), float(b[0].extracted_price) if b[0].extracted_price else 0)
-                    blocks_with_all_valid_enough.sort(key=sort_key)
-                    blocks_with_all_valid_not_enough.sort(key=sort_key)
-                    blocks_without_valid_big.sort(key=sort_key)
-
-                    # Decidir qual bloco usar
-                    block = None
-
-                    if blocks_with_all_valid_enough:
-                        block = blocks_with_all_valid_enough[0]
-                        logger.info(f"  Using block with all {len(valid_urls)} valid + untried")
-                    elif blocks_with_all_valid_not_enough and not trying_alternative:
-                        if blocks_without_valid_big and not alternative_failed:
-                            # Guardar como reserva e tentar alternativo
-                            logger.info(f"  Block with valid doesn't have enough. Saving reserve, trying alternative.")
-                            reserve_sources = list(valid_sources)
-                            reserve_sources_by_url = dict(valid_sources_by_url)
-                            reserve_prices = dict(valid_prices)
-
-                            # Limpar para tentar novo bloco
-                            valid_sources = []
-                            valid_sources_by_url = {}
-                            valid_prices = {}
-                            trying_alternative = True
-
-                            block = blocks_without_valid_big[0]
-                            logger.info(f"  Trying alternative block with {len(block)} products")
-                        else:
-                            block = blocks_with_all_valid_not_enough[0]
-                            logger.info(f"  Using block with valid (limited options)")
-                    elif trying_alternative and blocks_without_valid_big:
-                        block = blocks_without_valid_big[0]
-                    else:
-                        all_sorted = sorted(blocks, key=sort_key)
-                        if all_sorted:
-                            block = all_sorted[0]
-                            logger.info(f"  Using fallback block")
+                    # Calcular UM bloco único
+                    block = _calculate_best_block(
+                        available_products,
+                        valid_prices,
+                        variacao_maxima,
+                        num_quotes
+                    )
 
                     if not block:
-                        logger.info(f"  No suitable block found")
+                        logger.info(f"Iteration {iteration}: No valid block could be created")
                         break
 
-                    block_urls_set = {p.url for p in block}
-                    valid_in_block = len(valid_urls & block_urls_set)
+                    # Verificar quantos produtos validados estão no bloco
+                    block_urls = {p.url for p in block}
+                    valid_in_block = [url for url in valid_prices.keys() if url in block_urls]
+                    valid_outside_block = [url for url in valid_prices.keys() if url not in block_urls]
+                    untried_in_block = [p for p in block if p.url not in valid_prices and p.url not in failed_urls]
+                    needed = num_quotes - len(valid_sources)
 
                     logger.info(
                         f"Iteration {iteration}: Block with {len(block)} products "
                         f"(R$ {block[0].extracted_price} - R$ {block[-1].extracted_price}), "
-                        f"{valid_in_block} valid, need {needed} more"
+                        f"{len(valid_in_block)} valid in block, {len(valid_outside_block)} valid outside, "
+                        f"{len(untried_in_block)} untried, need {needed} more"
                     )
 
+                    # Se há validados fora do bloco, decidir o que fazer
+                    if valid_outside_block and not has_reserve:
+                        # Verificar se o bloco atual tem potencial para N cotações
+                        potential = len(valid_in_block) + len(untried_in_block)
+                        if potential < num_quotes:
+                            # Bloco atual não tem potencial - guardar como reserva e tentar outro
+                            logger.info(
+                                f"  Block potential ({potential}) < required ({num_quotes}). "
+                                f"Saving {len(valid_sources)} as reserve, trying fresh block."
+                            )
+                            reserve_sources = list(valid_sources)
+                            reserve_sources_by_url = dict(valid_sources_by_url)
+                            reserve_prices = dict(valid_prices)
+                            has_reserve = True
+
+                            # Limpar validados para tentar bloco fresco
+                            valid_sources = []
+                            valid_sources_by_url = {}
+                            valid_prices = {}
+                            continue
+
+                    # Extrair preços dos produtos do bloco
                     new_failures = []
 
                     for product in block:
                         if len(valid_sources) >= num_quotes:
                             break
 
-                        # Reutilizar válido (por URL, não por domínio)
+                        # Reutilizar válido
                         if product.url in valid_sources_by_url:
-                            logger.info(f"    ✓ Reused: {product.domain} - R$ {valid_prices[product.url]}")
                             continue
 
                         if product.url in failed_urls:
                             continue
+
+                        logger.info(f"    → Extracting: {product.domain} ({product.url[:60]}...)")
 
                         try:
                             screenshot_filename = f"screenshot_{quote_request_id}_{len(valid_sources)}.png"
@@ -406,7 +416,7 @@ def process_quote_request(self, quote_request_id: int):
                                 final_method = method
                                 google_price = product.extracted_price
 
-                                # Validar preço do site contra Google Shopping (PRICE_MISMATCH)
+                                # Validar preço do site contra Google Shopping
                                 if google_price and google_price > Decimal("0"):
                                     if not prices_match(float(price), float(google_price)):
                                         price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
@@ -415,8 +425,6 @@ def process_quote_request(self, quote_request_id: int):
                                             f"R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)"
                                         )
                                         raise ValueError(f"PRICE_MISMATCH: {price_diff:.1f}%")
-                                    else:
-                                        logger.info(f"Price validated for {product.domain}: R$ {price}")
 
                                 screenshot_file = File(
                                     type=FileType.SCREENSHOT,
@@ -443,41 +451,104 @@ def process_quote_request(self, quote_request_id: int):
                                 valid_sources_by_url[product.url] = source
                                 valid_prices[product.url] = float(final_price)
 
-                                logger.info(f"✓ Added [{len(valid_sources)}/{num_quotes}]: {product.domain} ({product.url[:50]}...) - R$ {final_price}")
+                                logger.info(f"    ✓ Added [{len(valid_sources)}/{num_quotes}]: {product.domain} - R$ {final_price}")
                             else:
                                 raise ValueError(f"Invalid price: {price}")
 
                         except Exception as e:
-                            logger.error(f"✗ Failed {product.domain} ({product.url[:50]}...): {str(e)[:100]}")
+                            logger.error(f"    ✗ Failed {product.domain}: {str(e)[:100]}")
                             new_failures.append(product.url)
-                            # Produto falhou - não entra na cotação (sem fallback)
 
-                    # Atualizar falhas (por URL)
+                    # Atualizar falhas
                     failed_urls.update(new_failures)
 
                     # Verificar resultado
                     if len(valid_sources) >= num_quotes:
                         logger.info(f"Success! Got {len(valid_sources)} quotes after {iteration} iterations")
                         break
-                    elif trying_alternative and new_failures:
-                        # Bloco alternativo falhou - voltar para reserva
-                        logger.info(f"  Alternative failed. Returning to reserve ({len(reserve_sources)} results)")
-                        valid_sources = reserve_sources
-                        valid_sources_by_url = reserve_sources_by_url
-                        valid_prices = reserve_prices
-                        trying_alternative = False
-                        alternative_failed = True
-                    elif not new_failures and len([p for p in block if p.url not in valid_prices and p.url not in failed_urls]) == 0:
-                        logger.info(f"No progress in iteration {iteration}, stopping")
-                        break
-                    else:
+
+                    # Verificar produtos restantes
+                    untried_global = [p for p in all_products if p.url not in valid_prices and p.url not in failed_urls]
+
+                    logger.info(
+                        f"  End iteration {iteration}: {len(valid_sources)}/{num_quotes} quotes, "
+                        f"{len(new_failures)} new failures, {len(untried_global)} untried globally"
+                    )
+
+                    if not untried_global:
+                        # Não há mais produtos para tentar
+                        if has_reserve and len(reserve_sources) > len(valid_sources):
+                            # Reserva é melhor - usar ela
+                            logger.info(
+                                f"  No more products. Reserve ({len(reserve_sources)}) > current ({len(valid_sources)}). Using reserve."
+                            )
+                            valid_sources = reserve_sources
+                            valid_sources_by_url = reserve_sources_by_url
+                            valid_prices = reserve_prices
+
                         logger.info(
-                            f"  → Iteration {iteration}: {len(valid_sources)}/{num_quotes} quotes, "
-                            f"{len(all_products) - len(failed_urls)} products remaining"
+                            f"All products tested. Final: {len(valid_sources)}/{num_quotes} quotes, "
+                            f"{len(failed_urls)} failed"
                         )
+                        break
+
+                    # Há produtos restantes - recalcular bloco na próxima iteração
+                    if new_failures:
+                        logger.info(f"  {len(new_failures)} failures. Recalculating block...")
+
+        def _calculate_best_block(products, valid_prices, max_variation, num_quotes):
+            """
+            Calcula o melhor bloco único baseado nos produtos disponíveis.
+            Prioriza blocos que:
+            1. Contêm todos os produtos já validados
+            2. Têm produtos não-testados suficientes para completar N cotações
+            3. Têm o menor preço base
+            """
+            if not products:
+                return None
+
+            valid_urls = set(valid_prices.keys())
+            best_block = None
+            best_score = (-1, -1, float('inf'))  # (contains_all_valid, untried_count, min_price)
+
+            for start_idx, start_product in enumerate(products):
+                if not start_product.extracted_price:
+                    continue
+
+                min_price = float(start_product.extracted_price)
+                max_allowed = min_price * (1 + max_variation)
+
+                # Construir bloco
+                block = []
+                for product in products[start_idx:]:
+                    if product.extracted_price and float(product.extracted_price) <= max_allowed:
+                        block.append(product)
+                    else:
+                        break
+
+                if not block:
+                    continue
+
+                # Calcular score do bloco
+                block_urls = {p.url for p in block}
+                valid_in_block = len(valid_urls & block_urls)
+                contains_all_valid = valid_in_block == len(valid_urls) if valid_urls else True
+                untried = len([p for p in block if p.url not in valid_prices])
+
+                score = (
+                    1 if contains_all_valid else 0,  # Prioridade 1: contém todos validados
+                    untried,                          # Prioridade 2: mais produtos não-testados
+                    -min_price                        # Prioridade 3: menor preço (negativo para ordenar desc->asc)
+                )
+
+                if score > best_score:
+                    best_score = score
+                    best_block = block
+
+            return best_block
 
         def _create_variation_blocks_local(products, max_variation, min_size=1):
-            """Cria blocos de variação localmente"""
+            """Cria blocos de variação localmente (mantido para compatibilidade)"""
             if not products:
                 return []
 
@@ -862,3 +933,191 @@ def _register_serpapi_cost(db: Session, quote_request: QuoteRequest, num_api_cal
     except Exception as e:
         logger.error(f"Erro ao registrar custo SERPAPI: {e}")
         db.rollback()
+
+
+def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_result) -> bool:
+    """
+    Processa cotação de veículo usando API FIPE.
+
+    Returns:
+        bool: True se deve usar fallback para Google Shopping, False se concluiu com sucesso
+    """
+    import asyncio
+    from app.services.fipe_client import FipeClient
+    from app.services.fipe_pdf_generator import FipePDFGenerator
+
+    try:
+        fipe_params = analysis_result.fipe_api
+
+        _update_progress(db, quote_request, "searching_fipe", 50,
+                        f"Consultando Tabela FIPE para {analysis_result.marca} {analysis_result.modelo}...")
+
+        # Criar cliente FIPE
+        fipe_client = FipeClient()
+
+        # Executar busca na FIPE
+        async def search_fipe():
+            return await fipe_client.search_vehicle(
+                vehicle_type=fipe_params.vehicle_type,
+                busca_marca=fipe_params.busca_marca or {},
+                busca_modelo=fipe_params.busca_modelo or {},
+                year_id_estimado=fipe_params.year_id_estimado,
+                codigo_fipe=fipe_params.codigo_fipe,
+                ano_modelo=analysis_result.especificacoes.get("essenciais", {}).get("ano_modelo") if hasattr(analysis_result, 'especificacoes') else None
+            )
+
+        fipe_result = asyncio.run(search_fipe())
+
+        logger.info(f"FIPE search result: success={fipe_result.success}, api_calls={fipe_result.api_calls}")
+
+        # Salvar resultado FIPE no JSON da cotação
+        fipe_data = {
+            "success": fipe_result.success,
+            "api_calls": fipe_result.api_calls,
+            "search_path": fipe_result.search_path,
+            "brand_id": fipe_result.brand_id,
+            "brand_name": fipe_result.brand_name,
+            "model_id": fipe_result.model_id,
+            "model_name": fipe_result.model_name,
+            "year_id": fipe_result.year_id,
+            "error_message": fipe_result.error_message
+        }
+
+        if fipe_result.price:
+            fipe_data["price"] = {
+                "price": fipe_result.price.price,
+                "price_value": fipe_result.price.price_value,
+                "brand": fipe_result.price.brand,
+                "model": fipe_result.price.model,
+                "modelYear": fipe_result.price.modelYear,
+                "fuel": fipe_result.price.fuel,
+                "codeFipe": fipe_result.price.codeFipe,
+                "referenceMonth": fipe_result.price.referenceMonth,
+                "vehicleType": fipe_result.price.vehicleType,
+                "fuelAcronym": fipe_result.price.fuelAcronym
+            }
+
+        # Atualizar claude_payload_json com dados da FIPE
+        payload = quote_request.claude_payload_json or {}
+        payload["fipe_result"] = fipe_data
+        quote_request.claude_payload_json = payload
+        db.commit()
+
+        if not fipe_result.success:
+            # FIPE falhou - tentar fallback para Google Shopping se disponível
+            if analysis_result.fallback_google_shopping:
+                logger.warning(f"FIPE search failed: {fipe_result.error_message}. Trying Google Shopping fallback...")
+                quote_request.error_message = f"FIPE: {fipe_result.error_message}. Tentando Google Shopping..."
+                db.commit()
+                # Alterar query para usar fallback
+                analysis_result.query_principal = analysis_result.fallback_google_shopping.get("query_principal", "")
+                # Retornar True para continuar com fluxo normal (Google Shopping)
+                return True
+            else:
+                raise ValueError(f"Consulta FIPE falhou: {fipe_result.error_message}")
+
+        _update_progress(db, quote_request, "processing_fipe_result", 70,
+                        f"Preço FIPE encontrado: {fipe_result.price.price}")
+
+        # Criar fonte de preço (QuoteSource) com dados da FIPE
+        from app.models.quote_source import ExtractionMethod
+
+        fipe_source = QuoteSource(
+            quote_request_id=quote_request.id,
+            url=f"https://veiculos.fipe.org.br/?codigoTipoVeiculo={fipe_result.price.vehicleType}&codigoFipe={fipe_result.price.codeFipe}",
+            domain="fipe.org.br",
+            page_title=f"Tabela FIPE - {fipe_result.price.brand} {fipe_result.price.model} {fipe_result.price.modelYear}",
+            price_value=Decimal(str(fipe_result.price.price_value)),
+            currency="BRL",
+            extraction_method=ExtractionMethod.API_FIPE,
+            is_accepted=True
+        )
+        db.add(fipe_source)
+        db.flush()
+
+        logger.info(f"Created FIPE source: {fipe_source.page_title} - R$ {fipe_source.price_value}")
+
+        # Definir valores de preço
+        quote_request.valor_medio = fipe_source.price_value
+        quote_request.valor_minimo = fipe_source.price_value
+        quote_request.valor_maximo = fipe_source.price_value
+        quote_request.variacao_percentual = Decimal("0")
+
+        _update_progress(db, quote_request, "generating_pdf", 85, "Gerando PDF da cotação FIPE...")
+
+        # Gerar PDF da cotação FIPE
+        try:
+            pdf_generator = FipePDFGenerator()
+            pdf_filename = f"cotacao_fipe_{quote_request.id}.pdf"
+            pdf_path = os.path.join(settings.STORAGE_PATH, "documents", pdf_filename)
+            os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+
+            pdf_generator.generate(
+                output_path=pdf_path,
+                quote_request=quote_request,
+                fipe_result=fipe_result,
+                analysis_result=analysis_result
+            )
+
+            # Registrar documento gerado
+            pdf_file = File(
+                type=FileType.GENERATED_DOCUMENT,
+                mime_type="application/pdf",
+                storage_path=pdf_path,
+                sha256=_calculate_sha256(pdf_path)
+            )
+            db.add(pdf_file)
+            db.flush()
+
+            doc = GeneratedDocument(
+                quote_request_id=quote_request.id,
+                file_id=pdf_file.id,
+                document_type="fipe_quote_pdf",
+                title=f"Cotação Tabela FIPE - {fipe_result.price.brand} {fipe_result.price.model}"
+            )
+            db.add(doc)
+
+            logger.info(f"Generated FIPE PDF: {pdf_path}")
+
+        except Exception as pdf_error:
+            logger.error(f"Error generating FIPE PDF: {pdf_error}")
+            # Não falhar a cotação por erro no PDF
+
+        # Registrar log de integração FIPE
+        fipe_log = IntegrationLog(
+            quote_request_id=quote_request.id,
+            integration_type="fipe",
+            activity=f"Consulta Tabela FIPE - {fipe_result.api_calls} chamadas",
+            response_summary=fipe_data
+        )
+        db.add(fipe_log)
+
+        # Finalizar cotação
+        _update_progress(db, quote_request, "finalizing", 95, "Finalizando cotação FIPE...")
+
+        quote_request.status = QuoteStatus.DONE
+        quote_request.current_step = "completed"
+        quote_request.step_details = f"Cotação FIPE concluída! Valor: {fipe_result.price.price}"
+        quote_request.progress_percentage = 100
+
+        db.commit()
+        db.refresh(quote_request)
+
+        logger.info(f"FIPE quote {quote_request.id} completed. Price: {fipe_result.price.price}")
+        return False  # Sucesso - não precisa de fallback
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Error processing FIPE quote {quote_request.id}: {error_msg}")
+
+        db.rollback()
+
+        quote_request = db.query(QuoteRequest).filter(QuoteRequest.id == quote_request.id).first()
+        if quote_request and quote_request.status != QuoteStatus.CANCELLED:
+            quote_request.status = QuoteStatus.ERROR
+            quote_request.error_message = error_msg[:1000]
+            quote_request.current_step = "error"
+            quote_request.step_details = f"Erro FIPE: {error_msg[:500]}"
+            db.commit()
+
+        raise

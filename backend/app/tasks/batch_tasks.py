@@ -478,27 +478,10 @@ def process_batch_quote(self, quote_request_id: int, batch_job_id: int):
                             continue
 
                     except Exception as e:
-                        logger.error(f"Error extracting price from {result.url}: {str(e)[:100]}")
+                        logger.error(f"✗ Failed extraction from {result.domain}: {str(e)[:100]}")
+                        # Não adicionar com fallback - continuar tentando outros produtos
 
-                    # Fallback: usar preco do Google sem screenshot
-                    source = QuoteSource(
-                        quote_request_id=quote_request.id,
-                        url=result.url or "",
-                        domain=result.domain or result.store_name or "",
-                        page_title=result.title or "",
-                        price_value=Decimal(str(result.extracted_price)),
-                        currency="BRL",
-                        extraction_method="LLM",
-                        screenshot_file_id=None,
-                        captured_at=datetime.now(timezone.utc),
-                        is_outlier=False,
-                        is_accepted=True
-                    )
-                    db.add(source)
-                    sources.append(source)
-                    source_index += 1
-                    logger.info(f"✓ Added (no screenshot) [{len(sources)}/{num_quotes}]: {result.domain} - R$ {result.extracted_price}")
-
+            logger.info(f"Extraction complete: {len(sources)}/{num_quotes} quotes obtained")
             return sources
 
         valid_sources = asyncio.run(process_sources())

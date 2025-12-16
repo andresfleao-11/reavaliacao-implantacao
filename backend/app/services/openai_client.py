@@ -101,81 +101,170 @@ class OpenAIClient:
                 })
 
         # ETAPA 1: OCR e identificação básica
-        ocr_prompt = """
-Você é um assistente especializado em identificação de equipamentos.
+        ocr_prompt = """# AGENTE: Especialista em OCR para Reavaliação Patrimonial
 
-## TAREFA: OCR E IDENTIFICAÇÃO BÁSICA
+## CONTEXTO
+
+Você analisa imagens de etiquetas de bens patrimoniais para extrair dados que permitam **pesquisa de preço de reposição** em órgãos públicos brasileiros.
+
+**Base normativa:** NBC TSP 07 | MCASP | Lei 14.133/2021
+
+---
+
+## TAREFA
 
 Analise a imagem e extraia:
 
-1. **OCR COMPLETO**: Transcreva TODO o texto visível na imagem literalmente
+### 1. OCR COMPLETO
+Transcreva **TODO** o texto visível, literalmente.
 
-2. **Tipo de produto**: (notebook, ar condicionado, impressora, etc.)
+### 2. IDENTIFICADORES
 
-3. **Marca**: Se visível na etiqueta
+| Campo | Descrição | Prioridade |
+|-------|-----------|------------|
+| **Part Number** | P/N - identifica configuração exata do produto | **CRÍTICA** |
+| **Número de série** | S/N, Serial, Service Tag - identificador único | Alta |
+| **Marca** | Fabricante | Alta |
+| **Modelo** | Código do modelo (usar versão mais completa) | Alta |
+| **Tipo** | notebook, ar_condicionado, impressora, monitor, etc. | Alta |
 
-4. **Modelo**: Código do modelo (ex: UL1502Y, 42AFCB12M5)
+> ⚠️ **MODELO DUPLICADO**: Etiquetas frequentemente mostram o modelo em versão curta e completa. **Sempre usar a string mais longa.**
+> Exemplo: "Inspiron 15" e "Inspiron 15 3501-M50P" → usar **"Inspiron 15 3501-M50P"**
 
-## ESPECIFICAÇÕES TÉCNICAS RELEVANTES PARA COTAÇÃO
-Identifique se as seguintes specs estão VISÍVEIS na imagem:
+### 3. ESPECIFICAÇÕES VISÍVEIS
 
-Para NOTEBOOK:
-- Processador (Intel i5, i7, Ryzen 5, Ryzen 7, etc.) - VISÍVEL?
-- Memória RAM (8GB, 16GB, etc.) - VISÍVEL?
-- Armazenamento (SSD 256GB, SSD 512GB, HD 1TB, etc.) - VISÍVEL?
-- Tamanho da tela (14", 15.6", etc.) - VISÍVEL?
+Extraia **APENAS** o que estiver **VISÍVEL na imagem**:
 
-Para AR CONDICIONADO:
-- Capacidade BTUs (9000, 12000, 18000, etc.) - VISÍVEL?
-- Ciclo (Frio/Quente-Frio) - VISÍVEL?
-- Tipo (Split, Inverter) - VISÍVEL?
+| Tipo | Specs relevantes |
+|------|------------------|
+| **Notebook** | Processador (i3/i5/i7, Ryzen), RAM (8GB, 16GB), Armazenamento (SSD/HD), Tela |
+| **Ar-condicionado** | BTUs, Ciclo (Frio/Quente-Frio), Tecnologia (Inverter), Voltagem |
+| **Impressora** | Tecnologia (Laser/Jato), Funções (Multi/Wifi/Duplex), Velocidade (ppm) |
+| **Monitor** | Tamanho, Resolução, Tipo painel |
 
-Para IMPRESSORA:
-- Tipo (laser, jato de tinta) - VISÍVEL?
-- Recursos (wifi, duplex) - VISÍVEL?
+### 4. IGNORAR (dados de fonte/certificações)
+- Input: 19V, 100-240V~, corrente (2.37A)
+- Potência fonte: 45W, 65W, 90W
+- Certificações: ANATEL, FCC, CE
 
-Retorne um JSON:
+---
+
+## FORMATO DE SAÍDA
+
+```json
 {
-  "ocr_completo": "todo texto extraído da imagem",
-  "tipo_produto": "notebook/ar_condicionado/impressora/outro",
-  "marca": "marca identificada ou null",
-  "modelo": "código do modelo ou null",
+  "ocr_completo": "transcrição literal",
+  "identificadores": {
+    "part_number": "P/N ou null",
+    "numero_serie": "S/N ou null",
+    "marca": "marca ou null",
+    "modelo": "versão mais completa do modelo ou null",
+    "tipo_produto": "notebook | ar_condicionado | impressora | monitor | outro"
+  },
   "specs_visiveis": {
-    "processador": "valor ou null",
-    "ram": "valor ou null",
-    "armazenamento": "valor ou null",
-    "tela": "valor ou null",
-    "btus": "valor ou null",
-    "ciclo": "valor ou null",
+    "processador": null,
+    "ram": null,
+    "armazenamento": null,
+    "tela": null,
+    "btus": null,
+    "ciclo": null,
+    "voltagem": null,
     "outras": {}
   },
-  "tem_specs_relevantes": true/false
+  "tem_specs_relevantes": true | false,
+  "pode_consultar_fabricante": true | false,
+  "observacoes": "notas relevantes"
 }
+```
 
-## CRITÉRIO CRÍTICO PARA tem_specs_relevantes:
+### Critérios:
+- `tem_specs_relevantes` = true: Notebook (processador/RAM/armazenamento) | Ar-cond (BTUs) | Impressora (tecnologia)
+- `pode_consultar_fabricante` = true: P/N ou S/N identificado **E** marca identificada
 
-⚠️ ATENÇÃO - LEIA COM CUIDADO:
+---
 
-Para NOTEBOOK, tem_specs_relevantes = true SOMENTE SE pelo menos UMA destas specs estiver visível:
-- Processador (Intel Core i3/i5/i7, AMD Ryzen 3/5/7, etc.)
-- Memória RAM (4GB, 8GB, 16GB, 32GB)
-- Armazenamento (SSD ou HD com capacidade)
+## EXEMPLOS
 
-❌ NÃO SÃO specs relevantes para cotação de notebook:
-- Voltagem de entrada (19V, 110V, 220V)
-- Potência da fonte/carregador (45W, 65W, 90W)
-- Corrente (2.37A, 3.42A)
-- Número de série
-- Modelo de placa WiFi (RTL8821CE)
-- Certificações (ANATEL, FCC, CE)
+### Etiqueta com modelo duplicado
+**OCR:** "Dell Inc. | Inspiron 15 | Model: Inspiron 15 3501-M50P | P/N: i3501-5081BLK | S/N: 7XK9M33"
 
-Exemplo: Uma etiqueta mostrando "Input: 19V 2.37A 45W" é uma etiqueta da FONTE DE ALIMENTAÇÃO, não do notebook. Neste caso tem_specs_relevantes = false.
+```json
+{
+  "ocr_completo": "Dell Inc. Inspiron 15 Model: Inspiron 15 3501-M50P P/N: i3501-5081BLK S/N: 7XK9M33",
+  "identificadores": {
+    "part_number": "i3501-5081BLK",
+    "numero_serie": "7XK9M33",
+    "marca": "Dell",
+    "modelo": "Inspiron 15 3501-M50P",
+    "tipo_produto": "notebook"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": null, "ciclo": null, "voltagem": null, "outras": {}
+  },
+  "tem_specs_relevantes": false,
+  "pode_consultar_fabricante": true,
+  "observacoes": "Modelo aparece 2x na etiqueta. Selecionada versão completa (3501-M50P). P/N permite consulta direta de specs."
+}
+```
 
-Para AR CONDICIONADO, tem_specs_relevantes = true SOMENTE SE:
-- Capacidade em BTUs estiver visível
+### Ar-condicionado
+**OCR:** "LG | S4-Q12JA3AD | 12000 BTU/h | Inverter | 220V | S/N: 203TAZZ0K789"
 
-Para IMPRESSORA, tem_specs_relevantes = true SOMENTE SE:
-- Tipo de impressão (laser/jato de tinta) estiver visível
+```json
+{
+  "ocr_completo": "LG S4-Q12JA3AD 12000 BTU/h Inverter 220V S/N: 203TAZZ0K789",
+  "identificadores": {
+    "part_number": null,
+    "numero_serie": "203TAZZ0K789",
+    "marca": "LG",
+    "modelo": "S4-Q12JA3AD",
+    "tipo_produto": "ar_condicionado"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": "12000", "ciclo": null, "voltagem": "220V",
+    "outras": { "tecnologia": "Inverter" }
+  },
+  "tem_specs_relevantes": true,
+  "pode_consultar_fabricante": true,
+  "observacoes": "Specs completas para cotação disponíveis na etiqueta."
+}
+```
+
+### Etiqueta de FONTE (não usar)
+**OCR:** "AC Adapter | Input: 100-240V~ | Output: 19V 2.37A 45W | Model: ADP-45BW"
+
+```json
+{
+  "ocr_completo": "AC Adapter Input: 100-240V~ Output: 19V 2.37A 45W Model: ADP-45BW",
+  "identificadores": {
+    "part_number": null,
+    "numero_serie": null,
+    "marca": null,
+    "modelo": "ADP-45BW",
+    "tipo_produto": "fonte_alimentacao"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": null, "ciclo": null, "voltagem": null,
+    "outras": { "potencia_saida": "45W" }
+  },
+  "tem_specs_relevantes": false,
+  "pode_consultar_fabricante": false,
+  "observacoes": "ATENÇÃO: Etiqueta da FONTE, não do equipamento. Não usar para cotação."
+}
+```
+
+---
+
+## INSTRUÇÃO FINAL
+
+1. Extraia todo texto visível
+2. Se modelo aparecer duplicado, **usar a string mais longa/completa**
+3. Priorize **Part Number** (identifica configuração exata)
+4. Classifique corretamente: equipamento vs. fonte/acessório
+5. Retorne **APENAS o JSON**
 """
 
         content.insert(0, {"type": "text", "text": ocr_prompt})
@@ -209,8 +298,23 @@ Para IMPRESSORA, tem_specs_relevantes = true SOMENTE SE:
         ocr_text = ocr_response.choices[0].message.content
         ocr_data = self._parse_json(ocr_text)
 
-        logger.info(f"OCR resultado: tipo={ocr_data.get('tipo_produto')}, marca={ocr_data.get('marca')}, modelo={ocr_data.get('modelo')}")
-        logger.info(f"Tem specs relevantes: {ocr_data.get('tem_specs_relevantes')}")
+        # Extrair identificadores (novo formato com objeto aninhado)
+        identificadores = ocr_data.get('identificadores', {})
+        tipo_produto = identificadores.get('tipo_produto') or ocr_data.get('tipo_produto')
+        marca = identificadores.get('marca') or ocr_data.get('marca')
+        modelo = identificadores.get('modelo') or ocr_data.get('modelo')
+        numero_serie = identificadores.get('numero_serie')
+        part_number = identificadores.get('part_number')
+
+        # Normalizar para formato plano (compatibilidade)
+        ocr_data['tipo_produto'] = tipo_produto
+        ocr_data['marca'] = marca
+        ocr_data['modelo'] = modelo
+        ocr_data['numero_serie'] = numero_serie
+        ocr_data['part_number'] = part_number
+
+        logger.info(f"OCR resultado: tipo={tipo_produto}, marca={marca}, modelo={modelo}, S/N={numero_serie}")
+        logger.info(f"Tem specs relevantes: {ocr_data.get('tem_specs_relevantes')}, Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante')}")
 
         # ETAPA 2: Gerar resultado final com query otimizada
         final_prompt = self._build_final_prompt(ocr_data)
@@ -271,8 +375,11 @@ Gerar queries otimizadas para buscar **cotações de preços** no Google Shoppin
 - Tipo de produto: {ocr_data.get('tipo_produto', 'N/A')}
 - Marca: {ocr_data.get('marca', 'N/A')}
 - Modelo: {ocr_data.get('modelo', 'N/A')}
+- Número de série: {ocr_data.get('numero_serie', 'N/A')}
+- Part Number: {ocr_data.get('part_number', 'N/A')}
 - Specs visíveis na imagem: {json.dumps(ocr_data.get('specs_visiveis') or {}, ensure_ascii=False)}
 - Tem specs relevantes: {ocr_data.get('tem_specs_relevantes', False)}
+- Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante', False)}
 
 ---
 

@@ -1,7 +1,7 @@
 # Documentacao Tecnica: Sistema de Cotacao de Precos
 
-**Versao:** 1.0
-**Data:** Dezembro 2024
+**Versao:** 2.0
+**Data:** Dezembro 2024 (Atualizado: 16/12/2024)
 **Sistema:** Reavaliacao Patrimonial
 
 ---
@@ -465,44 +465,130 @@ O sistema de cotacao de precos realiza pesquisa automatizada de valores de merca
 
 ---
 
-### 4.5 Etapa 4: Criacao de Blocos de Variacao
+### 4.5 Etapa 4: Calculo de Bloco Unico de Variacao
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    ALGORITMO SLIDING WINDOW                     │
+│                    ALGORITMO DE BLOCO UNICO                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Parametro: variacao_maxima = 25%                               │
+│  Parametros:                                                    │
+│  - variacao_maxima = 25%                                        │
+│  - max_iterations = 20                                          │
 │                                                                 │
-│  Exemplo com produtos:                                          │
+│  IMPORTANTE: Calcula apenas 1 BLOCO por iteracao               │
+│  Se um produto falha, RECALCULA o bloco na proxima iteracao    │
+│                                                                 │
+│  Exemplo com produtos disponiveis:                              │
 │  [R$2.000, R$2.100, R$2.200, R$2.400, R$2.500, R$3.000]        │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ BLOCO 1 (inicia R$2.000):                               │   │
+│  │ Iteracao 1: Calcula MELHOR bloco                        │   │
 │  │                                                          │   │
-│  │   Max permitido = R$2.000 x 1.25 = R$2.500              │   │
+│  │   Criterios de priorizacao:                             │   │
+│  │   1. Contem todos os produtos ja validados              │   │
+│  │   2. Mais produtos nao-testados                         │   │
+│  │   3. Menor preco base                                   │   │
 │  │                                                          │   │
-│  │   [R$2.000, R$2.100, R$2.200, R$2.400, R$2.500] ✓       │   │
-│  │   R$3.000 > R$2.500 ✗                                   │   │
+│  │   Bloco escolhido (R$2.000 base):                       │   │
+│  │   [R$2.000, R$2.100, R$2.200, R$2.400, R$2.500]         │   │
 │  │                                                          │   │
-│  │   Tamanho: 5 produtos                                   │   │
+│  │   Tenta extrair de R$2.000... FALHA ✗                   │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────┐   │
-│  │ BLOCO 2 (inicia R$2.100):                               │   │
+│  │ Iteracao 2: RECALCULA bloco (exclui R$2.000)            │   │
 │  │                                                          │   │
-│  │   Max permitido = R$2.100 x 1.25 = R$2.625              │   │
+│  │   Produtos disponiveis: [R$2.100...R$3.000]             │   │
 │  │                                                          │   │
-│  │   [R$2.100, R$2.200, R$2.400, R$2.500] ✓                │   │
+│  │   Novo bloco (R$2.100 base):                            │   │
+│  │   [R$2.100, R$2.200, R$2.400, R$2.500]                  │   │
 │  │                                                          │   │
-│  │   Tamanho: 4 produtos                                   │   │
+│  │   Tenta extrair de R$2.100... SUCESSO ✓ [1/3]           │   │
+│  │   Tenta extrair de R$2.200... SUCESSO ✓ [2/3]           │   │
+│  │   Tenta extrair de R$2.400... SUCESSO ✓ [3/3]           │   │
 │  └─────────────────────────────────────────────────────────┘   │
 │                                                                 │
-│  Ordenacao dos blocos:                                          │
-│  1. Mais produtos primeiro (maior chance de sucesso)           │
-│  2. Menor preco inicial (opcoes mais baratas)                  │
+│  SISTEMA DE RESERVA:                                            │
+│  - Se produtos validados ficam FORA do novo bloco,             │
+│    guarda como reserva e tenta bloco fresco                    │
+│  - No final, compara: usa o que tiver mais cotacoes            │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+#### Fluxo de Decisao do Bloco:
+
+```
+                    ┌──────────────────────────────┐
+                    │ Inicio da Iteracao           │
+                    └──────────────┬───────────────┘
+                                   │
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │ Excluir produtos que falharam│
+                    │ (failed_urls)                │
+                    └──────────────┬───────────────┘
+                                   │
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │ Ordenar por preco            │
+                    └──────────────┬───────────────┘
+                                   │
+                                   ▼
+                    ┌──────────────────────────────┐
+                    │ Calcular MELHOR bloco unico  │
+                    │ (prioriza validados + untried)│
+                    └──────────────┬───────────────┘
+                                   │
+                    ┌──────────────┴───────────────┐
+                    │                              │
+                    ▼                              ▼
+     ┌──────────────────────┐      ┌──────────────────────┐
+     │ Validados DENTRO     │      │ Validados FORA       │
+     │ do bloco             │      │ do bloco             │
+     │                      │      │                      │
+     │ Continua extraindo   │      │ Potencial < N?       │
+     └──────────┬───────────┘      └──────────┬───────────┘
+                │                             │
+                │                   ┌─────────┴─────────┐
+                │                   │                   │
+                │                   ▼                   ▼
+                │        ┌─────────────────┐  ┌─────────────────┐
+                │        │ SIM: Guarda     │  │ NAO: Continua   │
+                │        │ como RESERVA    │  │ com bloco atual │
+                │        │ Tenta novo bloco│  │                 │
+                │        └─────────────────┘  └─────────────────┘
+                │
+                ▼
+     ┌──────────────────────┐
+     │ Extrair precos       │
+     │ do bloco             │
+     └──────────┬───────────┘
+                │
+       ┌────────┴────────┐
+       │                 │
+       ▼                 ▼
+  ┌─────────┐       ┌─────────┐
+  │ Sucesso │       │ Falha   │
+  │ ✓       │       │ ✗       │
+  └────┬────┘       └────┬────┘
+       │                 │
+       │                 ▼
+       │      ┌──────────────────────┐
+       │      │ Adiciona a failed_urls│
+       │      │ Proxima iteracao      │
+       │      │ RECALCULA bloco       │
+       │      └──────────────────────┘
+       │
+       ▼
+  ┌─────────────────────────────┐
+  │ Obteve N cotacoes?          │
+  │                             │
+  │ SIM → DONE ✓                │
+  │ NAO → Continua iterando     │
+  │       (max 20 iteracoes)    │
+  └─────────────────────────────┘
 ```
 
 ---
@@ -563,14 +649,14 @@ O sistema de cotacao de precos realiza pesquisa automatizada de valores de merca
 
 ---
 
-### 4.7 Etapa 6: Extracao de Precos
+### 4.7 Etapa 6: Extracao de Precos (Playwright)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PLAYWRIGHT HEADLESS                          │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Para cada fonte valida:                                        │
+│  Para cada produto do bloco:                                    │
 │                                                                 │
 │  1. Abre URL no Chromium headless                              │
 │     - User-Agent: Chrome 120                                   │
@@ -598,11 +684,38 @@ O sistema de cotacao de precos realiza pesquisa automatizada de valores de merca
 │                    VALIDACAO DE PRECO                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  Se diferenca entre preco extraido e Google > 15%:             │
-│    → Usa preco do Google (mais confiavel)                      │
+│  1. Preco extraido > R$ 1,00?                                   │
+│     NAO → FALHA (preco invalido)                               │
 │                                                                 │
-│  Se extracao falha:                                             │
-│    → Fallback para preco do Google Shopping                    │
+│  2. Diferenca entre preco extraido e Google > 15%?             │
+│     SIM → FALHA (PRICE_MISMATCH)                               │
+│                                                                 │
+│  3. Salva screenshot + preco no banco                          │
+│     → SUCESSO ✓                                                │
+│                                                                 │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    TRATAMENTO DE FALHAS                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  IMPORTANTE: Nao ha fallback para preco do Google!             │
+│                                                                 │
+│  Se a extracao falha (qualquer motivo):                        │
+│  - ERR_CONNECTION_REFUSED                                       │
+│  - Cloudflare/anti-bot                                          │
+│  - Preco nao encontrado                                         │
+│  - PRICE_MISMATCH                                               │
+│  - Timeout                                                      │
+│                                                                 │
+│  Entao:                                                         │
+│  1. Produto e adicionado a failed_urls                         │
+│  2. NAO e salvo no banco                                        │
+│  3. Bloco e RECALCULADO na proxima iteracao                    │
+│  4. Sistema tenta outros produtos para obter N cotacoes        │
+│                                                                 │
+│  Filosofia: So salva cotacoes com screenshot comprovatorio     │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -913,34 +1026,118 @@ IMGBB_API_KEY=...
 
 ## Apendice: Exemplo de Log de Cotacao
 
+### Cenario 1: Sucesso sem falhas
+
 ```
 === Starting search: 'notebook i5 8gb ssd 256gb' ===
-Parameters: limit=3, variacao_maxima=25%
+Parameters: limit=3, variacao_maxima=25%, max_iterations=20
 
 Step 1: Got 40 raw products from Google Shopping
 Step 2: 8 products after source filter (32 blocked)
 Step 3: 8 products with valid prices (0 without price)
-Step 4: 8 products (under limit of 150)
-Step 5-6: Created 8 blocks, 5 valid (min size: 3)
-    Block 1: 5 products (R$ 2400.00 - R$ 2999.00)
-    Block 2: 4 products (R$ 2499.00 - R$ 3100.00)
-    Block 3: 3 products (R$ 2550.00 - R$ 3100.00)
 
-Step 7 (iteration 1): Block with 5 products
+=== FASE BUSCA (Immersive API) ===
+Iteration 1: Block with 5 products (R$ 2400.00 - R$ 2999.00)
   Getting store link for 'Notebook Dell...' (R$ 2400.00) from Leroy Merlin
-    API Call: Immersive Product
-    → Got 3 stores from product_results
     ✓ Added [1/3]: leroymerlin.com.br - R$ 2400.00
-
   Getting store link for 'Notebook HP...' (R$ 2499.00) from Kabum
-    API Call: Immersive Product
     ✓ Added [2/3]: kabum.com.br - R$ 2499.00
-
   Getting store link for 'Notebook Lenovo...' (R$ 2550.00) from Pichau
-    API Call: Immersive Product
     ✓ Added [3/3]: pichau.com.br - R$ 2550.00
+  ✓ SUCCESS: Got 3 quotes after 1 iterations
 
-=== Search complete: 3 results (target: 3, used 3 Immersive API calls) ===
+=== FASE EXTRACAO (Playwright) ===
+Iteration 1: Block with 3 products (R$ 2400.00 - R$ 2550.00)
+  0 valid in block, 0 valid outside, 3 untried, need 3 more
+    → Extracting: leroymerlin.com.br (https://www.leroymerlin...)
+    ✓ Added [1/3]: leroymerlin.com.br - R$ 2400.00
+    → Extracting: kabum.com.br (https://www.kabum.com.br...)
+    ✓ Added [2/3]: kabum.com.br - R$ 2499.00
+    → Extracting: pichau.com.br (https://www.pichau.com.br...)
+    ✓ Added [3/3]: pichau.com.br - R$ 2550.00
+Success! Got 3 quotes after 1 iterations
+
+=== RESULTADO ===
+Status: DONE
+Fontes: 3/3
+Valor medio: R$ 2.483,00
+Variacao: 6,25%
+```
+
+### Cenario 2: Com falhas e recalculo de bloco
+
+```
+=== Starting search: 'ar condicionado 12000 btus inverter' ===
+Parameters: limit=3, variacao_maxima=25%, max_iterations=20
+
+=== FASE EXTRACAO (Playwright) ===
+Iteration 1: Block with 6 products (R$ 1800.00 - R$ 2200.00)
+  0 valid in block, 0 valid outside, 6 untried, need 3 more
+    → Extracting: loja-a.com.br (https://www.loja-a...)
+    ✗ Failed loja-a.com.br: ERR_CONNECTION_REFUSED    ← FALHA
+    → Extracting: loja-b.com.br (https://www.loja-b...)
+    ✓ Added [1/3]: loja-b.com.br - R$ 1850.00
+  End iteration 1: 1/3 quotes, 1 new failures, 4 untried globally
+  1 failures. Recalculating block...                   ← RECALCULA
+
+Iteration 2: Block with 5 products (R$ 1850.00 - R$ 2200.00)
+  1 valid in block, 0 valid outside, 4 untried, need 2 more
+    → Extracting: loja-c.com.br (https://www.loja-c...)
+    ✗ Failed loja-c.com.br: PRICE_MISMATCH: 22.5%     ← FALHA
+    → Extracting: loja-d.com.br (https://www.loja-d...)
+    ✓ Added [2/3]: loja-d.com.br - R$ 1900.00
+  End iteration 2: 2/3 quotes, 1 new failures, 2 untried globally
+  1 failures. Recalculating block...                   ← RECALCULA
+
+Iteration 3: Block with 4 products (R$ 1850.00 - R$ 2200.00)
+  2 valid in block, 0 valid outside, 2 untried, need 1 more
+    → Extracting: loja-e.com.br (https://www.loja-e...)
+    ✓ Added [3/3]: loja-e.com.br - R$ 2000.00
+Success! Got 3 quotes after 3 iterations
+
+=== RESULTADO ===
+Status: DONE
+Fontes: 3/3 (2 falhas ignoradas)
+Valor medio: R$ 1.916,67
+Variacao: 8,1%
+```
+
+### Cenario 3: Com sistema de reserva
+
+```
+=== FASE EXTRACAO (Playwright) ===
+Iteration 1: Block with 4 products (R$ 1000.00 - R$ 1200.00)
+  0 valid in block, 0 valid outside, 4 untried, need 3 more
+    → Extracting: loja-a.com.br
+    ✓ Added [1/3]: loja-a.com.br - R$ 1000.00
+    → Extracting: loja-b.com.br
+    ✗ Failed loja-b.com.br: Timeout
+    → Extracting: loja-c.com.br
+    ✗ Failed loja-c.com.br: Cloudflare
+    → Extracting: loja-d.com.br
+    ✗ Failed loja-d.com.br: ERR_CONNECTION_REFUSED
+  End iteration 1: 1/3 quotes, 3 new failures, 2 untried globally
+
+Iteration 2: Block with 3 products (R$ 1500.00 - R$ 1800.00)
+  0 valid in block, 1 valid outside, 2 untried, need 2 more
+  Block potential (2) < required (3). Saving 1 as reserve, trying fresh block.
+  ← GUARDA RESERVA (loja-a.com.br R$ 1000.00)
+
+Iteration 3: Block with 2 products (R$ 1500.00 - R$ 1800.00)
+  0 valid in block, 0 valid outside, 2 untried, need 3 more
+    → Extracting: loja-e.com.br
+    ✓ Added [1/3]: loja-e.com.br - R$ 1500.00
+    → Extracting: loja-f.com.br
+    ✓ Added [2/3]: loja-f.com.br - R$ 1700.00
+  End iteration 3: 2/3 quotes, 0 new failures, 0 untried globally
+All products tested. Final: 2/3 quotes, 4 failed
+
+  No more products. Reserve (1) < current (2). Keeping current.
+  ← RESERVA DESCARTADA (atual tem mais cotacoes)
+
+=== RESULTADO ===
+Status: AWAITING_REVIEW (apenas 2 de 3 fontes)
+Fontes: 2/3
 ```
 
 ---

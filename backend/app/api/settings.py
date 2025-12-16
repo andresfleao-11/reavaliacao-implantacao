@@ -380,7 +380,8 @@ async def test_integration(provider: str, db: Session = Depends(get_db)):
         elif provider == "OPENAI":
             api_key = app_settings.OPENAI_API_KEY
 
-    if not api_key:
+    # FIPE API doesn't require API key
+    if not api_key and provider not in ["FIPE"]:
         return IntegrationTestResponse(
             success=False,
             message="API key not configured"
@@ -432,6 +433,27 @@ async def test_integration(provider: str, db: Session = Depends(get_db)):
                     return IntegrationTestResponse(success=True, message="imgbb API key is valid")
                 else:
                     return IntegrationTestResponse(success=False, message=f"imgbb error: {response.status_code}")
+
+        elif provider == "FIPE":
+            # Test FIPE API by fetching brands (API doesn't require key)
+            async with httpx.AsyncClient() as client:
+                # Get base URL from settings or use default
+                base_url = "https://fipe.parallelum.com.br/api/v2"
+                if integration and integration.settings_json:
+                    base_url = integration.settings_json.get("base_url", base_url)
+
+                response = await client.get(f"{base_url}/cars/brands")
+                if response.status_code == 200:
+                    data = response.json()
+                    if isinstance(data, list) and len(data) > 0:
+                        return IntegrationTestResponse(
+                            success=True,
+                            message=f"API FIPE conectada com sucesso. {len(data)} marcas de carros encontradas."
+                        )
+                    else:
+                        return IntegrationTestResponse(success=False, message="API FIPE retornou dados vazios")
+                else:
+                    return IntegrationTestResponse(success=False, message=f"Erro na API FIPE: {response.status_code}")
 
         else:
             return IntegrationTestResponse(success=False, message="Unknown provider")

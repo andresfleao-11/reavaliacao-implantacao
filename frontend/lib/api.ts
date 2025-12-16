@@ -212,7 +212,7 @@ export interface BlockedDomain {
 
 export interface IntegrationLog {
   id: number
-  integration_type: 'anthropic' | 'openai' | 'serpapi' | 'search_log'
+  integration_type: 'anthropic' | 'openai' | 'serpapi' | 'search_log' | 'fipe'
   activity: string | null
   created_at: string
   // Anthropic fields
@@ -624,9 +624,23 @@ export const batchQuotesApi = {
     return response.data
   },
 
-  listBatches: async (page: number = 1, perPage: number = 20, projectId?: number, status?: string) => {
+  listBatches: async (
+    page: number = 1,
+    perPage: number = 20,
+    filters?: {
+      batch_id?: number
+      project_id?: number
+      client_id?: number
+      input_type?: string
+      status?: string
+    }
+  ) => {
     const response = await api.get('/api/batch-quotes', {
-      params: { page, per_page: perPage, project_id: projectId, status },
+      params: {
+        page,
+        per_page: perPage,
+        ...filters,
+      },
     })
     return response.data
   },

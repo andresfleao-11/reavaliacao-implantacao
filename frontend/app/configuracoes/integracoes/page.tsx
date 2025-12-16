@@ -8,10 +8,13 @@ export default function IntegracoesPage() {
   const [anthropicApiKey, setAnthropicApiKey] = useState('')
   const [openaiApiKey, setOpenaiApiKey] = useState('')
   const [imgbbApiKey, setImgbbApiKey] = useState('')
+  const [fipeApiKey, setFipeApiKey] = useState('')
+  const [fipeApiType, setFipeApiType] = useState<'public' | 'private'>('public')
   const [serpApiStatus, setSerpApiStatus] = useState<IntegrationSetting | null>(null)
   const [anthropicStatus, setAnthropicStatus] = useState<IntegrationSetting | null>(null)
   const [openaiStatus, setOpenaiStatus] = useState<IntegrationSetting | null>(null)
   const [imgbbStatus, setImgbbStatus] = useState<IntegrationSetting | null>(null)
+  const [fipeStatus, setFipeStatus] = useState<IntegrationSetting | null>(null)
   const [anthropicModels, setAnthropicModels] = useState<AnthropicModelOption[]>([])
   const [openaiModels, setOpenaiModels] = useState<OpenAIModelOption[]>([])
   const [aiProviders, setAIProviders] = useState<AIProviderOption[]>([])
@@ -69,16 +72,23 @@ export default function IntegracoesPage() {
   const loadIntegrationStatus = async () => {
     setLoading(true)
     try {
-      const [serpResult, anthropicResult, openaiResult, imgbbResult] = await Promise.all([
+      const [serpResult, anthropicResult, openaiResult, imgbbResult, fipeResult] = await Promise.all([
         settingsApi.getIntegration('SERPAPI').catch(() => null),
         settingsApi.getIntegration('ANTHROPIC').catch(() => null),
         settingsApi.getIntegration('OPENAI').catch(() => null),
-        settingsApi.getIntegration('IMGBB').catch(() => null)
+        settingsApi.getIntegration('IMGBB').catch(() => null),
+        settingsApi.getIntegration('FIPE').catch(() => null)
       ])
       setSerpApiStatus(serpResult)
       setAnthropicStatus(anthropicResult)
       setOpenaiStatus(openaiResult)
       setImgbbStatus(imgbbResult)
+      setFipeStatus(fipeResult)
+
+      // Set FIPE API type from settings
+      if (fipeResult?.other_settings?.api_type) {
+        setFipeApiType(fipeResult.other_settings.api_type)
+      }
 
       // Set current models from other_settings
       if (anthropicResult?.other_settings?.model) {
@@ -190,6 +200,7 @@ export default function IntegracoesPage() {
       await loadIntegrationStatus()
       if (provider === 'SERPAPI') setSerpApiKey('')
       if (provider === 'IMGBB') setImgbbApiKey('')
+      if (provider === 'FIPE') setFipeApiKey('')
     } catch (err) {
       setIntegrationMessage(provider, 'error', `Erro ao atualizar ${provider}`)
     } finally {
@@ -244,6 +255,33 @@ export default function IntegracoesPage() {
       setOpenaiApiKey('')
     } catch (err) {
       setIntegrationMessage('OPENAI', 'error', 'Erro ao atualizar OpenAI')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSaveFipe = async () => {
+    setSaving(true)
+    setIntegrationMessages(prev => { const n = {...prev}; delete n['FIPE']; return n })
+    try {
+      const updateData: { api_key?: string; other_settings?: Record<string, any> } = {
+        other_settings: { api_type: fipeApiType }
+      }
+
+      // Se for API privada e tiver chave, ou se quiser atualizar a chave
+      if (fipeApiKey) {
+        updateData.api_key = fipeApiKey
+      } else if (fipeApiType === 'public') {
+        // Para API pública, usar uma chave placeholder
+        updateData.api_key = 'PUBLIC_API'
+      }
+
+      await settingsApi.updateIntegration('FIPE', updateData)
+      setIntegrationMessage('FIPE', 'success', 'API FIPE configurada com sucesso!')
+      await loadIntegrationStatus()
+      setFipeApiKey('')
+    } catch (err) {
+      setIntegrationMessage('FIPE', 'error', 'Erro ao configurar API FIPE')
     } finally {
       setSaving(false)
     }
@@ -719,6 +757,136 @@ export default function IntegracoesPage() {
               >
                 {testing === 'OPENAI' ? 'Testando...' : 'Testar Conexão'}
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* API FIPE (Tabela FIPE de Veículos) */}
+        <div className="card">
+          {renderIntegrationMessage('FIPE')}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">API FIPE</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Tabela FIPE para consulta de preços de veículos (
+                <a href="https://deividfortuna.github.io/fipe/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                  documentação
+                </a>)
+              </p>
+            </div>
+            {fipeStatus?.is_configured ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                Configurado ({fipeStatus.other_settings?.api_type === 'private' ? 'API Privada' : 'API Pública'})
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                Não configurado
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {/* Tipo de API */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tipo de API
+              </label>
+              <div className="flex gap-4">
+                <label className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  fipeApiType === 'public'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                    : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300'
+                }`}>
+                  <input
+                    type="radio"
+                    name="fipe_api_type"
+                    value="public"
+                    checked={fipeApiType === 'public'}
+                    onChange={() => setFipeApiType('public')}
+                    className="sr-only"
+                  />
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">API Pública</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Gratuita, sem necessidade de chave</div>
+                  </div>
+                  {fipeApiType === 'public' && (
+                    <svg className="w-5 h-5 ml-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
+                  )}
+                </label>
+
+                <label className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  fipeApiType === 'private'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                    : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300'
+                }`}>
+                  <input
+                    type="radio"
+                    name="fipe_api_type"
+                    value="private"
+                    checked={fipeApiType === 'private'}
+                    onChange={() => setFipeApiType('private')}
+                    className="sr-only"
+                  />
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">API Privada</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Requer chave de acesso</div>
+                  </div>
+                  {fipeApiType === 'private' && (
+                    <svg className="w-5 h-5 ml-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
+                  )}
+                </label>
+              </div>
+            </div>
+
+            {/* Campo de API Key (apenas para API privada) */}
+            {fipeApiType === 'private' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {fipeStatus?.is_configured && fipeStatus.other_settings?.api_type === 'private'
+                    ? 'Nova API Key (deixe em branco para manter a atual)'
+                    : 'API Key'}
+                </label>
+                <input
+                  type="password"
+                  value={fipeApiKey}
+                  onChange={(e) => setFipeApiKey(e.target.value)}
+                  className="input-field w-full"
+                  placeholder="Insira a chave da API FIPE privada"
+                />
+                {fipeStatus?.is_configured && fipeStatus.other_settings?.api_type === 'private' && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Chave atual: {fipeStatus.api_key_masked}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex space-x-4">
+              <button
+                onClick={handleSaveFipe}
+                className="btn-primary"
+                disabled={saving || (fipeApiType === 'private' && !fipeApiKey && !fipeStatus?.is_configured)}
+              >
+                {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+              <button
+                onClick={() => handleTest('FIPE')}
+                className="btn-secondary"
+                disabled={testing === 'FIPE'}
+              >
+                {testing === 'FIPE' ? 'Testando...' : 'Testar Conexão'}
+              </button>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>Nota:</strong> A API FIPE é usada para consultar preços de veículos (carros, motos e caminhões)
+                diretamente da Tabela FIPE. A API pública é gratuita e suficiente para a maioria dos casos de uso.
+              </p>
             </div>
           </div>
         </div>

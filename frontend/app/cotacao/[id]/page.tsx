@@ -24,6 +24,7 @@ export default function QuoteDetailPage() {
   const [serpApiExpanded, setSerpApiExpanded] = useState(true)
   const [searchLogExpanded, setSearchLogExpanded] = useState(true)
   const [googleShoppingExpanded, setGoogleShoppingExpanded] = useState(false)
+  const [fipeExpanded, setFipeExpanded] = useState(true)
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null)
   const [quoteCosts, setQuoteCosts] = useState<{
@@ -639,7 +640,7 @@ export default function QuoteDetailPage() {
       </div>
 
       {/* Variação da Cotação */}
-      {quote.status === 'DONE' && quote.variacao_percentual !== null && (
+      {(quote.status === 'DONE' || quote.status === 'AWAITING_REVIEW') && quote.variacao_percentual !== null && (
         <div className="card mt-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Variação da Cotação</h2>
           <div className={`border rounded-lg p-4 ${
@@ -1095,6 +1096,170 @@ export default function QuoteDetailPage() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* FIPE API Logs (for vehicles) */}
+          {integrationLogs.some(log => log.integration_type === 'fipe') && (
+            <div className="mb-6">
+              <button
+                onClick={() => setFipeExpanded(!fipeExpanded)}
+                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+              >
+                <span>🚗 API FIPE (Tabela FIPE)</span>
+                <svg
+                  className={`w-5 h-5 transform transition-transform ${fipeExpanded ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {fipeExpanded && integrationLogs
+                .filter(log => log.integration_type === 'fipe')
+                .map(log => {
+                  const fipeData = log.response_summary || {}
+                  return (
+                    <div key={log.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-4">
+                      {/* Status e Resumo */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {fipeData.success ? (
+                            <span className="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                              ✓ Sucesso
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 text-sm rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                              ✗ Falhou
+                            </span>
+                          )}
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {fipeData.api_calls || 0} chamadas à API
+                          </span>
+                        </div>
+                        {fipeData.price && (
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                              {fipeData.price.price}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Ref: {fipeData.price.referenceMonth}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Dados do Veículo Encontrado */}
+                      {fipeData.price && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 bg-white dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Código FIPE</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {fipeData.price.codeFipe}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Marca</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {fipeData.price.brand}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Modelo</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {fipeData.price.model}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Ano/Combustível</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {fipeData.price.modelYear} - {fipeData.price.fuel} ({fipeData.price.fuelAcronym})
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Caminho da Busca */}
+                      {fipeData.search_path && fipeData.search_path.length > 0 && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Chamadas à API ({fipeData.search_path.length}):
+                          </p>
+                          <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-3 max-h-48 overflow-y-auto">
+                            <ol className="list-decimal list-inside space-y-1">
+                              {fipeData.search_path.map((call: string, idx: number) => (
+                                <li key={idx} className="text-xs font-mono text-gray-600 dark:text-gray-400">
+                                  {call}
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dados de busca */}
+                      {(fipeData.brand_name || fipeData.model_name) && (
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          {fipeData.brand_name && (
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Marca Encontrada</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100">{fipeData.brand_name}</p>
+                              {fipeData.brand_id && (
+                                <p className="text-xs text-gray-400">ID: {fipeData.brand_id}</p>
+                              )}
+                            </div>
+                          )}
+                          {fipeData.model_name && (
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Modelo Encontrado</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100">{fipeData.model_name}</p>
+                              {fipeData.model_id && (
+                                <p className="text-xs text-gray-400">ID: {fipeData.model_id}</p>
+                              )}
+                            </div>
+                          )}
+                          {fipeData.year_id && (
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Ano Selecionado</p>
+                              <p className="font-medium text-gray-900 dark:text-gray-100">{fipeData.year_id}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Erro se houver */}
+                      {fipeData.error_message && (
+                        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <p className="text-sm text-red-700 dark:text-red-300">
+                            <strong>Erro:</strong> {fipeData.error_message}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Botão para download do JSON completo */}
+                      <div className="flex justify-end">
+                        <button
+                          onClick={() => {
+                            const dataStr = JSON.stringify(fipeData, null, 2)
+                            const blob = new Blob([dataStr], { type: 'application/json' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `cotacao_${quote.id}_fipe.json`
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                          }}
+                          className="px-3 py-1 text-sm bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors"
+                        >
+                          Download JSON FIPE
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
             </div>
           )}
 

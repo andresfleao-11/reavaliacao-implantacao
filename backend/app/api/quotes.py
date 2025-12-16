@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Form, HTTPException, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_, or_, cast, String
 from typing import List, Optional
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -323,11 +324,29 @@ def list_quotes(
         query = query.filter(QuoteRequest.id == quote_id)
         count_query = count_query.filter(QuoteRequest.id == quote_id)
 
-    # Filtro por busca na descrição
+    # Filtro por busca na descrição (suporta múltiplas palavras)
+    # Busca em input_text E em claude_payload_json->>'nome_canonico'
     if search:
-        search_filter = QuoteRequest.input_text.ilike(f"%{search}%")
-        query = query.filter(search_filter)
-        count_query = count_query.filter(search_filter)
+        # Dividir a busca em palavras e criar filtro AND para cada palavra
+        search_words = search.strip().split()
+        if search_words:
+            # Para cada palavra, deve estar em input_text OU em nome_canonico
+            word_conditions = []
+            for word in search_words:
+                # Usar cast para converter JSON field para string
+                nome_canonico_field = cast(
+                    QuoteRequest.claude_payload_json.op('->>')('nome_canonico'),
+                    String
+                )
+                word_filter = or_(
+                    QuoteRequest.input_text.ilike(f"%{word}%"),
+                    nome_canonico_field.ilike(f"%{word}%")
+                )
+                word_conditions.append(word_filter)
+            # Todas as palavras devem ser encontradas (AND entre palavras)
+            search_filter = and_(*word_conditions)
+            query = query.filter(search_filter)
+            count_query = count_query.filter(search_filter)
 
     # Filtro por status
     if status:

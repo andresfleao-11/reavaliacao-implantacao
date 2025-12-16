@@ -170,6 +170,7 @@ class SearchLog(BaseModel):
     results_obtained: int = 0
     skipped_reasons: List[dict] = []  # [{reason: "blocked_domain", domain: "...", count: N}, ...]
     block_details: List[dict] = []  # [{index: 1, size: 5, min_price: 100, max_price: 125, result: "success/failed"}, ...]
+    raw_shopping_response: Optional[dict] = None  # Raw response from first Google Shopping API call
 
 
 class ShoppingProduct(BaseModel):
@@ -234,6 +235,7 @@ class SerpApiProvider(SearchProvider):
         self.location = location
         self.base_url = "https://serpapi.com/search"
         self.api_calls_made = []  # Track all API calls made
+        self.raw_shopping_response = None  # Raw response from first Google Shopping API call
         # Use provided blocked_domains or fall back to default static list
         self._blocked_domains = blocked_domains if blocked_domains is not None else BLOCKED_DOMAINS
 
@@ -261,6 +263,9 @@ class SerpApiProvider(SearchProvider):
 
         # Step 1: ONE Google Shopping API call - get ALL products
         all_products = await self._search_google_shopping_raw(query)
+
+        # Store raw response in search log
+        search_log.raw_shopping_response = self.raw_shopping_response
 
         if not all_products:
             logger.warning("No products found from Google Shopping")
@@ -754,6 +759,9 @@ class SerpApiProvider(SearchProvider):
 
                     response.raise_for_status()
                     data = response.json()
+
+                # Store raw response for later access
+                self.raw_shopping_response = data
 
                 # Register the API call
                 self.api_calls_made.append({

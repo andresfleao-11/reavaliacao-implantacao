@@ -10,6 +10,7 @@ class ExtractionMethod(str, enum.Enum):
     META = "META"
     DOM = "DOM"
     LLM = "LLM"
+    API_FIPE = "API_FIPE"  # Preço obtido via API Tabela FIPE
 
 
 class QuoteSource(Base):

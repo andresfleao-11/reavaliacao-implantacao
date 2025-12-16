@@ -338,6 +338,15 @@ async def analyze_shopping_json(
         except json.JSONDecodeError as e:
             raise HTTPException(status_code=400, detail=f"JSON invalido: {str(e)}")
 
+        # Verificar se é o JSON da cotação (com raw_api_response) ou direto do SerpAPI
+        if 'raw_api_response' in shopping_data:
+            # JSON baixado da cotação - usar o raw_api_response
+            raw_api_response = shopping_data.get('raw_api_response', {})
+            if raw_api_response:
+                shopping_data = raw_api_response
+            else:
+                raise HTTPException(status_code=400, detail="JSON da cotacao nao contem raw_api_response valido")
+
         # Extrair query da resposta
         query = shopping_data.get('search_parameters', {}).get('q', 'N/A')
 

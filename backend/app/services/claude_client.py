@@ -5,6 +5,7 @@ import base64
 import json
 import logging
 import time
+from app.services.prompts import PROMPT_ANALISE_PATRIMONIAL
 
 logger = logging.getLogger(__name__)
 
@@ -18,20 +19,47 @@ class ClaudeCallLog(BaseModel):
     prompt: Optional[str] = None  # Prompt enviado para a IA
 
 
+class FipeApiParams(BaseModel):
+    """Parâmetros para consulta na API FIPE"""
+    vehicle_type: Optional[str] = None  # cars | motorcycles | trucks
+    codigo_fipe: Optional[str] = None
+    busca_marca: Optional[Dict[str, Any]] = None
+    busca_modelo: Optional[Dict[str, Any]] = None
+    year_id_estimado: Optional[str] = None
+    fluxo_recomendado: Optional[str] = None  # por_hierarquia | por_codigo_fipe
+    endpoints: Optional[Dict[str, str]] = None
+
+
 class ItemAnalysisResult(BaseModel):
+    # Tipo de processamento: FIPE para veículos, GOOGLE_SHOPPING para demais
+    tipo_processamento: str = "GOOGLE_SHOPPING"  # FIPE | GOOGLE_SHOPPING
+
+    # Dados do bem
     nome_canonico: str
     marca: Optional[str] = None
     modelo: Optional[str] = None
+    categoria: Optional[str] = None  # Veículos, Eletrônicos, Mobiliário, etc.
+    natureza: Optional[str] = None  # veiculo_carro, veiculo_moto, veiculo_caminhao, eletronico, etc.
+
+    # Campos legados (mantidos para compatibilidade)
     part_number: Optional[str] = None
     codigo_interno: Optional[str] = None
     especificacoes_tecnicas: Dict[str, Any] = {}  # Especificações técnicas extraídas
     palavras_chave: List[str] = []
     sinonimos: List[str] = []
-    query_principal: str  # Query baseada nas especificações técnicas
+    query_principal: str = ""  # Query baseada nas especificações técnicas
     query_alternativas: List[str] = []
     termos_excluir: List[str] = []
     observacoes: Optional[str] = None
     nivel_confianca: float = 0.0
+
+    # Campos para API FIPE (veículos)
+    fipe_api: Optional[FipeApiParams] = None
+    fallback_google_shopping: Optional[Dict[str, Any]] = None
+    dados_faltantes: List[str] = []
+    especificacoes: Dict[str, Any] = {}  # Especificações no formato {essenciais: {}, complementares: {}}
+
+    # Metadados
     total_tokens_used: int = 0  # Total de tokens usados em todas as chamadas
     call_logs: List[ClaudeCallLog] = []  # Log detalhado de cada chamada
 
@@ -104,81 +132,170 @@ class ClaudeClient:
                 })
 
         # ETAPA 1: OCR e identificação básica
-        ocr_prompt = """
-Você é um assistente especializado em identificação de equipamentos.
+        ocr_prompt = """# AGENTE: Especialista em OCR para Reavaliação Patrimonial
 
-## TAREFA: OCR E IDENTIFICAÇÃO BÁSICA
+## CONTEXTO
+
+Você analisa imagens de etiquetas de bens patrimoniais para extrair dados que permitam **pesquisa de preço de reposição** em órgãos públicos brasileiros.
+
+**Base normativa:** NBC TSP 07 | MCASP | Lei 14.133/2021
+
+---
+
+## TAREFA
 
 Analise a imagem e extraia:
 
-1. **OCR COMPLETO**: Transcreva TODO o texto visível na imagem literalmente
+### 1. OCR COMPLETO
+Transcreva **TODO** o texto visível, literalmente.
 
-2. **Tipo de produto**: (notebook, ar condicionado, impressora, etc.)
+### 2. IDENTIFICADORES
 
-3. **Marca**: Se visível na etiqueta
+| Campo | Descrição | Prioridade |
+|-------|-----------|------------|
+| **Part Number** | P/N - identifica configuração exata do produto | **CRÍTICA** |
+| **Número de série** | S/N, Serial, Service Tag - identificador único | Alta |
+| **Marca** | Fabricante | Alta |
+| **Modelo** | Código do modelo (usar versão mais completa) | Alta |
+| **Tipo** | notebook, ar_condicionado, impressora, monitor, etc. | Alta |
 
-4. **Modelo**: Código do modelo (ex: UL1502Y, 42AFCB12M5)
+> ⚠️ **MODELO DUPLICADO**: Etiquetas frequentemente mostram o modelo em versão curta e completa. **Sempre usar a string mais longa.**
+> Exemplo: "Inspiron 15" e "Inspiron 15 3501-M50P" → usar **"Inspiron 15 3501-M50P"**
 
-## ESPECIFICAÇÕES TÉCNICAS RELEVANTES PARA COTAÇÃO
-Identifique se as seguintes specs estão VISÍVEIS na imagem:
+### 3. ESPECIFICAÇÕES VISÍVEIS
 
-Para NOTEBOOK:
-- Processador (Intel i5, i7, Ryzen 5, Ryzen 7, etc.) - VISÍVEL?
-- Memória RAM (8GB, 16GB, etc.) - VISÍVEL?
-- Armazenamento (SSD 256GB, SSD 512GB, HD 1TB, etc.) - VISÍVEL?
-- Tamanho da tela (14", 15.6", etc.) - VISÍVEL?
+Extraia **APENAS** o que estiver **VISÍVEL na imagem**:
 
-Para AR CONDICIONADO:
-- Capacidade BTUs (9000, 12000, 18000, etc.) - VISÍVEL?
-- Ciclo (Frio/Quente-Frio) - VISÍVEL?
-- Tipo (Split, Inverter) - VISÍVEL?
+| Tipo | Specs relevantes |
+|------|------------------|
+| **Notebook** | Processador (i3/i5/i7, Ryzen), RAM (8GB, 16GB), Armazenamento (SSD/HD), Tela |
+| **Ar-condicionado** | BTUs, Ciclo (Frio/Quente-Frio), Tecnologia (Inverter), Voltagem |
+| **Impressora** | Tecnologia (Laser/Jato), Funções (Multi/Wifi/Duplex), Velocidade (ppm) |
+| **Monitor** | Tamanho, Resolução, Tipo painel |
 
-Para IMPRESSORA:
-- Tipo (laser, jato de tinta) - VISÍVEL?
-- Recursos (wifi, duplex) - VISÍVEL?
+### 4. IGNORAR (dados de fonte/certificações)
+- Input: 19V, 100-240V~, corrente (2.37A)
+- Potência fonte: 45W, 65W, 90W
+- Certificações: ANATEL, FCC, CE
 
-Retorne um JSON:
+---
+
+## FORMATO DE SAÍDA
+
+```json
 {
-  "ocr_completo": "todo texto extraído da imagem",
-  "tipo_produto": "notebook/ar_condicionado/impressora/outro",
-  "marca": "marca identificada ou null",
-  "modelo": "código do modelo ou null",
+  "ocr_completo": "transcrição literal",
+  "identificadores": {
+    "part_number": "P/N ou null",
+    "numero_serie": "S/N ou null",
+    "marca": "marca ou null",
+    "modelo": "versão mais completa do modelo ou null",
+    "tipo_produto": "notebook | ar_condicionado | impressora | monitor | outro"
+  },
   "specs_visiveis": {
-    "processador": "valor ou null",
-    "ram": "valor ou null",
-    "armazenamento": "valor ou null",
-    "tela": "valor ou null",
-    "btus": "valor ou null",
-    "ciclo": "valor ou null",
+    "processador": null,
+    "ram": null,
+    "armazenamento": null,
+    "tela": null,
+    "btus": null,
+    "ciclo": null,
+    "voltagem": null,
     "outras": {}
   },
-  "tem_specs_relevantes": true/false
+  "tem_specs_relevantes": true | false,
+  "pode_consultar_fabricante": true | false,
+  "observacoes": "notas relevantes"
 }
+```
 
-## CRITÉRIO CRÍTICO PARA tem_specs_relevantes:
+### Critérios:
+- `tem_specs_relevantes` = true: Notebook (processador/RAM/armazenamento) | Ar-cond (BTUs) | Impressora (tecnologia)
+- `pode_consultar_fabricante` = true: P/N ou S/N identificado **E** marca identificada
 
-⚠️ ATENÇÃO - LEIA COM CUIDADO:
+---
 
-Para NOTEBOOK, tem_specs_relevantes = true SOMENTE SE pelo menos UMA destas specs estiver visível:
-- Processador (Intel Core i3/i5/i7, AMD Ryzen 3/5/7, etc.)
-- Memória RAM (4GB, 8GB, 16GB, 32GB)
-- Armazenamento (SSD ou HD com capacidade)
+## EXEMPLOS
 
-❌ NÃO SÃO specs relevantes para cotação de notebook:
-- Voltagem de entrada (19V, 110V, 220V)
-- Potência da fonte/carregador (45W, 65W, 90W)
-- Corrente (2.37A, 3.42A)
-- Número de série
-- Modelo de placa WiFi (RTL8821CE)
-- Certificações (ANATEL, FCC, CE)
+### Etiqueta com modelo duplicado
+**OCR:** "Dell Inc. | Inspiron 15 | Model: Inspiron 15 3501-M50P | P/N: i3501-5081BLK | S/N: 7XK9M33"
 
-Exemplo: Uma etiqueta mostrando "Input: 19V 2.37A 45W" é uma etiqueta da FONTE DE ALIMENTAÇÃO, não do notebook. Neste caso tem_specs_relevantes = false.
+```json
+{
+  "ocr_completo": "Dell Inc. Inspiron 15 Model: Inspiron 15 3501-M50P P/N: i3501-5081BLK S/N: 7XK9M33",
+  "identificadores": {
+    "part_number": "i3501-5081BLK",
+    "numero_serie": "7XK9M33",
+    "marca": "Dell",
+    "modelo": "Inspiron 15 3501-M50P",
+    "tipo_produto": "notebook"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": null, "ciclo": null, "voltagem": null, "outras": {}
+  },
+  "tem_specs_relevantes": false,
+  "pode_consultar_fabricante": true,
+  "observacoes": "Modelo aparece 2x na etiqueta. Selecionada versão completa (3501-M50P). P/N permite consulta direta de specs."
+}
+```
 
-Para AR CONDICIONADO, tem_specs_relevantes = true SOMENTE SE:
-- Capacidade em BTUs estiver visível
+### Ar-condicionado
+**OCR:** "LG | S4-Q12JA3AD | 12000 BTU/h | Inverter | 220V | S/N: 203TAZZ0K789"
 
-Para IMPRESSORA, tem_specs_relevantes = true SOMENTE SE:
-- Tipo de impressão (laser/jato de tinta) estiver visível
+```json
+{
+  "ocr_completo": "LG S4-Q12JA3AD 12000 BTU/h Inverter 220V S/N: 203TAZZ0K789",
+  "identificadores": {
+    "part_number": null,
+    "numero_serie": "203TAZZ0K789",
+    "marca": "LG",
+    "modelo": "S4-Q12JA3AD",
+    "tipo_produto": "ar_condicionado"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": "12000", "ciclo": null, "voltagem": "220V",
+    "outras": { "tecnologia": "Inverter" }
+  },
+  "tem_specs_relevantes": true,
+  "pode_consultar_fabricante": true,
+  "observacoes": "Specs completas para cotação disponíveis na etiqueta."
+}
+```
+
+### Etiqueta de FONTE (não usar)
+**OCR:** "AC Adapter | Input: 100-240V~ | Output: 19V 2.37A 45W | Model: ADP-45BW"
+
+```json
+{
+  "ocr_completo": "AC Adapter Input: 100-240V~ Output: 19V 2.37A 45W Model: ADP-45BW",
+  "identificadores": {
+    "part_number": null,
+    "numero_serie": null,
+    "marca": null,
+    "modelo": "ADP-45BW",
+    "tipo_produto": "fonte_alimentacao"
+  },
+  "specs_visiveis": {
+    "processador": null, "ram": null, "armazenamento": null, "tela": null,
+    "btus": null, "ciclo": null, "voltagem": null,
+    "outras": { "potencia_saida": "45W" }
+  },
+  "tem_specs_relevantes": false,
+  "pode_consultar_fabricante": false,
+  "observacoes": "ATENÇÃO: Etiqueta da FONTE, não do equipamento. Não usar para cotação."
+}
+```
+
+---
+
+## INSTRUÇÃO FINAL
+
+1. Extraia todo texto visível
+2. Se modelo aparecer duplicado, **usar a string mais longa/completa**
+3. Priorize **Part Number** (identifica configuração exata)
+4. Classifique corretamente: equipamento vs. fonte/acessório
+5. Retorne **APENAS o JSON**
 """
 
         content.insert(0, {"type": "text", "text": ocr_prompt})
@@ -213,18 +330,31 @@ Para IMPRESSORA, tem_specs_relevantes = true SOMENTE SE:
         ocr_text = ocr_response.content[0].text
         ocr_data = self._parse_json(ocr_text)
 
-        logger.info(f"OCR resultado: tipo={ocr_data.get('tipo_produto')}, marca={ocr_data.get('marca')}, modelo={ocr_data.get('modelo')}")
-        logger.info(f"Tem specs relevantes: {ocr_data.get('tem_specs_relevantes')}")
+        # Extrair identificadores (novo formato com objeto identificadores)
+        identificadores = ocr_data.get('identificadores', {})
+        tipo_produto = identificadores.get('tipo_produto') or ocr_data.get('tipo_produto')
+        marca = identificadores.get('marca') or ocr_data.get('marca')
+        modelo = identificadores.get('modelo') or ocr_data.get('modelo')
+        numero_serie = identificadores.get('numero_serie')
+        part_number = identificadores.get('part_number')
+
+        # Normalizar ocr_data para manter compatibilidade
+        ocr_data['tipo_produto'] = tipo_produto
+        ocr_data['marca'] = marca
+        ocr_data['modelo'] = modelo
+        ocr_data['numero_serie'] = numero_serie
+        ocr_data['part_number'] = part_number
+
+        logger.info(f"OCR resultado: tipo={tipo_produto}, marca={marca}, modelo={modelo}, S/N={numero_serie}")
+        logger.info(f"Tem specs relevantes: {ocr_data.get('tem_specs_relevantes')}, Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante')}")
 
         # ETAPA 2: Busca web se necessário (specs não visíveis na imagem)
         specs_from_web = {}
-        if not ocr_data.get('tem_specs_relevantes', False) and ocr_data.get('marca') and ocr_data.get('modelo'):
-            marca = ocr_data.get('marca')
-            modelo = ocr_data.get('modelo')
-            tipo = ocr_data.get('tipo_produto', 'produto')
+        if not ocr_data.get('tem_specs_relevantes', False) and marca and modelo:
+            tipo = tipo_produto or 'produto'
 
-            logger.info(f"Etapa 2: Buscando specs na web para {marca} {modelo}")
-            specs_from_web = await self._search_specs_on_web(marca, modelo, tipo)
+            logger.info(f"Etapa 2: Buscando specs na web para {marca} {modelo} (S/N: {numero_serie}, P/N: {part_number})")
+            specs_from_web = await self._search_specs_on_web(marca, modelo, tipo, numero_serie, part_number)
             logger.info(f"Specs encontradas na web: {specs_from_web}")
 
         # ETAPA 3: Gerar resultado final com todas as informações
@@ -266,43 +396,205 @@ Para IMPRESSORA, tem_specs_relevantes = true SOMENTE SE:
 
         return ItemAnalysisResult(**data)
 
-    async def _search_specs_on_web(self, marca: str, modelo: str, tipo: str) -> Dict[str, Any]:
+    async def _search_specs_on_web(self, marca: str, modelo: str, tipo: str, numero_serie: Optional[str] = None, part_number: Optional[str] = None) -> Dict[str, Any]:
         """Busca especificações técnicas na web usando web_search do Claude"""
 
-        search_prompt = f"""
-Busque as especificações técnicas do produto: {marca} {modelo} ({tipo})
+        search_prompt = f"""# AGENTE: Especialista em Pesquisa de Especificações Técnicas para Reavaliação Patrimonial
 
-Use a ferramenta web_search para encontrar as especificações técnicas REAIS deste produto.
+## CONTEXTO
 
-Após a busca, retorne um JSON com as especificações encontradas:
+Você pesquisa especificações técnicas de bens patrimoniais para subsidiar **cotação de preços de reposição** em órgãos públicos brasileiros.
 
-Para NOTEBOOK:
-{{
-  "processador": "ex: Intel Core i5-1235U",
-  "ram": "ex: 8GB DDR4",
-  "armazenamento": "ex: SSD 256GB",
-  "tela": "ex: 15.6 polegadas Full HD",
-  "fonte_informacao": "URL da fonte"
-}}
+**Base normativa:** NBC TSP 07 | MCASP | Lei 14.133/2021
 
-Para AR CONDICIONADO:
-{{
-  "capacidade_btus": "ex: 12000",
-  "ciclo": "ex: Frio",
-  "tipo": "ex: Split Inverter",
-  "tensao": "ex: 220V",
-  "fonte_informacao": "URL da fonte"
-}}
+---
 
-Para IMPRESSORA:
-{{
-  "tipo_impressao": "ex: Laser Monocromática",
-  "velocidade": "ex: 40 ppm",
-  "conectividade": "ex: WiFi, USB, Ethernet",
-  "fonte_informacao": "URL da fonte"
-}}
+## DADOS DE ENTRADA
 
-Retorne APENAS o JSON com as especificações encontradas.
+```
+Marca: {marca}
+Modelo: {modelo}
+Tipo: {tipo}
+Part Number: {part_number or 'null'}  // pode ser null
+Número de Série: {numero_serie or 'null'}  // pode ser null
+```
+
+---
+
+## ESTRATÉGIA DE BUSCA (usar `web_search`)
+
+| Prioridade | Estratégia | Query |
+|------------|------------|-------|
+| **1ª** | Marca + Modelo | `"{marca}" "{modelo}" ficha técnica especificações` |
+| **2ª** | Part Number + Marca | `"{marca}" "{part_number}" especificações` |
+| **3ª** | S/N + Marca (suporte) | `"{marca}" suporte "{numero_serie}"` |
+| **4ª** | Modelo genérico | `"{modelo}" specs datasheet` |
+
+> **Marca + Modelo** é a busca mais direta e comum.
+> **Part Number** refina para configuração exata quando o modelo tem variantes.
+> **Número de série** permite consulta ao suporte do fabricante.
+
+### Fontes prioritárias:
+1. Site oficial do fabricante
+2. Lojas especializadas (Kabum, Pichau, Fast Shop)
+3. Reviews técnicos
+
+### Evitar: Mercado Livre, OLX, fóruns
+
+---
+
+## ESPECIFICAÇÕES POR TIPO
+
+| Tipo | Specs críticas | Specs complementares |
+|------|----------------|---------------------|
+| **Notebook** | Processador, RAM, Armazenamento | Tela, Placa vídeo, SO |
+| **Ar-condicionado** | BTUs, Tecnologia (Inverter), Ciclo | Tensão, Selo Procel |
+| **Impressora** | Tecnologia (Laser/Jato), Funções | Velocidade, Conectividade, Duplex |
+| **Monitor** | Tamanho, Resolução | Painel, Taxa Hz, Conectores |
+
+---
+
+## FORMATO DE SAÍDA
+
+```json
+{{{{
+  "tipo_produto": "notebook | ar_condicionado | impressora | monitor",
+  "identificacao": {{{{
+    "marca": "string",
+    "modelo": "string",
+    "part_number": "string ou null"
+  }}}},
+  "especificacoes": {{{{
+    "// campos conforme tipo do produto": "valores encontrados ou null"
+  }}}},
+  "fonte": {{{{
+    "url": "URL da fonte",
+    "tipo": "fabricante | loja | review",
+    "confiabilidade": "alta | media | baixa"
+  }}}},
+  "observacoes": "notas relevantes"
+}}}}
+```
+
+### Specs por tipo:
+
+**Notebook:**
+```json
+"especificacoes": {{{{
+  "processador": "Intel Core i5-1135G7",
+  "geracao": "11ª geração",
+  "ram": "8GB DDR4",
+  "armazenamento": "SSD 256GB NVMe",
+  "tela": "15.6\\" Full HD",
+  "placa_video": "Integrada ou modelo",
+  "sistema_operacional": "Windows 11"
+}}}}
+```
+
+**Ar-condicionado:**
+```json
+"especificacoes": {{{{
+  "capacidade_btus": "12000",
+  "tecnologia": "Inverter | Convencional",
+  "ciclo": "Frio | Quente/Frio",
+  "tensao": "220V",
+  "classificacao_energetica": "A"
+}}}}
+```
+
+**Impressora:**
+```json
+"especificacoes": {{{{
+  "tecnologia": "Laser Mono | Laser Color | Jato de Tinta",
+  "funcoes": "Impressora | Multifuncional",
+  "velocidade_ppm": "40",
+  "conectividade": ["WiFi", "USB", "Ethernet"],
+  "duplex": "Automático | Manual"
+}}}}
+```
+
+**Monitor:**
+```json
+"especificacoes": {{{{
+  "tamanho": "24\\"",
+  "resolucao": "1920x1080",
+  "tipo_painel": "IPS | VA | TN",
+  "taxa_atualizacao": "60Hz",
+  "conectores": ["HDMI", "VGA"]
+}}}}
+```
+
+### Se não encontrar:
+```json
+{{{{
+  "tipo_produto": "{tipo}",
+  "identificacao": {{{{ "marca": "{marca}", "modelo": "{modelo}", "part_number": null }}}},
+  "especificacoes": null,
+  "fonte": null,
+  "erro": "Especificações não encontradas",
+  "tentativas": ["query 1", "query 2"],
+  "sugestao": "alternativa para busca manual"
+}}}}
+```
+
+---
+
+## REGRAS
+
+1. Usar `web_search` na ordem de prioridade
+2. **Marca + Modelo primeiro** - busca mais direta
+3. Usar **Part Number** para refinar quando houver variantes
+4. Validar specs conflitantes: fabricante > loja > review
+5. **Não inventar dados** - retornar `null` se não encontrar
+6. Sempre documentar a fonte (URL)
+
+---
+
+## EXEMPLO
+
+**Entrada:**
+```
+Marca: Dell | Modelo: Inspiron 15 3501 | Tipo: notebook
+Part Number: i3501-5081BLK | Número de Série: 7XK9M33
+```
+
+**Ação:** `web_search("Dell Inspiron 15 3501 ficha técnica especificações")`
+
+**Saída:**
+```json
+{{{{
+  "tipo_produto": "notebook",
+  "identificacao": {{{{
+    "marca": "Dell",
+    "modelo": "Inspiron 15 3501",
+    "part_number": "i3501-5081BLK"
+  }}}},
+  "especificacoes": {{{{
+    "processador": "Intel Core i5-1135G7",
+    "geracao": "11ª geração",
+    "ram": "8GB DDR4 2666MHz",
+    "armazenamento": "SSD 256GB PCIe NVMe",
+    "tela": "15.6\\" Full HD (1920x1080)",
+    "placa_video": "Intel Iris Xe (integrada)",
+    "sistema_operacional": "Windows 11 Home"
+  }}}},
+  "fonte": {{{{
+    "url": "https://www.dell.com/pt-br/shop/notebooks/inspiron-15/spd/inspiron-15-3501-laptop",
+    "tipo": "fabricante",
+    "confiabilidade": "alta"
+  }}}},
+  "observacoes": "Modelo possui variantes (i3/i5/i7). Part Number i3501-5081BLK confirma configuração i5/8GB/256GB."
+}}}}
+```
+
+---
+
+## INSTRUÇÃO FINAL
+
+1. Execute `web_search` priorizando **Marca + Modelo**
+2. Use **Part Number** para refinar se houver variantes
+3. Extraia specs de fontes confiáveis
+4. Retorne **APENAS o JSON**
 """
 
         try:
@@ -465,287 +757,13 @@ Retorne APENAS o JSON válido.
 """
 
     async def _analyze_text_only(self, input_text: str) -> ItemAnalysisResult:
-        """Analisa apenas texto (sem imagem) de forma direta"""
+        """Analisa apenas texto (sem imagem) de forma direta.
+        Suporta veículos (retorna dados para API FIPE) e bens gerais (Google Shopping).
+        """
         logger.info("Analisando texto puro (sem imagem)")
 
-        prompt = f'''# AGENTE: Especialista em Pesquisa de Preços para Reavaliação Patrimonial
-
-## CONTEXTO
-
-Você é um especialista em pesquisa de preços de mercado para **reavaliação de bens patrimoniais** de órgãos públicos brasileiros. Sua função é analisar descrições de bens móveis permanentes e gerar queries otimizadas para o **Google Shopping**, buscando o **valor justo de reposição**.
-
-### Base normativa:
-- NBC TSP 07 (Ativo Imobilizado)
-- MCASP (Manual de Contabilidade Aplicada ao Setor Público)
-- Lei 14.133/2021 (Licitações e Contratos)
-
-### Princípio de busca:
-> Encontrar o **valor de mercado atual** de bens equivalentes (mesmas especificações funcionais), independente da marca/fabricante original.
-
----
-
-## DADO DE ENTRADA
-```
-Descrição do bem: "{input_text}"
-```
-
----
-
-## PROCESSO DE ANÁLISE
-
-### Etapa 1: Identificação do bem
-- Extrair tipo/categoria do bem
-- Identificar marca e modelo (se presentes)
-- Classificar natureza: eletrônico | mobiliário | equipamento | instrumento | veículo
-
-### Etapa 2: Extração de especificações
-- Separar especificações **essenciais** (definem equivalência funcional)
-- Separar especificações **complementares** (refinam a busca)
-- Priorizar atributos conforme categoria:
-
-| Categoria | Especificações prioritárias |
-|-----------|----------------------------|
-| **Eletrônicos/TI** | processador, memória, armazenamento, tela, conectividade |
-| **Mobiliário** | material, dimensões, tipo de uso, capacidade |
-| **Equipamentos** | potência, capacidade, voltagem, função |
-| **Instrumentos** | tipo, faixa de medição, precisão, certificação |
-| **Veículos** | tipo, capacidade, motorização, ano |
-
-### Etapa 3: Construção da query
-- Estrutura: `[TIPO] + [SPECS ESSENCIAIS] + [QUALIFICADORES]`
-- Limite: 4-8 termos por query
-- Usar linguagem de e-commerce (não técnica)
-- Abreviações padrão de mercado (gb, cm, pol, w)
-
----
-
-## REGRAS OBRIGATÓRIAS
-
-| # | Regra | Motivo |
-|---|-------|--------|
-| 1 | `query_principal` **NUNCA** pode ser vazia | Garantir funcionalidade da busca |
-| 2 | Priorizar especificações sobre marca | Encontrar equivalentes de qualquer fabricante |
-| 3 | Omitir marca na `query_principal` | Ampliar resultados para valor justo |
-| 4 | Incluir marca apenas em `query_com_marca` | Referência de preço do item original |
-| 5 | Usar termos comerciais | Melhor indexação no Google Shopping |
-| 6 | Buscar sempre bem NOVO | Base para cálculo de valor de reposição |
-
----
-
-## FORMATO DE SAÍDA
-
-Retorne **APENAS** o JSON abaixo, sem texto adicional:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Descrição padronizada do bem",
-    "marca": "marca identificada ou null",
-    "modelo": "modelo identificado ou null",
-    "categoria": "Eletrônicos | Mobiliário | Equipamentos | Instrumentos | Veículos",
-    "natureza": "eletronico | mobiliario | equipamento | instrumento | veiculo"
-  }},
-  "especificacoes": {{
-    "essenciais": {{}},
-    "complementares": {{}}
-  }},
-  "queries": {{
-    "principal": "query otimizada SEM marca (OBRIGATÓRIO - nunca vazio)",
-    "alternativas": ["variação 1", "variação 2"],
-    "com_marca": "query incluindo marca original para referência"
-  }},
-  "busca": {{
-    "palavras_chave": ["termo1", "termo2", "termo3"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.0,
-    "completude_dados": "alta | media | baixa",
-    "observacoes": "notas relevantes para a reavaliação"
-  }}
-}}
-```
-
----
-
-## EXEMPLOS
-
-### Entrada 1:
-```
-"Notebook Dell Inspiron 15, processador Intel Core i5, 8GB RAM, SSD 256GB, tela 15.6 polegadas"
-```
-
-### Saída 1:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Notebook Intel Core i5 8GB SSD 256GB 15.6 polegadas",
-    "marca": "Dell",
-    "modelo": "Inspiron 15",
-    "categoria": "Eletrônicos",
-    "natureza": "eletronico"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "processador": "Intel Core i5",
-      "memoria_ram": "8GB",
-      "armazenamento": "SSD 256GB",
-      "tela": "15.6 polegadas"
-    }},
-    "complementares": {{}}
-  }},
-  "queries": {{
-    "principal": "notebook i5 8gb ssd 256gb 15.6 polegadas",
-    "alternativas": [
-      "notebook intel core i5 8gb ssd 256",
-      "laptop i5 8gb ram ssd 256gb"
-    ],
-    "com_marca": "notebook dell inspiron i5 8gb ssd 256gb"
-  }},
-  "busca": {{
-    "palavras_chave": ["notebook", "i5", "8gb", "ssd", "256gb", "15.6"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.95,
-    "completude_dados": "alta",
-    "observacoes": "Especificações completas permitem busca precisa de equivalentes"
-  }}
-}}
-```
-
----
-
-### Entrada 2:
-```
-"Cadeira giratória tipo presidente, couro sintético preto, braços reguláveis, base cromada"
-```
-
-### Saída 2:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Cadeira Presidente Giratória Couro Sintético",
-    "marca": null,
-    "modelo": null,
-    "categoria": "Mobiliário",
-    "natureza": "mobiliario"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "tipo": "presidente",
-      "material": "couro sintético",
-      "base": "giratória"
-    }},
-    "complementares": {{
-      "cor": "preto",
-      "bracos": "reguláveis",
-      "acabamento_base": "cromada"
-    }}
-  }},
-  "queries": {{
-    "principal": "cadeira presidente giratoria couro sintetico",
-    "alternativas": [
-      "cadeira escritorio presidente braco regulavel",
-      "poltrona executiva giratoria couro"
-    ],
-    "com_marca": ""
-  }},
-  "busca": {{
-    "palavras_chave": ["cadeira", "presidente", "giratoria", "couro", "sintetico", "escritorio"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.85,
-    "completude_dados": "media",
-    "observacoes": "Sem marca identificada. Dimensões auxiliariam na precisão"
-  }}
-}}
-```
-
----
-
-### Entrada 3:
-```
-"Ar condicionado split 12000 BTUs inverter 220V quente/frio"
-```
-
-### Saída 3:
-```json
-{{
-  "bem_patrimonial": {{
-    "nome_canonico": "Ar-condicionado Split 12000 BTUs Inverter 220V",
-    "marca": null,
-    "modelo": null,
-    "categoria": "Equipamentos",
-    "natureza": "equipamento"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
-      "tipo": "split",
-      "capacidade": "12000 BTUs",
-      "tecnologia": "inverter",
-      "voltagem": "220V"
-    }},
-    "complementares": {{
-      "funcao": "quente/frio"
-    }}
-  }},
-  "queries": {{
-    "principal": "ar condicionado split 12000 btus inverter 220v",
-    "alternativas": [
-      "split 12000 btus inverter quente frio",
-      "ar condicionado 12000 btus 220v inverter"
-    ],
-    "com_marca": ""
-  }},
-  "busca": {{
-    "palavras_chave": ["ar condicionado", "split", "12000", "btus", "inverter", "220v"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "conserto", "defeito", "outlet", "instalacao"],
-    "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
-    "confianca": 0.92,
-    "completude_dados": "alta",
-    "observacoes": "Especificações técnicas completas para equivalência"
-  }}
-}}
-```
-
----
-
-## TRATAMENTO DE DADOS INCOMPLETOS
-
-Se a descrição for insuficiente:
-
-1. **Extrair o máximo possível** da descrição fornecida
-2. **Gerar query genérica** baseada no tipo identificado
-3. **Indicar baixa confiança** no campo `confianca`
-4. **Documentar limitações** em `observacoes`
-
-Exemplo para entrada vaga como `"computador antigo"`:
-```json
-{{
-  "queries": {{
-    "principal": "computador desktop",
-    "alternativas": ["pc desktop", "computador completo"]
-  }},
-  "avaliacao": {{
-    "confianca": 0.30,
-    "completude_dados": "baixa",
-    "observacoes": "Descrição insuficiente. Necessário complementar com especificações técnicas (processador, memória, armazenamento)"
-  }}
-}}
-```
-
----
-
-## INSTRUÇÃO FINAL
-
-Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JSON conforme formato especificado. A `query_principal` é OBRIGATÓRIA e nunca pode estar vazia.
-'''
+        # Usar o prompt do arquivo de templates
+        prompt = PROMPT_ANALISE_PATRIMONIAL.replace("{input_text}", input_text)
 
         response = self._call_with_retry(
             lambda: self.client.messages.create(
@@ -785,11 +803,12 @@ Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JS
         return ItemAnalysisResult(**data)
 
     def _transform_patrimonial_response(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Transforma resposta do novo formato patrimonial para formato ItemAnalysisResult"""
+        """Transforma resposta do formato patrimonial para formato ItemAnalysisResult.
+        Suporta tanto veículos (FIPE) quanto bens gerais (Google Shopping).
+        """
+        tipo_processamento = raw_data.get('tipo_processamento', 'GOOGLE_SHOPPING')
         bem = raw_data.get('bem_patrimonial', {})
         specs = raw_data.get('especificacoes', {})
-        queries = raw_data.get('queries', {})
-        busca = raw_data.get('busca', {})
         avaliacao = raw_data.get('avaliacao', {})
 
         # Combinar especificações essenciais e complementares
@@ -797,30 +816,58 @@ Analise a descrição do bem patrimonial fornecida e retorne exclusivamente o JS
         especificacoes_tecnicas.update(specs.get('essenciais', {}))
         especificacoes_tecnicas.update(specs.get('complementares', {}))
 
-        # Adicionar categoria e natureza às especificações
-        if bem.get('categoria'):
-            especificacoes_tecnicas['categoria'] = bem.get('categoria')
-        if bem.get('natureza'):
-            especificacoes_tecnicas['natureza'] = bem.get('natureza')
-
-        return {
+        # Base result
+        result = {
+            'tipo_processamento': tipo_processamento,
             'nome_canonico': bem.get('nome_canonico', ''),
             'marca': bem.get('marca'),
             'modelo': bem.get('modelo'),
+            'categoria': bem.get('categoria'),
+            'natureza': bem.get('natureza'),
             'part_number': None,
             'codigo_interno': None,
             'especificacoes_tecnicas': especificacoes_tecnicas,
-            'palavras_chave': busca.get('palavras_chave', []),
-            'sinonimos': [],
-            'query_principal': queries.get('principal', ''),
-            'query_alternativas': queries.get('alternativas', []),
-            'termos_excluir': busca.get('termos_excluir', []),
+            'especificacoes': specs,  # Manter formato original {essenciais: {}, complementares: {}}
             'observacoes': avaliacao.get('observacoes', ''),
             'nivel_confianca': avaliacao.get('confianca', 0.0),
-            # Campos extras para referência
-            'query_com_marca': queries.get('com_marca', ''),
-            'completude_dados': avaliacao.get('completude_dados', ''),
+            'dados_faltantes': avaliacao.get('dados_faltantes', []),
         }
+
+        # Processar conforme tipo
+        if tipo_processamento == 'FIPE':
+            # Veículo - dados para API FIPE
+            fipe_api_data = raw_data.get('fipe_api', {})
+            result['fipe_api'] = FipeApiParams(
+                vehicle_type=fipe_api_data.get('vehicle_type'),
+                codigo_fipe=fipe_api_data.get('codigo_fipe'),
+                busca_marca=fipe_api_data.get('busca_marca'),
+                busca_modelo=fipe_api_data.get('busca_modelo'),
+                year_id_estimado=fipe_api_data.get('year_id_estimado'),
+                fluxo_recomendado=fipe_api_data.get('fluxo_recomendado'),
+                endpoints=fipe_api_data.get('endpoints')
+            )
+            result['fallback_google_shopping'] = raw_data.get('fallback_google_shopping', {})
+
+            # Query principal vazia para veículos (usa FIPE)
+            result['query_principal'] = ''
+            result['query_alternativas'] = []
+            result['palavras_chave'] = []
+            result['termos_excluir'] = []
+            result['sinonimos'] = []
+        else:
+            # Bem geral - dados para Google Shopping
+            queries = raw_data.get('queries', {})
+            busca = raw_data.get('busca', {})
+
+            result['query_principal'] = queries.get('principal', '')
+            result['query_alternativas'] = queries.get('alternativas', [])
+            result['palavras_chave'] = busca.get('palavras_chave', [])
+            result['termos_excluir'] = busca.get('termos_excluir', [])
+            result['sinonimos'] = []
+            result['fipe_api'] = None
+            result['fallback_google_shopping'] = None
+
+        return result
 
     def _parse_json(self, text: str) -> Dict[str, Any]:
         """Extrai e parseia JSON de uma string"""
