@@ -331,13 +331,12 @@ def process_batch_quote(self, quote_request_id: int, batch_job_id: int):
             logger.info(f"[Batch] Detected vehicle - using FIPE API flow for quote {quote_request_id}")
             use_fallback = _process_fipe_quote(db, quote_request, analysis_result)
             if not use_fallback:
-                # FIPE processou com sucesso, atualizar status do batch e retornar
-                quote_request.status = QuoteStatus.DONE
-                quote_request.current_step = "completed"
-                quote_request.progress_percentage = 100
-                quote_request.step_details = "Cotação FIPE concluída com sucesso"
-                db.commit()
+                # FIPE processou com sucesso - o status já foi atualizado em _process_fipe_quote
+                # Mas precisamos garantir que o batch seja atualizado
+                db.refresh(quote_request)
                 logger.info(f"[Batch] FIPE quote {quote_request_id} completed successfully")
+                # Atualizar progresso do batch ANTES de retornar
+                _update_batch_on_quote_complete(db, batch_job_id)
                 return {"status": "completed", "quote_id": quote_request_id, "source": "FIPE"}
             # FIPE falhou, continuar com Google Shopping usando query de fallback
             logger.info(f"[Batch] FIPE failed, falling back to Google Shopping with query: {analysis_result.query_principal}")

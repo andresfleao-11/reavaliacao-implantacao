@@ -691,7 +691,8 @@ export interface VehiclePrice {
   price_value: number
   reference_month: string
   reference_date: string
-  status: 'Vigente' | 'Expirada'  // Status calculado baseado na vigência
+  status: 'Vigente' | 'Expirada' | 'Pendente'  // Status: Vigente, Expirada ou Pendente (sem screenshot)
+  has_screenshot: boolean  // Indica se tem screenshot da consulta FIPE
   quote_request_id: number | null
   last_api_call: string | null
 }
@@ -730,7 +731,7 @@ export const vehiclePricesApi = {
     codigo_fipe?: string
     reference_month?: string
     vehicle_type?: string
-    status?: 'Vigente' | 'Expirada'  // Filtro por status de vigência
+    status?: 'Vigente' | 'Expirada' | 'Pendente'  // Filtro por status de vigência ou screenshot pendente
     sort_by?: string
     sort_order?: string
   }): Promise<VehiclePriceListResponse> => {

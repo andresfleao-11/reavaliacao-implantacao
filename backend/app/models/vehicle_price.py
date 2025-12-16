@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, Date, ForeignKey, JSON, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, Date, ForeignKey, JSON, UniqueConstraint, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -48,6 +48,7 @@ class VehiclePriceBank(Base):
     # Screenshot da consulta FIPE
     screenshot_file_id = Column(Integer, ForeignKey("files.id"), nullable=True)
     screenshot_path = Column(String(500), nullable=True)  # Caminho do screenshot
+    has_screenshot = Column(Boolean, default=False, nullable=True)  # Indica se tem screenshot válido
 
     # Relacionamentos
     quote_request = relationship("QuoteRequest", backref="vehicle_prices")

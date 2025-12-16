@@ -9,8 +9,13 @@ from decimal import Decimal
 import logging
 
 from app.core.database import get_db
-from app.models import VehiclePriceBank, Setting
+from app.models import VehiclePriceBank, Setting, File
+from app.models.file import FileType
 from app.services.fipe_client import FipeClient
+from app.services.fipe_screenshot import capture_fipe_screenshot
+from app.core.config import settings
+import hashlib
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +30,15 @@ def _get_vigencia_meses(db: Session) -> int:
     return 6
 
 
-def _calculate_status(updated_at: datetime, vigencia_meses: int) -> str:
-    """Calcula o status da cotacao baseado na vigencia"""
+def _calculate_status(updated_at: datetime, vigencia_meses: int, has_screenshot: bool = True) -> str:
+    """
+    Calcula o status da cotacao baseado na vigencia e screenshot.
+
+    Status possíveis:
+    - "Pendente": Vigente mas sem screenshot
+    - "Vigente": Vigente com screenshot
+    - "Expirada": Fora da vigência
+    """
     if updated_at is None:
         return "Expirada"
 
@@ -35,7 +47,12 @@ def _calculate_status(updated_at: datetime, vigencia_meses: int) -> str:
         updated_at = updated_at.replace(tzinfo=None)
 
     limite = datetime.now() - relativedelta(months=vigencia_meses)
-    return "Vigente" if updated_at >= limite else "Expirada"
+
+    if updated_at >= limite:
+        # Dentro da vigência - verificar se tem screenshot
+        return "Vigente" if has_screenshot else "Pendente"
+    else:
+        return "Expirada"
 
 
 # ============= Schemas =============
@@ -66,7 +83,10 @@ class VehiclePriceResponse(BaseModel):
     reference_date: date
 
     # Status de vigência (calculado)
-    status: str = "Vigente"  # "Vigente" ou "Expirada"
+    status: str = "Vigente"  # "Vigente", "Pendente" ou "Expirada"
+
+    # Screenshot
+    has_screenshot: bool = False  # Indica se tem screenshot da consulta FIPE
 
     # Rastreabilidade
     quote_request_id: Optional[int] = None
@@ -115,7 +135,7 @@ def list_vehicle_prices(
     codigo_fipe: Optional[str] = None,
     reference_month: Optional[str] = None,
     vehicle_type: Optional[str] = None,
-    status: Optional[str] = Query(None, regex="^(Vigente|Expirada)$"),
+    status: Optional[str] = Query(None, regex="^(Vigente|Expirada|Pendente)$"),
     sort_by: str = Query("updated_at", regex="^(updated_at|price_value|brand_name|year_model|codigo_fipe)$"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
     db: Session = Depends(get_db)
@@ -156,12 +176,29 @@ def list_vehicle_prices(
     if vehicle_type:
         query = query.filter(VehiclePriceBank.vehicle_type == vehicle_type)
 
-    # Filtro por status (calculado baseado em vigencia)
+    # Filtro por status (calculado baseado em vigencia e has_screenshot)
     if status:
-        from sqlalchemy import func
+        from sqlalchemy import func, and_, or_
         limite = datetime.now() - relativedelta(months=vigencia_meses)
         if status == "Vigente":
-            query = query.filter(VehiclePriceBank.updated_at >= limite)
+            # Vigente = dentro da vigência E tem screenshot
+            query = query.filter(
+                and_(
+                    VehiclePriceBank.updated_at >= limite,
+                    VehiclePriceBank.has_screenshot == True
+                )
+            )
+        elif status == "Pendente":
+            # Pendente = dentro da vigência E não tem screenshot
+            query = query.filter(
+                and_(
+                    VehiclePriceBank.updated_at >= limite,
+                    or_(
+                        VehiclePriceBank.has_screenshot == False,
+                        VehiclePriceBank.has_screenshot.is_(None)
+                    )
+                )
+            )
         else:  # Expirada
             query = query.filter(VehiclePriceBank.updated_at < limite)
 
@@ -182,6 +219,7 @@ def list_vehicle_prices(
     # Converter para response com status calculado
     items = []
     for item in db_items:
+        has_screenshot = bool(item.has_screenshot)
         item_dict = {
             "id": item.id,
             "created_at": item.created_at,
@@ -200,7 +238,8 @@ def list_vehicle_prices(
             "price_value": item.price_value,
             "reference_month": item.reference_month,
             "reference_date": item.reference_date,
-            "status": _calculate_status(item.updated_at, vigencia_meses),
+            "status": _calculate_status(item.updated_at, vigencia_meses, has_screenshot),
+            "has_screenshot": has_screenshot,
             "quote_request_id": item.quote_request_id,
             "last_api_call": item.last_api_call
         }
@@ -228,6 +267,7 @@ def get_vehicle_price(
         raise HTTPException(status_code=404, detail="Veículo não encontrado no banco de preços")
 
     vigencia_meses = _get_vigencia_meses(db)
+    has_screenshot = bool(vehicle.has_screenshot)
     return VehiclePriceResponse(
         id=vehicle.id,
         created_at=vehicle.created_at,
@@ -246,7 +286,8 @@ def get_vehicle_price(
         price_value=vehicle.price_value,
         reference_month=vehicle.reference_month,
         reference_date=vehicle.reference_date,
-        status=_calculate_status(vehicle.updated_at, vigencia_meses),
+        status=_calculate_status(vehicle.updated_at, vigencia_meses, has_screenshot),
+        has_screenshot=has_screenshot,
         quote_request_id=vehicle.quote_request_id,
         last_api_call=vehicle.last_api_call
     )
@@ -272,8 +313,17 @@ async def refresh_vehicle_price(
 
     try:
         fipe_client = FipeClient()
+
+        # Converter vehicle_type de inteiro para string se necessário
+        # Dados legados podem ter "1", "2", "3" em vez de "cars", "motorcycles", "trucks"
+        vehicle_type_map = {"1": "cars", "2": "motorcycles", "3": "trucks"}
+        vehicle_type = vehicle.vehicle_type
+        if vehicle_type in vehicle_type_map:
+            vehicle_type = vehicle_type_map[vehicle_type]
+            logger.info(f"Converted vehicle_type from '{vehicle.vehicle_type}' to '{vehicle_type}'")
+
         result = await fipe_client.refresh_price(
-            vehicle_type=vehicle.vehicle_type,
+            vehicle_type=vehicle_type,
             brand_id=str(vehicle.brand_id),
             model_id=str(vehicle.model_id),
             year_id=vehicle.year_id
@@ -310,14 +360,61 @@ async def refresh_vehicle_price(
             "vehicleType": price_data.vehicleType
         }
 
+        # Capturar screenshot se não tiver ou sempre atualizar
+        screenshot_captured = False
+        try:
+            logger.info(f"Capturando screenshot FIPE para {vehicle.vehicle_name}...")
+
+            # Extrair combustível do fuel_type
+            combustivel = vehicle.fuel_type
+
+            screenshot_path = await capture_fipe_screenshot(
+                codigo_fipe=vehicle.codigo_fipe,
+                ano_modelo=vehicle.year_model,
+                combustivel=combustivel,
+                vehicle_type=vehicle_type,
+                quote_id=vehicle_id  # Usar vehicle_id como referência
+            )
+
+            if screenshot_path:
+                logger.info(f"Screenshot FIPE capturado: {screenshot_path}")
+
+                # Calcular hash do arquivo
+                def _calculate_sha256(file_path: str) -> str:
+                    sha256_hash = hashlib.sha256()
+                    with open(file_path, "rb") as f:
+                        for byte_block in iter(lambda: f.read(4096), b""):
+                            sha256_hash.update(byte_block)
+                    return sha256_hash.hexdigest()
+
+                # Criar registro de File para o screenshot
+                screenshot_file = File(
+                    type=FileType.SCREENSHOT,
+                    mime_type="image/png",
+                    storage_path=screenshot_path,
+                    sha256=_calculate_sha256(screenshot_path)
+                )
+                db.add(screenshot_file)
+                db.flush()
+
+                vehicle.screenshot_file_id = screenshot_file.id
+                vehicle.screenshot_path = screenshot_path
+                vehicle.has_screenshot = True
+                screenshot_captured = True
+                logger.info(f"Screenshot registrado: file_id={screenshot_file.id}")
+
+        except Exception as screenshot_error:
+            logger.warning(f"Erro ao capturar screenshot FIPE (não bloqueante): {screenshot_error}")
+
         db.commit()
         db.refresh(vehicle)
 
-        logger.info(f"Preço atualizado: {vehicle.vehicle_name} de R$ {old_price} para R$ {new_price}")
+        msg_suffix = " Screenshot capturado." if screenshot_captured else ""
+        logger.info(f"Preço atualizado: {vehicle.vehicle_name} de R$ {old_price} para R$ {new_price}{msg_suffix}")
 
         return RefreshPriceResponse(
             success=True,
-            message=f"Preço atualizado com sucesso. Referência: {price_data.referenceMonth}",
+            message=f"Preço atualizado com sucesso. Referência: {price_data.referenceMonth}{msg_suffix}",
             vehicle=vehicle,
             new_price=new_price,
             old_price=old_price,
@@ -374,10 +471,18 @@ async def refresh_all_prices(
 
     fipe_client = FipeClient()
 
+    # Mapa para converter vehicle_type legado
+    vehicle_type_map = {"1": "cars", "2": "motorcycles", "3": "trucks"}
+
     for vehicle in vehicles:
         try:
+            # Converter vehicle_type de inteiro para string se necessário
+            vehicle_type = vehicle.vehicle_type
+            if vehicle_type in vehicle_type_map:
+                vehicle_type = vehicle_type_map[vehicle_type]
+
             result = await fipe_client.refresh_price(
-                vehicle_type=vehicle.vehicle_type,
+                vehicle_type=vehicle_type,
                 brand_id=str(vehicle.brand_id),
                 model_id=str(vehicle.model_id),
                 year_id=vehicle.year_id

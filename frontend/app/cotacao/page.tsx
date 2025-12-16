@@ -112,15 +112,15 @@ export default function CotacaoPage() {
 
   return (
     <div className="max-w-4xl">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Nova Cotação</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">Nova Cotação</h1>
 
         {/* Link para Google Lens */}
         <Link
           href="/cotacao/google-lens"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+          className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
             <path d="M21 21l-4.35-4.35" />
           </svg>
@@ -134,18 +134,18 @@ export default function CotacaoPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Projeto e Código do Item */}
         <div className="card">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 Projeto (opcional)
               </label>
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-                className="input-field w-full"
+                className="input-field w-full text-sm"
                 disabled={loading}
               >
                 <option value="">Sem vínculo com projeto</option>
@@ -158,14 +158,14 @@ export default function CotacaoPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 Código do Item (opcional)
               </label>
               <input
                 type="text"
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value)}
-                className="input-field w-full"
+                className="input-field w-full text-sm"
                 placeholder="Ex: 100002346"
                 disabled={loading}
               />
@@ -175,30 +175,30 @@ export default function CotacaoPage() {
 
         {/* Local e Pesquisador */}
         <div className="card">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 Local
               </label>
               <input
                 type="text"
                 value={local}
                 onChange={(e) => setLocal(e.target.value)}
-                className="input-field w-full"
+                className="input-field w-full text-sm"
                 placeholder="Ex: Online"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 Pesquisador
               </label>
               <input
                 type="text"
                 value={pesquisador}
                 readOnly
-                className="input-field w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
+                className="input-field w-full text-sm bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
                 placeholder="Ex: João Silva"
               />
             </div>
@@ -207,17 +207,17 @@ export default function CotacaoPage() {
 
         {/* Pesquisa por: Abas */}
         <div className="card">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">
             Pesquisar por:
           </label>
 
           {/* Tabs */}
           <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex space-x-4 sm:space-x-8">
               <button
                 type="button"
                 onClick={() => setActiveTab('descricao')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                   activeTab === 'descricao'
                     ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -228,13 +228,13 @@ export default function CotacaoPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('imagens')}
-                className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+                className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                   activeTab === 'imagens'
                     ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
                 }`}
               >
-                Imagens (Etiqueta ou Foto do Bem)
+                Imagens
               </button>
             </nav>
           </div>
@@ -285,21 +285,21 @@ export default function CotacaoPage() {
               </div>
 
               {images.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-4">
+                <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
                   {images.map((image, index) => (
                     <div key={index} className="relative">
                       <img
                         src={URL.createObjectURL(image)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-40 object-cover rounded-lg"
+                        className="w-full h-24 sm:h-40 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-red-500 text-white rounded-full p-0.5 sm:p-1 hover:bg-red-600"
                         disabled={loading}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -313,23 +313,23 @@ export default function CotacaoPage() {
         </div>
 
         {/* Submit buttons */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:space-x-4">
           <button
             type="button"
             onClick={() => router.push('/historico')}
-            className="btn-secondary"
+            className="btn-secondary text-sm"
             disabled={loading}
           >
             Cancelar
           </button>
           <button
             type="submit"
-            className="btn-primary"
+            className="btn-primary text-sm"
             disabled={!canSubmit}
           >
             {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>

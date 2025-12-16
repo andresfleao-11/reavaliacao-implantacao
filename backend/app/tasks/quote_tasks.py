@@ -1095,15 +1095,72 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
         # Calcular data limite para vigência
         limite_vigencia = datetime.now() - relativedelta(months=vigencia_meses)
 
-        # Buscar no banco de preços por codigo_fipe (se disponível)
-        existing_price = None
-        codigo_fipe_busca = fipe_params.codigo_fipe if fipe_params and fipe_params.codigo_fipe else None
+        # Extrair dados do veículo da análise da IA
+        marca_busca = analysis_result.marca if hasattr(analysis_result, 'marca') else None
+        modelo_busca = analysis_result.modelo if hasattr(analysis_result, 'modelo') else None
+        ano_busca = None
+        combustivel_busca = None
 
-        if codigo_fipe_busca:
-            existing_price = db.query(VehiclePriceBank).filter(
-                VehiclePriceBank.codigo_fipe == codigo_fipe_busca
-            ).order_by(VehiclePriceBank.updated_at.desc()).first()
-            logger.info(f"[FIPE] Buscando por codigo_fipe={codigo_fipe_busca}: {'encontrado' if existing_price else 'não encontrado'}")
+        if hasattr(analysis_result, 'especificacoes') and analysis_result.especificacoes:
+            essenciais = analysis_result.especificacoes.get("essenciais", {})
+            ano_busca = essenciais.get("ano_modelo")
+            combustivel_busca = essenciais.get("combustivel")
+
+        # Converter ano para inteiro se possível
+        if ano_busca:
+            try:
+                ano_busca = int(str(ano_busca).strip())
+            except (ValueError, TypeError):
+                ano_busca = None
+
+        logger.info(f"[FIPE] Buscando no banco de preços por semelhança: marca='{marca_busca}', modelo='{modelo_busca}', ano={ano_busca}, combustivel='{combustivel_busca}'")
+
+        # Buscar no banco de preços por SEMELHANÇA (marca, modelo, ano, combustível)
+        existing_price = None
+
+        if marca_busca and modelo_busca:
+            from sqlalchemy import func, or_
+
+            # Query base com filtro de marca (case insensitive, match parcial)
+            query = db.query(VehiclePriceBank).filter(
+                VehiclePriceBank.brand_name.ilike(f"%{marca_busca}%")
+            )
+
+            # Filtro de modelo (match parcial)
+            # Dividir o modelo em palavras e buscar por cada palavra-chave
+            modelo_palavras = modelo_busca.split()
+            for palavra in modelo_palavras:
+                if len(palavra) >= 2:  # Ignorar palavras muito curtas
+                    query = query.filter(VehiclePriceBank.model_name.ilike(f"%{palavra}%"))
+
+            # Filtro de ano (exato)
+            if ano_busca:
+                query = query.filter(VehiclePriceBank.year_model == ano_busca)
+
+            # Filtro de combustível (opcional, match parcial)
+            if combustivel_busca and len(combustivel_busca) > 2:
+                # Normalizar combustível para busca
+                combustivel_norm = combustivel_busca.lower().strip()
+                # Mapear variações comuns
+                if "flex" in combustivel_norm:
+                    query = query.filter(VehiclePriceBank.fuel_type.ilike("%flex%"))
+                elif "diesel" in combustivel_norm:
+                    query = query.filter(VehiclePriceBank.fuel_type.ilike("%diesel%"))
+                elif "gasolina" in combustivel_norm:
+                    query = query.filter(VehiclePriceBank.fuel_type.ilike("%gasolina%"))
+                elif "alcool" in combustivel_norm or "etanol" in combustivel_norm:
+                    query = query.filter(or_(
+                        VehiclePriceBank.fuel_type.ilike("%alcool%"),
+                        VehiclePriceBank.fuel_type.ilike("%etanol%")
+                    ))
+
+            # Ordenar por data de atualização (mais recente primeiro)
+            existing_price = query.order_by(VehiclePriceBank.updated_at.desc()).first()
+
+            if existing_price:
+                logger.info(f"[FIPE] Encontrado no banco por semelhança: {existing_price.vehicle_name} (código {existing_price.codigo_fipe})")
+            else:
+                logger.info(f"[FIPE] Nenhum veículo encontrado no banco por semelhança")
 
         # Verificar se cotação está vigente
         if existing_price:
@@ -1129,10 +1186,17 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
                     price_value=existing_price.price_value,
                     currency="BRL",
                     extraction_method=ExtractionMethod.API_FIPE,
-                    is_accepted=True
+                    is_accepted=True,
+                    screenshot_file_id=existing_price.screenshot_file_id  # Usar screenshot do cache
                 )
                 db.add(fipe_source)
                 db.flush()
+
+                # Log se screenshot está disponível ou não
+                if existing_price.screenshot_file_id:
+                    logger.info(f"[FIPE] Usando screenshot do cache: file_id={existing_price.screenshot_file_id}")
+                else:
+                    logger.warning(f"[FIPE] Cache sem screenshot disponível para {existing_price.vehicle_name}")
 
                 # Salvar resultado no JSON da cotação
                 import copy
@@ -1422,6 +1486,15 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
             fuel_map = {"G": "Gasolina", "A": "Alcool", "D": "Diesel", "F": "Flex"}
             fuel_type = fuel_map.get(fipe_result.price.fuelAcronym, fipe_result.price.fuel or "Gasolina")
 
+            # Mapear vehicle_type de inteiro para string (a API FIPE retorna inteiro mas espera string nas URLs)
+            # vehicleType: 1=carro, 2=moto, 3=caminhão
+            vehicle_type_int_to_str = {1: "cars", 2: "motorcycles", 3: "trucks"}
+            vehicle_type_value = fipe_result.price.vehicleType
+            if isinstance(vehicle_type_value, int):
+                vehicle_type_str = vehicle_type_int_to_str.get(vehicle_type_value, "cars")
+            else:
+                vehicle_type_str = vehicle_type_value or "cars"
+
             # Dados para inserção/atualização (incluindo screenshot)
             vehicle_data = {
                 "codigo_fipe": fipe_result.price.codeFipe,
@@ -1433,7 +1506,7 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
                 "year_model": fipe_result.price.modelYear,
                 "fuel_type": fuel_type,
                 "fuel_code": fuel_code,
-                "vehicle_type": fipe_result.price.vehicleType or "cars",
+                "vehicle_type": vehicle_type_str,
                 "vehicle_name": f"{fipe_result.price.brand} {fipe_result.price.model} {fipe_result.price.modelYear}",
                 "price_value": Decimal(str(fipe_result.price.price_value)),
                 "reference_month": fipe_result.price.referenceMonth,
@@ -1442,7 +1515,8 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
                 "api_response_json": fipe_data.get("price"),
                 "last_api_call": datetime.utcnow(),
                 "screenshot_file_id": screenshot_file_id,
-                "screenshot_path": screenshot_path
+                "screenshot_path": screenshot_path,
+                "has_screenshot": screenshot_file_id is not None  # Indica se tem screenshot válido
             }
 
             # UPSERT: INSERT ... ON CONFLICT (codigo_fipe, year_id) DO UPDATE
@@ -1460,6 +1534,7 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
                     "last_api_call": stmt.excluded.last_api_call,
                     "screenshot_file_id": stmt.excluded.screenshot_file_id,
                     "screenshot_path": stmt.excluded.screenshot_path,
+                    "has_screenshot": stmt.excluded.has_screenshot,
                     "updated_at": datetime.utcnow()
                 }
             )

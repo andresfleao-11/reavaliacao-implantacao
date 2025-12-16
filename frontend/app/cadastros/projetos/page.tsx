@@ -256,31 +256,31 @@ export default function ProjetosPage() {
   return (
     <AdminRoute>
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Projetos</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Projetos</h1>
         <button
           onClick={openNewModal}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           Novo Projeto
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-        <form onSubmit={handleSearch} className="flex flex-wrap gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou código..."
-            className="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <select
             value={filterClientId}
             onChange={(e) => { setFilterClientId(e.target.value); setPage(1); }}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
-            <option value="">Todos os clientes</option>
+            <option value="">Todos clientes</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>{c.nome_curto || c.nome}</option>
             ))}
@@ -288,16 +288,16 @@ export default function ProjetosPage() {
           <select
             value={filterStatus}
             onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
-            <option value="">Todos os status</option>
+            <option value="">Todos status</option>
             {statusOptions.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
           <button
             type="submit"
-            className="px-6 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="px-4 sm:px-6 py-1.5 sm:py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             Buscar
           </button>
@@ -306,104 +306,106 @@ export default function ProjetosPage() {
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500 dark:text-gray-400">Carregando...</div>
+          <div className="p-6 sm:p-8 text-center text-sm text-gray-500 dark:text-gray-400">Carregando...</div>
         ) : projects.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+          <div className="p-6 sm:p-8 text-center text-sm text-gray-500 dark:text-gray-400">
             Nenhum projeto encontrado
           </div>
         ) : (
           <>
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Projeto
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Cliente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Contrato
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Cotações
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {projects.map((project) => (
-                  <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900 dark:text-gray-100">{project.nome}</div>
-                      {project.codigo && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Cód: {project.codigo}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                      {project.client?.nome_curto || project.client?.nome || '-'}
-                    </td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
-                      {project.numero_contrato || '-'}
-                      {project.modalidade_licitacao && (
-                        <div className="text-xs text-gray-400 dark:text-gray-500">{project.modalidade_licitacao}</div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(project.status)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300">
-                        {project.total_cotacoes}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <a
-                        href={`/cadastros/projetos/${project.id}`}
-                        className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 mr-3"
-                      >
-                        Detalhes
-                      </a>
-                      <button
-                        onClick={() => openEditModal(project)}
-                        className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mr-3"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleDelete(project)}
-                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                      >
-                        Excluir
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Projeto
+                    </th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">
+                      Cliente
+                    </th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">
+                      Contrato
+                    </th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Status
+                    </th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">
+                      Cot.
+                    </th>
+                    <th className="px-3 sm:px-6 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                      Ações
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {projects.map((project) => (
+                    <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4">
+                        <div className="font-medium text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate max-w-[120px] sm:max-w-none">{project.nome}</div>
+                        {project.codigo && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Cód: {project.codigo}</div>
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden md:table-cell">
+                        {project.client?.nome_curto || project.client?.nome || '-'}
+                      </td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden lg:table-cell">
+                        {project.numero_contrato || '-'}
+                        {project.modalidade_licitacao && (
+                          <div className="text-xs text-gray-400 dark:text-gray-500">{project.modalidade_licitacao}</div>
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4">
+                        {getStatusBadge(project.status)}
+                      </td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 hidden sm:table-cell">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300">
+                          {project.total_cotacoes}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 text-right whitespace-nowrap">
+                        <a
+                          href={`/cadastros/projetos/${project.id}`}
+                          className="text-xs sm:text-sm text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 mr-2 sm:mr-3"
+                        >
+                          Ver
+                        </a>
+                        <button
+                          onClick={() => openEditModal(project)}
+                          className="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mr-2 sm:mr-3"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(project)}
+                          className="text-xs sm:text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Mostrando {(page - 1) * perPage + 1} a {Math.min(page * perPage, total)} de {total} resultados
+              <div className="px-3 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  {(page - 1) * perPage + 1}-{Math.min(page * perPage, total)} de {total}
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                   >
                     Anterior
                   </button>
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                   >
                     Próximo
                   </button>
@@ -415,22 +417,22 @@ export default function ProjetosPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {editingProject ? 'Editar Projeto' : 'Novo Projeto'}
               </h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6">
               {error && (
-                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
+                <div className="mb-4 p-2 sm:p-3 text-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
                   {error}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Cliente *
