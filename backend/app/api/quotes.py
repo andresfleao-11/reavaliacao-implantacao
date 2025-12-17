@@ -128,7 +128,18 @@ async def create_quote(
 
         db.commit()
 
-    process_quote_request.delay(quote_request.id)
+    # Enviar tarefa para processamento assíncrono com tratamento de erro
+    try:
+        process_quote_request.delay(quote_request.id)
+    except Exception as celery_error:
+        # Se falhar ao enviar para o Celery, marcar como erro
+        quote_request.status = QuoteStatus.ERROR
+        quote_request.error_message = f"Erro ao enviar para processamento: {str(celery_error)}"
+        db.commit()
+        raise HTTPException(
+            status_code=503,
+            detail=f"Serviço de processamento indisponível. Por favor, tente novamente mais tarde. Erro: {str(celery_error)}"
+        )
 
     return QuoteCreateResponse(quoteRequestId=quote_request.id)
 

@@ -4,12 +4,14 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.api import quotes, settings, clients, projects, materials, project_config, users, financial, blocked_domains, financial_v2, batch_quotes, debug_serpapi, vehicle_prices
 from app.core.database import engine, Base
 from app.core.logging import setup_logging
 import logging
 import time
 import os
+import traceback
 
 # Configurar logging estruturado
 setup_logging(level="INFO", json_logs=True)
@@ -28,6 +30,40 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
+# Middleware para garantir CORS em todas as respostas (incluindo erros)
+class CORSErrorMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            logger.error(f"Unhandled exception: {str(e)}\n{traceback.format_exc()}")
+            response = JSONResponse(
+                status_code=500,
+                content={"detail": f"Internal server error: {str(e)}"}
+            )
+
+        # Garantir headers CORS em todas as respostas
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+
+        return response
+
+
+# Handler para OPTIONS (preflight requests)
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(request: Request, rest_of_path: str):
+    response = JSONResponse(content={"message": "OK"})
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
+
+# Adicionar middleware de CORS com erro primeiro (executa por último)
+app.add_middleware(CORSErrorMiddleware)
+
 # Configurar CORS - permitir todas as origens para Railway
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +72,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-logger.info("CORS configured: allow all origins")
+logger.info("CORS configured: allow all origins with error handling")
 
 # Middleware para logging de requests
 @app.middleware("http")
