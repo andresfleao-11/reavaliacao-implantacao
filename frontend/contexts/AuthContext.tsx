@@ -3,10 +3,25 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' && window.location.hostname.includes('railway.app')
-    ? 'https://backend-production-78bb.up.railway.app'
-    : 'http://localhost:8000')
+// Função para garantir que a URL tenha protocolo
+const getApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || ''
+
+  // Se não tiver variável ou estiver no Railway, usar URL do backend
+  if (!url || (typeof window !== 'undefined' && window.location.hostname.includes('railway.app'))) {
+    url = 'https://backend-production-78bb.up.railway.app'
+  }
+
+  // Garantir que tenha protocolo
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url
+  }
+
+  // Fallback para localhost em desenvolvimento
+  return url || 'http://localhost:8000'
+}
+
+const API_URL = getApiUrl()
 
 interface User {
   id: number
