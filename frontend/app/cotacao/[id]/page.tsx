@@ -1142,6 +1142,36 @@ export default function QuoteDetailPage() {
                       </div>
                     </div>
 
+                    {/* Price Mismatch Validation Status */}
+                    {searchStats.enable_price_mismatch !== undefined && (
+                      <div className={`mb-4 p-3 rounded-lg border ${searchStats.enable_price_mismatch
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                        : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-lg ${searchStats.enable_price_mismatch ? 'text-green-600' : 'text-yellow-600'}`}>
+                            {searchStats.enable_price_mismatch ? '✓' : '⚠'}
+                          </span>
+                          <div>
+                            <p className={`font-medium ${searchStats.enable_price_mismatch
+                              ? 'text-green-800 dark:text-green-200'
+                              : 'text-yellow-800 dark:text-yellow-200'}`}>
+                              Validação de Preço: {searchStats.enable_price_mismatch ? 'HABILITADA' : 'DESABILITADA'}
+                            </p>
+                            <p className={`text-sm ${searchStats.enable_price_mismatch
+                              ? 'text-green-700 dark:text-green-300'
+                              : 'text-yellow-700 dark:text-yellow-300'}`}>
+                              {searchStats.price_mismatch_note || (searchStats.enable_price_mismatch
+                                ? 'Produtos com diferença > 5% entre preço Google e Site são rejeitados'
+                                : 'Usando preço do Google Shopping (consistente com seleção de bloco)')}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Fonte de preço: <span className="font-mono">{searchStats.price_source || (searchStats.enable_price_mismatch ? 'site' : 'google')}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Validation Failures Table */}
                     {searchStats.validation_failures && searchStats.validation_failures.length > 0 && (
                       <div>
