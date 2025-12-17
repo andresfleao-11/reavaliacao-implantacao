@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { settingsApi, IntegrationSetting, AnthropicModelOption, OpenAIModelOption, AIProviderOption } from '@/lib/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function IntegracoesPage() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN'
   const [serpApiKey, setSerpApiKey] = useState('')
   const [anthropicApiKey, setAnthropicApiKey] = useState('')
   const [openaiApiKey, setOpenaiApiKey] = useState('')
@@ -363,6 +366,18 @@ export default function IntegracoesPage() {
     <div className="max-w-4xl">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Integrações</h1>
 
+      {!isAdmin && (
+        <div className="mb-6 px-4 py-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span className="font-medium">Acesso somente leitura.</span>
+            <span className="ml-1">Apenas administradores podem alterar as configurações de integração.</span>
+          </div>
+        </div>
+      )}
+
       {message && (
         <div className={`mb-6 px-4 py-3 rounded-lg ${message.includes('✓') || message.includes('sucesso') ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'}`}>
           {message}
@@ -424,8 +439,9 @@ export default function IntegracoesPage() {
             </div>
             <button
               onClick={handleSaveAIProvider}
-              className="btn-primary bg-purple-600 hover:bg-purple-700"
-              disabled={saving}
+              className="btn-primary bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={saving || !isAdmin}
+              title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
             >
               {saving ? 'Salvando...' : 'Salvar Provedor'}
             </button>
@@ -455,8 +471,9 @@ export default function IntegracoesPage() {
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">BRL</span>
             <button
               onClick={handleSaveExchangeRate}
-              className="btn-primary bg-green-600 hover:bg-green-700"
-              disabled={saving || !usdToBrl}
+              className="btn-primary bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={saving || !usdToBrl || !isAdmin}
+              title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
             >
               {saving ? 'Salvando...' : 'Salvar Taxa'}
             </button>
@@ -503,8 +520,9 @@ export default function IntegracoesPage() {
             <div className="flex space-x-4">
               <button
                 onClick={() => handleSave('SERPAPI', serpApiKey)}
-                className="btn-primary"
-                disabled={saving || !serpApiKey}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={saving || !serpApiKey || !isAdmin}
+                title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
               >
                 {saving ? 'Salvando...' : 'Salvar'}
               </button>
@@ -533,8 +551,9 @@ export default function IntegracoesPage() {
                 />
                 <button
                   onClick={handleSaveSerpApiCost}
-                  className="btn-secondary"
-                  disabled={saving || !serpApiCostPerCall}
+                  className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={saving || !serpApiCostPerCall || !isAdmin}
+                  title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
                 >
                   {saving ? 'Salvando...' : 'Salvar Custo'}
                 </button>
@@ -591,8 +610,9 @@ export default function IntegracoesPage() {
             <div className="flex space-x-4">
               <button
                 onClick={() => handleSave('IMGBB', imgbbApiKey)}
-                className="btn-primary"
-                disabled={saving || !imgbbApiKey}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={saving || !imgbbApiKey || !isAdmin}
+                title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
               >
                 {saving ? 'Salvando...' : 'Salvar'}
               </button>
@@ -668,8 +688,9 @@ export default function IntegracoesPage() {
             <div className="flex space-x-4">
               <button
                 onClick={() => handleSaveAnthropic()}
-                className="btn-primary"
-                disabled={saving || (!anthropicApiKey && selectedAnthropicModel === (anthropicStatus?.other_settings?.model || ''))}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={saving || (!anthropicApiKey && selectedAnthropicModel === (anthropicStatus?.other_settings?.model || '')) || !isAdmin}
+                title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
               >
                 {saving ? 'Salvando...' : 'Salvar'}
               </button>
@@ -745,8 +766,9 @@ export default function IntegracoesPage() {
             <div className="flex space-x-4">
               <button
                 onClick={() => handleSaveOpenAI()}
-                className="btn-primary"
-                disabled={saving || (!openaiApiKey && selectedOpenaiModel === (openaiStatus?.other_settings?.model || ''))}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={saving || (!openaiApiKey && selectedOpenaiModel === (openaiStatus?.other_settings?.model || '')) || !isAdmin}
+                title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
               >
                 {saving ? 'Salvando...' : 'Salvar'}
               </button>
@@ -868,8 +890,9 @@ export default function IntegracoesPage() {
             <div className="flex space-x-4">
               <button
                 onClick={handleSaveFipe}
-                className="btn-primary"
-                disabled={saving || (fipeApiType === 'private' && !fipeApiKey && !fipeStatus?.is_configured)}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={saving || (fipeApiType === 'private' && !fipeApiKey && !fipeStatus?.is_configured) || !isAdmin}
+                title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
               >
                 {saving ? 'Salvando...' : 'Salvar'}
               </button>
