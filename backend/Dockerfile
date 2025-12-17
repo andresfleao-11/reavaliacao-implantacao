@@ -38,7 +38,10 @@ RUN playwright install chromium
 
 COPY . .
 
+# Make start script executable
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-# Use /bin/sh -c explicitly to ensure variable expansion
-CMD ["/bin/sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Use start script for proper environment variable handling
+CMD ["./start.sh"]
