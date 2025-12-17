@@ -40,5 +40,5 @@ COPY . .
 
 EXPOSE 8000
 
-# Use Python to read PORT from environment (avoids shell variable expansion issues)
-CMD ["python", "-c", "import os; port = os.environ.get('PORT', '8000'); import subprocess; subprocess.run(['uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', port])"]
+# Use Python startup script to properly read PORT environment variable
+CMD ["python", "start_server.py"]
