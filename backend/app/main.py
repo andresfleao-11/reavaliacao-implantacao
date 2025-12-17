@@ -9,6 +9,7 @@ from app.core.database import engine, Base
 from app.core.logging import setup_logging
 import logging
 import time
+import os
 
 # Configurar logging estruturado
 setup_logging(level="INFO", json_logs=True)
@@ -27,9 +28,21 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Configurar origens CORS dinamicamente
+cors_origins = ["http://localhost:3000"]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    cors_origins.append(frontend_url)
+# Também adicionar variantes comuns do Railway
+railway_frontend = os.getenv("RAILWAY_PUBLIC_DOMAIN_FRONTEND")
+if railway_frontend:
+    cors_origins.append(f"https://{railway_frontend}")
+
+logger.info(f"CORS origins configured: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization"],
