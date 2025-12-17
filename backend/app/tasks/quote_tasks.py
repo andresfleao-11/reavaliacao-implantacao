@@ -2,7 +2,7 @@ from celery import Task
 from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
 from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, BlockedDomain, QuoteSourceFailure, CaptureFailureReason
-from app.models.quote_request import QuoteStatus
+from app.models.quote_request import QuoteStatus, QuoteInputType
 from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
 from app.services.claude_client import ClaudeClient, FipeApiParams
@@ -525,10 +525,19 @@ def process_quote_request(self, quote_request_id: int):
                             logger.info(f"✅ SUCESSO! Bloco já tem {valid_in_block} cotações válidas")
                             block_record["result"] = "success_early"
                             search_stats["block_history"].append(block_record)
+
+                            # Filtrar fontes para manter apenas as do bloco vencedor
                             valid_sources = [
                                 s for pk, s in valid_sources_by_product_key.items()
                                 if pk in block_keys
                             ]
+
+                            # Marcar como não aceitas as fontes fora do bloco vencedor
+                            for pk, source in valid_sources_by_product_key.items():
+                                if pk not in block_keys:
+                                    source.is_accepted = False
+                                    logger.info(f"  Fonte {source.domain} marcada como não aceita (fora do bloco vencedor)")
+
                             return  # Sucesso!
 
                         # ETAPA 3: Testar TODOS os produtos do bloco
@@ -543,10 +552,19 @@ def process_quote_request(self, quote_request_id: int):
                                 logger.info(f"✅ SUCESSO! Atingido {valid_in_block_now} cotações no bloco")
                                 block_record["result"] = "success"
                                 search_stats["block_history"].append(block_record)
+
+                                # Filtrar fontes para manter apenas as do bloco vencedor
                                 valid_sources = [
                                     s for pk, s in valid_sources_by_product_key.items()
                                     if pk in block_keys
                                 ]
+
+                                # Marcar como não aceitas as fontes fora do bloco vencedor
+                                for pk, source in valid_sources_by_product_key.items():
+                                    if pk not in block_keys:
+                                        source.is_accepted = False
+                                        logger.info(f"  Fonte {source.domain} marcada como não aceita (fora do bloco vencedor)")
+
                                 return  # Sucesso!
 
                             # Processar produto
@@ -745,10 +763,19 @@ def process_quote_request(self, quote_request_id: int):
                             logger.info(f"✅ SUCESSO! {valid_in_block_final} cotações válidas no bloco")
                             block_record["result"] = "success"
                             search_stats["block_history"].append(block_record)
+
+                            # Filtrar fontes para manter apenas as do bloco vencedor
                             valid_sources = [
                                 s for pk, s in valid_sources_by_product_key.items()
                                 if pk in block_keys
                             ]
+
+                            # Marcar como não aceitas as fontes fora do bloco vencedor
+                            for pk, source in valid_sources_by_product_key.items():
+                                if pk not in block_keys:
+                                    source.is_accepted = False
+                                    logger.info(f"  Fonte {source.domain} marcada como não aceita (fora do bloco vencedor)")
+
                             return
 
                         # BLOCO FALHOU: testamos todos os produtos e temos < N válidos
@@ -765,11 +792,47 @@ def process_quote_request(self, quote_request_id: int):
                     logger.info(f"Tolerância {current_var_max*100:.0f}% esgotada após {global_iteration} iterações")
 
                 # Se chegou aqui, não conseguiu mesmo com todos os fallbacks
+                # Encontrar o bloco com mais validados para usar como "melhor esforço"
                 total_validated = len(validated_product_keys)
                 logger.warning(
                     f"Não foi possível obter {num_quotes} cotações em um único bloco. "
                     f"Total validado: {total_validated}. Tolerância final: {current_var_max*100:.0f}%"
                 )
+
+                # Selecionar o melhor bloco (com mais validados) do histórico
+                # Recalcular usando validated_product_keys atual (não o status salvo no momento)
+                best_block_keys = set()
+                best_valid_count = 0
+
+                for block_record in search_stats["block_history"]:
+                    products = block_record.get("products_in_block", [])
+                    block_product_keys = set()
+
+                    for p in products:
+                        pk = _make_product_key(p.get("title", ""), p.get("price", 0))
+                        block_product_keys.add(pk)
+
+                    # Contar quantos validados estão NESTE bloco
+                    valid_count = len(validated_product_keys & block_product_keys)
+
+                    if valid_count > best_valid_count:
+                        best_valid_count = valid_count
+                        best_block_keys = block_product_keys
+
+                if best_block_keys and best_valid_count > 0:
+                    logger.info(f"Selecionando melhor bloco com {best_valid_count} validados como fallback")
+
+                    # Filtrar para manter apenas as do melhor bloco
+                    valid_sources = [
+                        s for pk, s in valid_sources_by_product_key.items()
+                        if pk in best_block_keys
+                    ]
+
+                    # Marcar como não aceitas as fontes fora do melhor bloco
+                    for pk, source in valid_sources_by_product_key.items():
+                        if pk not in best_block_keys:
+                            source.is_accepted = False
+                            logger.info(f"  Fonte {source.domain} marcada como não aceita (fora do melhor bloco)")
 
         # Executar a nova lógica
         asyncio.run(extract_prices_with_blocks())
