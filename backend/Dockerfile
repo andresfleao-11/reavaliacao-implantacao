@@ -38,10 +38,7 @@ RUN playwright install chromium
 
 COPY . .
 
-# Make start script executable
-RUN chmod +x start.sh
-
 EXPOSE 8000
 
-# Use start script for proper environment variable handling
-CMD ["./start.sh"]
+# Use Python to read PORT from environment (avoids shell variable expansion issues)
+CMD ["python", "-c", "import os; port = os.environ.get('PORT', '8000'); import subprocess; subprocess.run(['uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', port])"]
