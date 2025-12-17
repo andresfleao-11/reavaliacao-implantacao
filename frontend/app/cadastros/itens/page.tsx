@@ -238,6 +238,7 @@ export default function ItensPage() {
   const openEditModal = (item: Item) => {
     setEditingItem(item)
     setFormData({
+      client_id: item.client_id,
       material_id: item.material_id,
       codigo: item.codigo || '',
       patrimonio: item.patrimonio || '',
