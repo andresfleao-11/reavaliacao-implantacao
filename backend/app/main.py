@@ -28,29 +28,15 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Configurar origens CORS dinamicamente
-cors_origins = [
-    "http://localhost:3000",
-    "https://frontend-production-4989.up.railway.app",  # Produção Railway
-]
-frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
-    # Garantir que tenha protocolo
-    if not frontend_url.startswith("http"):
-        frontend_url = f"https://{frontend_url}"
-    if frontend_url not in cors_origins:
-        cors_origins.append(frontend_url)
-
-logger.info(f"CORS origins configured: {cors_origins}")
-
+# Configurar CORS - permitir todas as origens para Railway
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Content-Type", "Authorization"],
-    expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+logger.info("CORS configured: allow all origins")
 
 # Middleware para logging de requests
 @app.middleware("http")
