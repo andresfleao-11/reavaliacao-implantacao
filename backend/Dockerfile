@@ -38,6 +38,9 @@ RUN playwright install chromium
 
 COPY . .
 
+# Create necessary directories for uploads and storage
+RUN mkdir -p /app/data/uploads /app/data/documents /app/data/screenshots/fipe /app/data/pdfs /app/data/lens_temp
+
 EXPOSE 8000
 
 # Run migrations and start server
