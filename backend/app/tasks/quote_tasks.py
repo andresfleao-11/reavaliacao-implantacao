@@ -619,7 +619,7 @@ def process_quote_request(self, quote_request_id: int):
                                     raise ValueError("NO_STORE_LINK: Produto sem link Immersive API")
 
                                 search_stats["immersive_api_calls"] += 1
-                                store_result = await search_provider.get_store_link(product)
+                                store_result = await search_provider.get_store_link_for_product(product)
 
                                 if not store_result or not store_result.url:
                                     raise ValueError("NO_STORE_LINK: Não foi possível obter URL do site")
