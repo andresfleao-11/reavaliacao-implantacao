@@ -226,7 +226,7 @@ export default function GoogleLensPage() {
                     : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
-                <input {...getInputProps()} />
+                <input {...getInputProps()} capture="environment" />
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,6 +239,9 @@ export default function GoogleLensPage() {
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       PNG, JPG ou WEBP
+                    </p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                      No celular, voce pode usar a camera para tirar fotos
                     </p>
                   </div>
                 </div>

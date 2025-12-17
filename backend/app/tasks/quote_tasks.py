@@ -289,6 +289,10 @@ def process_quote_request(self, quote_request_id: int):
             # Novos campos para histórico de blocos
             "initial_products_sorted": [],  # Lista inicial ordenada por preço
             "block_history": [],  # Histórico de cada iteração de bloco
+            # Configuração de validação de preços
+            "enable_price_mismatch": enable_price_mismatch,
+            "price_source": "site" if enable_price_mismatch else "google",
+            "price_mismatch_note": "Validação de preço HABILITADA: rejeita produtos com diferença > 5% entre Google e Site" if enable_price_mismatch else "Validação de preço DESABILITADA: usa preço do Google Shopping (consistente com seleção de bloco)",
         }
 
         # Parâmetros
@@ -655,12 +659,17 @@ def process_quote_request(self, quote_request_id: int):
                                 db.add(screenshot_file)
                                 db.flush()
 
+                                # Determinar preço final:
+                                # - Se enable_price_mismatch=True: usar preço extraído do site
+                                # - Se enable_price_mismatch=False: usar preço do Google (consistente com seleção de bloco)
+                                final_price = price if enable_price_mismatch else Decimal(str(google_price))
+
                                 source = QuoteSource(
                                     quote_request_id=quote_request_id,
                                     url=store_result.url,
                                     domain=store_result.domain,
                                     page_title=product.title,
-                                    price_value=price,
+                                    price_value=final_price,
                                     currency="BRL",
                                     extraction_method=method,
                                     screenshot_file_id=screenshot_file.id,
@@ -671,11 +680,13 @@ def process_quote_request(self, quote_request_id: int):
                                 valid_sources_by_product_key[product_key] = source
                                 validated_product_keys.add(product_key)
 
-                                logger.info(f"  ✓ Validado [{len(validated_product_keys & block_keys)}/{num_quotes}]: {store_result.domain} - R$ {price}")
+                                price_source_info = "" if enable_price_mismatch else " (preço Google)"
+                                logger.info(f"  ✓ Validado [{len(validated_product_keys & block_keys)}/{num_quotes}]: {store_result.domain} - R$ {final_price}{price_source_info}")
 
                                 # Registrar teste bem-sucedido
                                 test_record["result"] = "success"
                                 test_record["extracted_price"] = float(price)
+                                test_record["final_price"] = float(final_price)
                                 test_record["domain"] = store_result.domain
                                 block_record["tests"].append(test_record)
 
@@ -684,6 +695,8 @@ def process_quote_request(self, quote_request_id: int):
                                     "source": product.source,
                                     "google_price": float(product.extracted_price) if product.extracted_price else None,
                                     "extracted_price": float(price),
+                                    "final_price": float(final_price),
+                                    "price_source": "site" if enable_price_mismatch else "google",
                                     "url": store_result.url,
                                     "domain": store_result.domain
                                 })

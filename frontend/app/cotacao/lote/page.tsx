@@ -90,7 +90,7 @@ export default function BatchQuotePage() {
         setFile(f)
         setError('')
       } else {
-        setError('Formato invalido. Use CSV ou XLSX.')
+        setError('Formato inválido. Use CSV ou XLSX.')
       }
     }
   }, [])
@@ -119,7 +119,7 @@ export default function BatchQuotePage() {
 
       if (inputMethod === 'text') {
         if (!textInput.trim()) {
-          throw new Error('Digite as descricoes dos produtos separadas por ";"')
+          throw new Error('Digite as descrições dos produtos separadas por ";"')
         }
         result = await batchQuotesApi.createTextBatch({
           input_text: textInput,
@@ -170,7 +170,7 @@ export default function BatchQuotePage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Cotacao em Lote
+          Cotação em Lote
         </h1>
 
         {error && (
@@ -179,10 +179,10 @@ export default function BatchQuotePage() {
           </div>
         )}
 
-        {/* Configuracoes do Lote */}
+        {/* Configurações do Lote */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Configuracoes
+            Configurações
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -297,13 +297,14 @@ export default function BatchQuotePage() {
                     : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                 }`}
               >
-                <input {...getImagesInputProps()} />
+                <input {...getImagesInputProps()} capture="environment" />
                 <div className="text-gray-500 dark:text-gray-400">
                   <svg className="mx-auto h-12 w-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <p className="font-medium">Arraste imagens aqui ou clique para selecionar</p>
                   <p className="text-sm mt-1">Uma imagem por produto (PNG, JPG, WEBP)</p>
+                  <p className="text-xs mt-2 text-gray-400">No celular, voce pode usar a camera para tirar fotos</p>
                 </div>
               </div>
 
@@ -348,7 +349,7 @@ export default function BatchQuotePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <p className="font-medium">Arraste um arquivo CSV ou XLSX aqui</p>
-                  <p className="text-sm mt-1">A primeira coluna deve conter as descricoes dos produtos</p>
+                  <p className="text-sm mt-1">A primeira coluna deve conter as descrições dos produtos</p>
                 </div>
               </div>
 
@@ -415,7 +416,7 @@ export default function BatchQuotePage() {
                   Criando lote...
                 </span>
               ) : (
-                'Iniciar Cotacao em Lote'
+                'Iniciar Cotação em Lote'
               )}
             </button>
           </div>

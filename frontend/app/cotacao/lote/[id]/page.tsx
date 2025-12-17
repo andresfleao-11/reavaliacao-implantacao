@@ -159,12 +159,12 @@ export default function BatchDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-red-600">Lote nao encontrado</h1>
+          <h1 className="text-2xl font-bold text-red-600">Lote não encontrado</h1>
           <button
             onClick={() => router.push('/cotacao/lote')}
             className="mt-4 text-blue-600 hover:underline"
           >
-            Voltar para Cotacao em Lote
+            Voltar para Cotação em Lote
           </button>
         </div>
       </div>
@@ -174,16 +174,16 @@ export default function BatchDetailPage() {
   const totalPages = Math.ceil(totalQuotes / perPage)
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-3 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Lote #{batch.id}
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Criado em {format(new Date(batch.created_at), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {format(new Date(batch.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -191,7 +191,7 @@ export default function BatchDetailPage() {
               <button
                 onClick={handleResume}
                 disabled={actionLoading}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50"
               >
                 Retomar
               </button>
@@ -200,7 +200,7 @@ export default function BatchDetailPage() {
               <button
                 onClick={handleCancel}
                 disabled={actionLoading}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -215,32 +215,32 @@ export default function BatchDetailPage() {
         )}
 
         {/* Status e Progresso */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[batch.status]}`}>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${STATUS_COLORS[batch.status]}`}>
                 {STATUS_LABELS[batch.status] || batch.status}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                 {INPUT_TYPE_LABELS[batch.input_type] || batch.input_type}
               </span>
             </div>
             {batch.project && (
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Projeto: {batch.project.nome}
+              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                {batch.project.nome}
               </span>
             )}
           </div>
 
           {/* Barra de Progresso */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm mb-1">
+            <div className="flex justify-between text-xs sm:text-sm mb-1">
               <span className="text-gray-600 dark:text-gray-300">Progresso</span>
               <span className="text-gray-900 dark:text-white font-medium">
                 {batch.progress_percentage.toFixed(0)}%
               </span>
             </div>
-            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 rounded-full transition-all duration-500"
                 style={{ width: `${batch.progress_percentage}%` }}
@@ -249,41 +249,41 @@ export default function BatchDetailPage() {
           </div>
 
           {/* Contadores */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4">
+            <div className="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {batch.total_items}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Total</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total</div>
             </div>
-            <div className="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-center p-2 sm:p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
                 {batch.quotes_done}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Concluidas</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">OK</div>
             </div>
-            <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+            <div className="text-center p-2 sm:p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                 {batch.quotes_awaiting_review}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Aguardando Revisao</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Revisão</div>
             </div>
-            <div className="text-center p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+            <div className="text-center p-2 sm:p-3 bg-red-50 dark:bg-red-900/30 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
                 {batch.failed_items}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Falhas</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Falhas</div>
             </div>
-            <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-center p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg col-span-3 sm:col-span-1">
+              <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {batch.total_items - batch.completed_items - batch.failed_items}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Pendentes</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Pendentes</div>
             </div>
           </div>
 
           {batch.error_message && (
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 rounded-lg text-sm text-red-700 dark:text-red-300">
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-red-50 dark:bg-red-900/30 rounded-lg text-xs sm:text-sm text-red-700 dark:text-red-300">
               {batch.error_message}
             </div>
           )}
@@ -291,37 +291,26 @@ export default function BatchDetailPage() {
 
         {/* Resumo de Custos */}
         {costs && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Resumo de Custos e Chamadas de API
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+              Custos de API
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
               {/* Anthropic */}
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span className="font-medium text-purple-900 dark:text-purple-200">Anthropic (IA)</span>
+              <div className="p-3 sm:p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                  <span className="text-xs sm:text-sm font-medium text-purple-900 dark:text-purple-200">Anthropic</span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-400">Chamadas:</span>
                     <span className="font-medium text-gray-900 dark:text-white">{costs.anthropic.calls}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Tokens (entrada):</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{costs.anthropic.input_tokens.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Tokens (saida):</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{costs.anthropic.output_tokens.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Tokens total:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Tokens:</span>
                     <span className="font-medium text-gray-900 dark:text-white">{costs.anthropic.total_tokens.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-purple-200 dark:border-purple-700">
+                  <div className="flex justify-between pt-1 sm:pt-2 border-t border-purple-200 dark:border-purple-700">
                     <span className="text-gray-600 dark:text-gray-400">Custo:</span>
                     <span className="font-medium text-purple-600 dark:text-purple-400">US$ {costs.anthropic.cost_usd.toFixed(4)}</span>
                   </div>
@@ -329,52 +318,37 @@ export default function BatchDetailPage() {
               </div>
 
               {/* SerpAPI */}
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <span className="font-medium text-blue-900 dark:text-blue-200">SerpAPI (Buscas)</span>
+              <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                  <span className="text-xs sm:text-sm font-medium text-blue-900 dark:text-blue-200">SerpAPI</span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Total de chamadas:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Chamadas:</span>
                     <span className="font-medium text-gray-900 dark:text-white">{costs.serpapi.calls}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Google Shopping:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Shopping:</span>
                     <span className="font-medium text-gray-900 dark:text-white">{costs.serpapi.google_shopping}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Immersive Product:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{costs.serpapi.immersive_product}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-blue-200 dark:border-blue-700">
-                    <span className="text-gray-600 dark:text-gray-400">Custo estimado:</span>
+                  <div className="flex justify-between pt-1 sm:pt-2 border-t border-blue-200 dark:border-blue-700">
+                    <span className="text-gray-600 dark:text-gray-400">Custo:</span>
                     <span className="font-medium text-blue-600 dark:text-blue-400">US$ {(costs.serpapi.cost_usd || 0).toFixed(4)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Total */}
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="font-medium text-green-900 dark:text-green-200">Custo Total</span>
+              <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                  <span className="text-xs sm:text-sm font-medium text-green-900 dark:text-green-200">Total</span>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
-                      R$ {costs.total_cost_brl.toFixed(2)}
-                    </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      US$ {costs.total_cost_usd.toFixed(4)}
-                    </div>
+                <div>
+                  <div className="text-xl sm:text-3xl font-bold text-green-600 dark:text-green-400">
+                    R$ {costs.total_cost_brl.toFixed(2)}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t border-green-200 dark:border-green-700">
-                    * Custo SerpAPI estimado em US$ 0.005/chamada
+                  <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                    US$ {costs.total_cost_usd.toFixed(4)}
                   </div>
                 </div>
               </div>
@@ -384,65 +358,60 @@ export default function BatchDetailPage() {
 
         {/* Lista de Cotacoes */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Cotacoes ({totalQuotes})
+          <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+            <h2 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">
+              Cotações ({totalQuotes})
             </h2>
             <select
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs sm:text-sm"
             >
-              <option value="">Todos os status</option>
+              <option value="">Todos</option>
               <option value="PROCESSING">Processando</option>
-              <option value="DONE">Concluido</option>
-              <option value="AWAITING_REVIEW">Aguardando Revisao</option>
+              <option value="DONE">Concluído</option>
+              <option value="AWAITING_REVIEW">Revisão</option>
               <option value="ERROR">Erro</option>
               <option value="CANCELLED">Cancelado</option>
             </select>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Produto</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Valor Medio</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Acoes</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">#</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ID</th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Produto</th>
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Valor</th>
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                  <th className="px-3 py-2"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {quotes.map((quote) => (
                   <tr key={quote.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    <td className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                       {(quote.batch_index ?? 0) + 1}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
                       {quote.id}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white max-w-[200px] truncate">
                       {quote.nome_item || quote.codigo_item || '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                      {quote.valor_medio
-                        ? `R$ ${quote.valor_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                        : '-'
-                      }
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white text-right font-medium">
+                      {quote.valor_medio ? `R$ ${quote.valor_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[quote.status]}`}>
                         {STATUS_LABELS[quote.status] || quote.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/cotacao/${quote.id}`}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                      >
-                        Ver detalhes
+                    <td className="px-3 py-2">
+                      <Link href={`/cotacao/${quote.id}`} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm">
+                        Ver
                       </Link>
                     </td>
                   </tr>
@@ -450,7 +419,7 @@ export default function BatchDetailPage() {
                 {quotes.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                      Nenhuma cotacao encontrada
+                      Nenhuma cotação encontrada
                     </td>
                   </tr>
                 )}
@@ -458,26 +427,58 @@ export default function BatchDetailPage() {
             </table>
           </div>
 
-          {/* Paginacao */}
+          {/* Mobile Cards */}
+          <div className="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
+            {quotes.map((quote) => (
+              <Link
+                key={quote.id}
+                href={`/cotacao/${quote.id}`}
+                className="block p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">#{(quote.batch_index ?? 0) + 1}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">ID {quote.id}</span>
+                  </div>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${STATUS_COLORS[quote.status]}`}>
+                    {STATUS_LABELS[quote.status] || quote.status}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-300 truncate mb-1">
+                  {quote.nome_item || quote.codigo_item || '-'}
+                </div>
+                <div className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                  {quote.valor_medio ? `R$ ${quote.valor_medio.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'}
+                </div>
+              </Link>
+            ))}
+            {quotes.length === 0 && (
+              <div className="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                Nenhuma cotação encontrada
+              </div>
+            )}
+          </div>
+
+          {/* Paginação */}
           {totalPages > 1 && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Pagina {page} de {totalPages}
+            <div className="p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                {page}/{totalPages}
               </span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50"
+                  className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50"
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm disabled:opacity-50"
+                  className="px-2 sm:px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs sm:text-sm disabled:opacity-50"
                 >
-                  Proximo
+                  Próximo
                 </button>
               </div>
             </div>

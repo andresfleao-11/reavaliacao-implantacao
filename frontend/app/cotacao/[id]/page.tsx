@@ -73,6 +73,7 @@ export default function QuoteDetailPage() {
       // Status mudou de PROCESSING para outro - recarregar logs e custos
       setIntegrationLogs([])
       setQuoteCosts(null)
+      setLoadingLogs(false)  // Reset loading state para permitir novo carregamento
     }
     if (quote?.status) {
       setPrevStatus(quote.status)
@@ -242,21 +243,24 @@ export default function QuoteDetailPage() {
 
   return (
     <div className="max-w-6xl">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      {/* Header responsivo: título em uma linha, tags abaixo */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">
           Cotação #{quote.id}
           {quote.attempt_number > 1 && (
-            <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+            <span className="ml-2 text-xs sm:text-sm font-normal text-gray-500 dark:text-gray-400">
               (Tentativa {quote.attempt_number})
             </span>
           )}
         </h1>
-        <div className="flex items-center space-x-4">
+
+        {/* Tags e botões em linha separada */}
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           {/* Tag de Lote */}
           {quote.batch_job_id && (
             <Link
               href={`/cotacao/lote/${quote.batch_job_id}`}
-              className="px-3 py-1 rounded-full text-sm font-medium bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-200 hover:bg-cyan-200 dark:hover:bg-cyan-900/50 transition-colors"
+              className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-200 hover:bg-cyan-200 dark:hover:bg-cyan-900/50 transition-colors"
               title="Ver lote completo"
             >
               📦 Lote #{quote.batch_job_id}
@@ -265,7 +269,7 @@ export default function QuoteDetailPage() {
 
           {/* Tipo de Entrada */}
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${inputTypeInfo.color}`}
+            className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${inputTypeInfo.color}`}
             title={`Tipo de entrada: ${inputTypeInfo.label}`}
           >
             {inputTypeInfo.icon} {inputTypeInfo.label}
@@ -273,7 +277,7 @@ export default function QuoteDetailPage() {
 
           {/* Status */}
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
+            className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
               quote.status === 'DONE'
                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                 : quote.status === 'PROCESSING'
@@ -297,9 +301,9 @@ export default function QuoteDetailPage() {
             <button
               onClick={handleCancel}
               disabled={cancelling}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {cancelling ? 'Cancelando...' : 'Cancelar Cotação'}
+              {cancelling ? 'Cancelando...' : 'Cancelar'}
             </button>
           )}
 
@@ -308,9 +312,9 @@ export default function QuoteDetailPage() {
             <button
               onClick={handleRequote}
               disabled={requoting}
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {requoting ? 'Iniciando...' : 'Cotar Novamente'}
+              {requoting ? 'Iniciando...' : 'Recotar'}
             </button>
           )}
 
@@ -318,12 +322,12 @@ export default function QuoteDetailPage() {
           {(quote.status === 'CANCELLED' || quote.status === 'ERROR' || quote.status === 'AWAITING_REVIEW') && quote.child_quote_id && (
             <Link
               href={`/cotacao/${quote.child_quote_id}`}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center"
+              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-              Nova cotação: #{quote.child_quote_id}
+              #{quote.child_quote_id}
             </Link>
           )}
         </div>
@@ -408,18 +412,18 @@ export default function QuoteDetailPage() {
         }
 
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Médio</h3>
-              <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">{formatCurrency(quote.valor_medio)}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6">
+            <div className="card p-3 sm:p-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">Valor Médio</h3>
+              <p className="text-xl sm:text-3xl font-bold text-primary-600 dark:text-primary-400">{formatCurrency(quote.valor_medio)}</p>
             </div>
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Mínimo</h3>
-              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_minimo)}</p>
+            <div className="card p-3 sm:p-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">Valor Mínimo</h3>
+              <p className="text-lg sm:text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_minimo)}</p>
             </div>
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Valor Máximo</h3>
-              <p className="text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_maximo)}</p>
+            <div className="card p-3 sm:p-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">Valor Máximo</h3>
+              <p className="text-lg sm:text-2xl font-semibold text-gray-700 dark:text-gray-300">{formatCurrency(quote.valor_maximo)}</p>
             </div>
           </div>
         );
@@ -427,28 +431,28 @@ export default function QuoteDetailPage() {
 
       {/* Informações do Projeto */}
       {quote.project && (
-        <div className="card mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Projeto Vinculado</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Projeto Vinculado</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Projeto</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Projeto</p>
               <Link
                 href={`/cadastros/projetos/${quote.project.id}`}
-                className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium"
+                className="text-sm sm:text-base text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium"
               >
                 {quote.project.nome}
               </Link>
             </div>
             {quote.project.cliente_nome && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Cliente</p>
-                <p className="text-gray-900 dark:text-gray-100">{quote.project.cliente_nome}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Cliente</p>
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">{quote.project.cliente_nome}</p>
               </div>
             )}
             {quote.project.config_versao && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Versão da Configuração</p>
-                <p className="text-gray-900 dark:text-gray-100">v{quote.project.config_versao}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Versão Config</p>
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">v{quote.project.config_versao}</p>
               </div>
             )}
           </div>
@@ -456,29 +460,29 @@ export default function QuoteDetailPage() {
       )}
 
       {quote.claude_payload_json && (
-        <div className="card mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Análise do Item</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        <div className="card mb-4 sm:mb-6 p-3 sm:p-4">
+          <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Análise do Item</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-2 sm:mb-4">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Nome</p>
-              <p className="text-gray-900 dark:text-gray-100">{quote.claude_payload_json.nome_canonico || 'N/A'}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Nome</p>
+              <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">{quote.claude_payload_json.nome_canonico || 'N/A'}</p>
             </div>
             {quote.claude_payload_json.marca && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Marca</p>
-                <p className="text-gray-900 dark:text-gray-100">{quote.claude_payload_json.marca}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Marca</p>
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">{quote.claude_payload_json.marca}</p>
               </div>
             )}
             {quote.claude_payload_json.modelo && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Modelo</p>
-                <p className="text-gray-900 dark:text-gray-100">{quote.claude_payload_json.modelo}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Modelo</p>
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">{quote.claude_payload_json.modelo}</p>
               </div>
             )}
             {quote.codigo_item && (
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Código</p>
-                <p className="text-gray-900 dark:text-gray-100">{quote.codigo_item}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Código</p>
+                <p className="text-sm sm:text-base text-gray-900 dark:text-gray-100">{quote.codigo_item}</p>
               </div>
             )}
           </div>
@@ -486,15 +490,15 @@ export default function QuoteDetailPage() {
           {/* Especificações Técnicas */}
           {quote.claude_payload_json.especificacoes_tecnicas &&
            Object.keys(quote.claude_payload_json.especificacoes_tecnicas).length > 0 && (
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Especificações Técnicas</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4 mt-3 sm:mt-4">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3">Especificações Técnicas</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                 {Object.entries(quote.claude_payload_json.especificacoes_tecnicas).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                  <div key={key} className="bg-gray-50 dark:bg-gray-700 p-2 sm:p-3 rounded-lg">
+                    <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                       {key.replace(/_/g, ' ')}
                     </p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {String(value)}
                     </p>
                   </div>
@@ -842,59 +846,53 @@ export default function QuoteDetailPage() {
 
           {/* Cost Summary */}
           {quoteCosts && (quoteCosts.total_cost_usd > 0 || quoteCosts.total_cost_brl > 0) && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Custos desta Cotacao</h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 mb-3">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Custos desta Cotação</h3>
+                <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                   Taxa: 1 USD = R$ {quoteCosts.usd_to_brl_rate.toFixed(2)}
                 </span>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 {/* Anthropic */}
                 {quoteCosts.anthropic.calls > 0 && (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Anthropic ({quoteCosts.anthropic.tokens.toLocaleString()} tokens)</p>
-                    <p className="text-sm font-medium text-orange-500 dark:text-orange-300">
-                      $ {quoteCosts.anthropic.cost_usd.toFixed(4)} USD
-                    </p>
-                    <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                  <div className="text-center p-2 sm:p-0 bg-white/50 dark:bg-gray-800/50 rounded-lg sm:bg-transparent sm:rounded-none">
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Anthropic</p>
+                    <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">({quoteCosts.anthropic.tokens.toLocaleString()} tokens)</p>
+                    <p className="text-sm sm:text-lg font-bold text-orange-600 dark:text-orange-400">
                       R$ {quoteCosts.anthropic.cost_brl.toFixed(2)}
                     </p>
                   </div>
                 )}
                 {/* OpenAI */}
                 {quoteCosts.openai.calls > 0 && (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">OpenAI ({quoteCosts.openai.tokens.toLocaleString()} tokens)</p>
-                    <p className="text-sm font-medium text-blue-500 dark:text-blue-300">
-                      $ {quoteCosts.openai.cost_usd.toFixed(4)} USD
-                    </p>
-                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  <div className="text-center p-2 sm:p-0 bg-white/50 dark:bg-gray-800/50 rounded-lg sm:bg-transparent sm:rounded-none">
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">OpenAI</p>
+                    <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">({quoteCosts.openai.tokens.toLocaleString()} tokens)</p>
+                    <p className="text-sm sm:text-lg font-bold text-blue-600 dark:text-blue-400">
                       R$ {quoteCosts.openai.cost_brl.toFixed(2)}
                     </p>
                   </div>
                 )}
                 {/* SerpAPI */}
                 {quoteCosts.serpapi.total_calls > 0 && (
-                  <div className="text-center">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      SerpAPI ({quoteCosts.serpapi.shopping_calls} busca + {quoteCosts.serpapi.immersive_calls} loja)
+                  <div className="text-center p-2 sm:p-0 bg-white/50 dark:bg-gray-800/50 rounded-lg sm:bg-transparent sm:rounded-none">
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">SerpAPI</p>
+                    <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
+                      ({quoteCosts.serpapi.shopping_calls}+{quoteCosts.serpapi.immersive_calls})
                     </p>
-                    <p className="text-sm font-medium text-green-500 dark:text-green-300">
-                      R$ {quoteCosts.serpapi.cost_per_call.toFixed(4)}/chamada
-                    </p>
-                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                    <p className="text-sm sm:text-lg font-bold text-green-600 dark:text-green-400">
                       R$ {quoteCosts.serpapi.cost_brl.toFixed(2)}
                     </p>
                   </div>
                 )}
                 {/* Total */}
-                <div className="text-center border-l border-gray-300 dark:border-gray-600 pl-4">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="text-center p-2 sm:p-0 sm:border-l sm:border-gray-300 sm:dark:border-gray-600 sm:pl-4 bg-primary-50 dark:bg-primary-900/30 rounded-lg sm:bg-transparent sm:rounded-none col-span-2 sm:col-span-1">
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Total</p>
+                  <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
                     $ {quoteCosts.total_cost_usd.toFixed(4)} USD
                   </p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
                     R$ {quoteCosts.total_cost_brl.toFixed(2)}
                   </p>
                 </div>
@@ -904,14 +902,14 @@ export default function QuoteDetailPage() {
 
           {/* Search Log Summary */}
           {integrationLogs.some(log => log.integration_type === 'search_log') && (
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <button
                 onClick={() => setSearchLogExpanded(!searchLogExpanded)}
-                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+                className="w-full flex items-center justify-between text-sm sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 sm:mb-3 hover:text-primary-600 transition-colors"
               >
                 <span>📊 Log de Busca</span>
                 <svg
-                  className={`w-5 h-5 transform transition-transform ${searchLogExpanded ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 sm:w-5 sm:h-5 transform transition-transform ${searchLogExpanded ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -924,23 +922,23 @@ export default function QuoteDetailPage() {
                 .map(log => {
                   const summary = log.response_summary || {}
                   return (
-                    <div key={log.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Retornados</p>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.total_raw_products || 0}</p>
+                    <div key={log.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                        <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
+                          <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">Produtos</p>
+                          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.total_raw_products || 0}</p>
                         </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Após Filtro Fontes</p>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.after_source_filter || 0}</p>
+                        <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
+                          <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">Após Filtro</p>
+                          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.after_source_filter || 0}</p>
                         </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Blocos Válidos</p>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.valid_blocks || 0}</p>
+                        <div className="text-center p-2 bg-white dark:bg-gray-700 rounded-lg">
+                          <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">Blocos</p>
+                          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{summary.valid_blocks || 0}</p>
                         </div>
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Resultados Obtidos</p>
-                          <p className="text-lg font-semibold text-green-600">{summary.results_obtained || 0}</p>
+                        <div className="text-center p-2 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                          <p className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">Obtidos</p>
+                          <p className="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">{summary.results_obtained || 0}</p>
                         </div>
                       </div>
                       {summary.block_details && summary.block_details.length > 0 && (
@@ -1290,6 +1288,222 @@ export default function QuoteDetailPage() {
                             </tbody>
                           </table>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Histórico Cronológico de Blocos */}
+                    {(searchStats.initial_products_sorted?.length > 0 || searchStats.block_history?.length > 0) && (
+                      <div className="mt-4 border-t border-gray-300 dark:border-gray-600 pt-4">
+                        <details className="group" open>
+                          <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 cursor-pointer list-none flex items-center gap-2">
+                            <svg className="w-4 h-4 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                            📊 Histórico de Blocos ({searchStats.block_history?.length || 0} blocos criados)
+                          </summary>
+
+                          <div className="mt-3 space-y-4">
+                            {/* 1. Lista inicial de produtos ordenados por preço */}
+                            {searchStats.initial_products_sorted && searchStats.initial_products_sorted.length > 0 && (
+                              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                                  📋 Lista Inicial de Produtos (ordenados por preço crescente)
+                                </h4>
+                                <div className="max-h-48 overflow-y-auto">
+                                  <table className="w-full text-xs">
+                                    <thead className="bg-blue-100 dark:bg-blue-900/40 sticky top-0">
+                                      <tr>
+                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">#</th>
+                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Produto</th>
+                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Fonte</th>
+                                        <th className="px-2 py-1 text-right text-blue-700 dark:text-blue-300">Preço</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {searchStats.initial_products_sorted.map((p: any) => (
+                                        <tr key={p.index} className="border-b border-blue-100 dark:border-blue-800/50 hover:bg-blue-100/50 dark:hover:bg-blue-900/30">
+                                          <td className="px-2 py-1 font-mono text-blue-600 dark:text-blue-400">{p.index}</td>
+                                          <td className="px-2 py-1 truncate max-w-[200px]" title={p.title}>{p.title}</td>
+                                          <td className="px-2 py-1 text-gray-600 dark:text-gray-400">{p.source}</td>
+                                          <td className="px-2 py-1 text-right font-mono">R$ {p.price?.toFixed(2)}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 2. Blocos criados cronologicamente */}
+                            {searchStats.block_history && searchStats.block_history.map((block: any, blockIdx: number) => (
+                              <div key={blockIdx} className="bg-white dark:bg-gray-700 rounded-lg border-2 border-purple-300 dark:border-purple-700 overflow-hidden">
+                                {/* Header da Iteração */}
+                                <div className="bg-purple-100 dark:bg-purple-900/40 px-3 py-2 border-b border-purple-200 dark:border-purple-800">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <span className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded">
+                                        Iteração #{block.iteration}
+                                      </span>
+                                      <span className="text-xs text-gray-600 dark:text-gray-300">
+                                        {block.status_before?.valid_count || 0} válidas, faltam {block.status_before?.needed || 0}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="p-3 space-y-3">
+                                  {/* ETAPA 1: Produtos disponíveis para cálculo */}
+                                  {block.available_for_calculation && (
+                                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2 border border-yellow-200 dark:border-yellow-800">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-semibold text-yellow-800 dark:text-yellow-300">
+                                          1️⃣ Produtos disponíveis para cálculo de blocos
+                                        </span>
+                                        <div className="flex items-center gap-2 text-[10px]">
+                                          <span className="text-yellow-700 dark:text-yellow-400">
+                                            {block.available_for_calculation.count} produtos
+                                          </span>
+                                          {block.available_for_calculation.discarded_failures > 0 && (
+                                            <span className="text-red-600 dark:text-red-400">
+                                              ({block.available_for_calculation.discarded_failures} descartados por falha)
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <details className="group">
+                                        <summary className="text-[10px] text-yellow-700 dark:text-yellow-400 cursor-pointer">
+                                          Ver lista de produtos [{block.available_for_calculation.indices?.join(', ')}]
+                                        </summary>
+                                        <div className="mt-1 flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                                          {block.available_for_calculation.products?.map((p: any, pIdx: number) => (
+                                            <span
+                                              key={pIdx}
+                                              className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${
+                                                p.status === 'validated'
+                                                  ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300'
+                                                  : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300'
+                                              }`}
+                                              title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
+                                            >
+                                              {p.status === 'validated' && <span>✓</span>}
+                                              <span className="font-mono">#{p.index}</span>
+                                              <span>R$ {p.price?.toFixed(2)}</span>
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </details>
+                                    </div>
+                                  )}
+
+                                  {/* ETAPA 2: Bloco selecionado */}
+                                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-xs font-semibold text-blue-800 dark:text-blue-300">
+                                        2️⃣ Bloco selecionado: [{block.products_indices?.join(', ')}]
+                                      </span>
+                                      <div className="flex items-center gap-2 text-[10px]">
+                                        <span className="px-2 py-0.5 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded">
+                                          {block.block_size || block.products_in_block?.length} produtos
+                                        </span>
+                                        <span className="text-blue-600 dark:text-blue-400">
+                                          R$ {block.price_range?.min?.toFixed(2)} - R$ {block.price_range?.max?.toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    {block.selection_criteria && (
+                                      <div className="text-[10px] text-blue-600 dark:text-blue-400 italic mb-2">
+                                        {block.selection_criteria}
+                                      </div>
+                                    )}
+                                    <div className="flex flex-wrap gap-1">
+                                      {block.products_in_block?.map((p: any, pIdx: number) => (
+                                        <span
+                                          key={pIdx}
+                                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
+                                            p.status === 'validated'
+                                              ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'
+                                              : 'bg-white dark:bg-gray-600 border-blue-200 dark:border-blue-700'
+                                          }`}
+                                          title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
+                                        >
+                                          {p.status === 'validated' && <span className="text-green-600">✓</span>}
+                                          <span className="font-mono text-blue-600 dark:text-blue-400">#{p.index}</span>
+                                          <span className="truncate max-w-[80px]">{p.title?.substring(0, 15)}...</span>
+                                          <span className="text-gray-500">R$ {p.price?.toFixed(2)}</span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
+                                      {block.validated_in_block > 0 && (
+                                        <span><span className="inline-block w-2 h-2 bg-green-500 rounded mr-1"></span>{block.validated_in_block} já validado(s)</span>
+                                      )}
+                                      {block.untried_count > 0 && (
+                                        <span><span className="inline-block w-2 h-2 bg-blue-400 rounded mr-1"></span>{block.untried_count} a testar</span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* ETAPA 3: Testes realizados */}
+                                  {block.tests && block.tests.length > 0 && (
+                                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-600">
+                                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                                        3️⃣ Testes realizados ({block.tests.length})
+                                      </span>
+                                      <div className="space-y-1">
+                                        {block.tests.map((test: any, testIdx: number) => (
+                                          <div key={testIdx} className={`text-xs p-2 rounded ${test.result === 'success' ? 'bg-green-100 dark:bg-green-900/30 border-l-3 border-green-500' : 'bg-red-100 dark:bg-red-900/30 border-l-3 border-red-500'}`}>
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">#{test.product_index}</span>
+                                                <span className="truncate max-w-[180px]" title={test.title}>{test.title}</span>
+                                              </div>
+                                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${test.result === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                                                {test.result === 'success' ? '✓ VÁLIDO' : '✗ FALHA'}
+                                              </span>
+                                            </div>
+                                            <div className="text-gray-600 dark:text-gray-400 mt-1 text-[11px]">
+                                              {test.source} | Google: R$ {test.google_price?.toFixed(2)}
+                                              {test.result === 'success' && (
+                                                <span className="text-green-700 dark:text-green-400 ml-2">
+                                                  → Extraído: R$ {test.extracted_price?.toFixed(2)} ({test.domain})
+                                                </span>
+                                              )}
+                                              {test.result === 'failed' && (
+                                                <span className="text-red-700 dark:text-red-400 ml-2">
+                                                  → {test.failure_step}: {test.error_message?.substring(0, 60)}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Resultado da iteração */}
+                                  {block.status_after && (
+                                    <div className="bg-gray-100 dark:bg-gray-600 rounded-lg p-2 flex items-center justify-between text-xs">
+                                      <span className="text-gray-600 dark:text-gray-300">
+                                        Resultado: <span className="text-green-600 dark:text-green-400 font-medium">{block.status_after.successes_this_block} sucesso(s)</span>,{' '}
+                                        <span className="text-red-600 dark:text-red-400 font-medium">{block.status_after.failures_this_block} falha(s)</span>
+                                      </span>
+                                      <span className="font-bold text-purple-700 dark:text-purple-300">
+                                        Total válidas: {block.status_after.valid_count}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+
+                            {/* Caso não tenha block_history mas tenha block_iterations (dados antigos) */}
+                            {(!searchStats.block_history || searchStats.block_history.length === 0) && searchStats.block_iterations && searchStats.block_iterations.length > 0 && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                                Dados de blocos no formato antigo ({searchStats.block_iterations.length} iterações). Execute uma nova cotação para ver o formato atualizado.
+                              </div>
+                            )}
+                          </div>
+                        </details>
                       </div>
                     )}
                   </div>

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from typing import List, Optional, Literal
@@ -7,6 +8,8 @@ from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 import logging
+import csv
+import io
 
 from app.core.database import get_db
 from app.models import VehiclePriceBank, Setting, File
@@ -548,6 +551,95 @@ def get_available_reference_months(db: Session = Depends(get_db)):
     """Lista todos os meses de referência disponíveis no banco de preços"""
     months = db.query(VehiclePriceBank.reference_month).distinct().order_by(desc(VehiclePriceBank.reference_date)).all()
     return [m[0] for m in months]
+
+
+@router.get("/export/csv")
+def export_vehicle_prices_csv(
+    brand_name: Optional[str] = None,
+    year_model: Optional[int] = None,
+    reference_month: Optional[str] = None,
+    status: Optional[Literal["Vigente", "Expirada", "Pendente"]] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Exporta o banco de preços de veículos em formato CSV.
+
+    Colunas: Marcacarro, Modelocarro, Anocarro, CodigoFIPE, Valor, MesReferencia, DataCotacao
+    """
+    vigencia_meses = _get_vigencia_meses(db)
+
+    # Query base
+    query = db.query(VehiclePriceBank)
+
+    # Aplicar filtros
+    if brand_name:
+        query = query.filter(VehiclePriceBank.brand_name == brand_name)
+    if year_model:
+        query = query.filter(VehiclePriceBank.year_model == year_model)
+    if reference_month:
+        query = query.filter(VehiclePriceBank.reference_month == reference_month)
+
+    # Ordenar por marca e modelo
+    query = query.order_by(VehiclePriceBank.brand_name, VehiclePriceBank.model_name, VehiclePriceBank.year_model)
+
+    vehicles = query.all()
+
+    # Filtrar por status se especificado
+    if status:
+        vehicles = [
+            v for v in vehicles
+            if _calculate_status(v.updated_at, vigencia_meses, v.has_screenshot) == status
+        ]
+
+    # Criar CSV em memória
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+
+    # Header conforme template + campos adicionais
+    writer.writerow([
+        'Marcacarro',
+        'Modelocarro',
+        'Anocarro',
+        'CodigoFIPE',
+        'Combustivel',
+        'Valor',
+        'MesReferencia',
+        'DataCotacao'
+    ])
+
+    # Dados
+    for vehicle in vehicles:
+        # Formatar valor como moeda brasileira
+        valor_formatado = f"{vehicle.price_value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+        # Formatar data da cotação
+        data_cotacao = vehicle.updated_at.strftime("%d/%m/%Y") if vehicle.updated_at else ""
+
+        writer.writerow([
+            vehicle.brand_name,
+            vehicle.model_name,
+            vehicle.year_model,
+            vehicle.codigo_fipe,
+            vehicle.fuel_type,
+            valor_formatado,
+            vehicle.reference_month,
+            data_cotacao
+        ])
+
+    # Preparar response
+    output.seek(0)
+
+    # Nome do arquivo com data
+    filename = f"banco_precos_veiculos_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Content-Type": "text/csv; charset=utf-8"
+        }
+    )
 
 
 # ============= Helpers =============

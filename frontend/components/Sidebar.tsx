@@ -172,7 +172,7 @@ export default function Sidebar() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
-              <span className="ml-3">Cotacao</span>
+              <span className="ml-3">Cotação</span>
             </div>
             <svg className={`w-4 h-4 transition-transform ${cotacaoOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -180,27 +180,27 @@ export default function Sidebar() {
           </button>
           {cotacaoOpen && (
             <div className="bg-gray-50 dark:bg-gray-800 pl-4">
-              <SubmenuItem href="/cotacao" label="Nova Cotacao" />
-              <SubmenuItem href="/cotacao/lote" label="Cotacao em Lote" />
-              <SubmenuItem href="/cotacao/lote/historico" label="Historico de Lote" />
-              <SubmenuItem href="/historico" label="Historico" />
+              <SubmenuItem href="/cotacao" label="Nova Cotação" />
+              <SubmenuItem href="/cotacao/lote" label="Cotação em Lote" />
+              <SubmenuItem href="/cotacao/lote/historico" label="Histórico de Lote" />
+              <SubmenuItem href="/historico" label="Histórico" />
             </div>
           )}
         </div>
       ) : (
         <MenuWithSubmenu
           icon={<svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>}
-          label="Cotacao"
+          label="Cotação"
           isOpen={cotacaoOpen}
           setIsOpen={setCotacaoOpen}
           isHovered={hoverCotacao}
           setIsHovered={setHoverCotacao}
           isActiveCheck={isActive('/cotacao') || isActive('/historico')}
         >
-          <SubmenuItem href="/cotacao" label="Nova Cotacao" isCollapsed={collapsed} />
-          <SubmenuItem href="/cotacao/lote" label="Cotacao em Lote" isCollapsed={collapsed} />
-          <SubmenuItem href="/cotacao/lote/historico" label="Historico de Lote" isCollapsed={collapsed} />
-          <SubmenuItem href="/historico" label="Historico" isCollapsed={collapsed} />
+          <SubmenuItem href="/cotacao" label="Nova Cotação" isCollapsed={collapsed} />
+          <SubmenuItem href="/cotacao/lote" label="Cotação em Lote" isCollapsed={collapsed} />
+          <SubmenuItem href="/cotacao/lote/historico" label="Histórico de Lote" isCollapsed={collapsed} />
+          <SubmenuItem href="/historico" label="Histórico" isCollapsed={collapsed} />
         </MenuWithSubmenu>
       )}
 

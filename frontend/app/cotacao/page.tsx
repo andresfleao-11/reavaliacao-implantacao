@@ -263,7 +263,7 @@ function CotacaoContent() {
                     : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
                 } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <input {...getInputProps()} disabled={loading} />
+                <input {...getInputProps()} disabled={loading} capture="environment" />
                 <svg
                   className="mx-auto h-12 w-12 text-gray-400"
                   stroke="currentColor"
@@ -281,6 +281,9 @@ function CotacaoContent() {
                   {isDragActive
                     ? 'Solte as imagens aqui...'
                     : 'Arraste imagens ou clique para selecionar'}
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                  No celular, voce pode usar a camera para tirar fotos
                 </p>
               </div>
 

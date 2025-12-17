@@ -132,17 +132,17 @@ export default function BatchHistoryPage() {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Historico de Lotes
+          Histórico de Lotes
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Visualize todos os lotes de cotacao processados
+          Visualize todos os lotes de cotação processados
         </p>
       </div>
 
       {/* Filtros */}
       <div className="card mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {/* Numero do Lote */}
+          {/* Número do Lote */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               N Lote
@@ -277,65 +277,105 @@ export default function BatchHistoryPage() {
             )}
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tipo</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Projeto</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Itens</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Progresso</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Acoes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <>
+            {/* Desktop Table */}
+            <table className="w-full hidden md:table">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Tipo</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Projeto</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Itens</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Progresso</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Acoes</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {batches.map((batch) => (
+                  <tr key={batch.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                      #{batch.id}
+                    </td>
+                    <td className="px-4 py-3">
+                      {getInputTypeBadge(batch.input_type)}
+                    </td>
+                    <td className="px-4 py-3">
+                      {getStatusBadge(batch.status)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      {batch.project_nome || '-'}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                      {batch.completed_items}/{batch.total_items}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2 w-20">
+                          <div
+                            className="bg-primary-600 h-2 rounded-full transition-all"
+                            style={{ width: `${batch.progress_percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          {batch.progress_percentage.toFixed(0)}%
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      {formatDate(batch.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <Link
+                        href={`/cotacao/lote/${batch.id}`}
+                        className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                      >
+                        Ver Detalhes
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
               {batches.map((batch) => (
-                <tr key={batch.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
-                    #{batch.id}
-                  </td>
-                  <td className="px-4 py-3">
-                    {getInputTypeBadge(batch.input_type)}
-                  </td>
-                  <td className="px-4 py-3">
-                    {getStatusBadge(batch.status)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                    {batch.project_nome || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">
-                    {batch.completed_items}/{batch.total_items}
-                  </td>
-                  <td className="px-4 py-3">
+                <Link
+                  key={batch.id}
+                  href={`/cotacao/lote/${batch.id}`}
+                  className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                >
+                  <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2 w-20">
+                      <span className="font-medium text-gray-900 dark:text-gray-100">#{batch.id}</span>
+                      {getInputTypeBadge(batch.input_type)}
+                    </div>
+                    {getStatusBadge(batch.status)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    {batch.project_nome || 'Sem projeto'}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-1 mr-4">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{batch.completed_items}/{batch.total_items}</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5 max-w-[100px]">
                         <div
-                          className="bg-primary-600 h-2 rounded-full transition-all"
+                          className="bg-primary-600 h-1.5 rounded-full transition-all"
                           style={{ width: `${batch.progress_percentage}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                        {batch.progress_percentage.toFixed(0)}%
-                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{batch.progress_percentage.toFixed(0)}%</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                    {formatDate(batch.created_at)}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <Link
-                      href={`/cotacao/lote/${batch.id}`}
-                      className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                    >
-                      Ver Detalhes
-                    </Link>
-                  </td>
-                </tr>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatDate(batch.created_at)}
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
 

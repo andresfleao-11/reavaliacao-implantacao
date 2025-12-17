@@ -57,6 +57,11 @@ class ProjectConfigVersion(Base):
     search_timeout = Column(Integer, default=30)
     max_sources = Column(Integer, default=10)
 
+    # ========== VALIDAÇÃO DE PREÇOS ==========
+    # Habilitar/desabilitar validação de PRICE_MISMATCH (preço Google vs Site)
+    # Se desabilitado, não invalida o produto por diferença de preço, mas ainda registra no log
+    enable_price_mismatch_validation = Column(Boolean, default=True)
+
     # ========== BANCO DE PREÇOS ==========
     # JSON com lista de itens do banco de preços
     # Formato: [{"codigo": "X", "material": "Y", "caracteristicas": "Z", "vl_mercado": 1000.00, "update_mode": "MARKET"}]

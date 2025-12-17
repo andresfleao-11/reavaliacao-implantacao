@@ -78,14 +78,14 @@ export default function FatorReavaliacaoPage() {
       })
 
       if (response.ok) {
-        setSuccess('Parametros salvos com sucesso!')
+        setSuccess('Parâmetros salvos com sucesso!')
         setTimeout(() => setSuccess(''), 3000)
       } else {
         const data = await response.json()
-        setError(data.detail || 'Erro ao salvar parametros')
+        setError(data.detail || 'Erro ao salvar parâmetros')
       }
     } catch (err) {
-      setError('Erro de conexao')
+      setError('Erro de conexão')
     } finally {
       setSaving(false)
     }
@@ -100,21 +100,21 @@ export default function FatorReavaliacaoPage() {
 
   // Adicionar nova chave aos maps
   const addEcKey = () => {
-    const key = prompt('Nome da nova categoria de Estado de Conservacao:')
+    const key = prompt('Nome da nova categoria de Estado de Conservação:')
     if (key && !ecMap[key]) {
       setEcMap({ ...ecMap, [key]: 0.5 })
     }
   }
 
   const addPuKey = () => {
-    const key = prompt('Faixa do Periodo de Utilizacao (ex: 10-15):')
+    const key = prompt('Faixa do Período de Utilização (ex: 10-15):')
     if (key && !puMap[key]) {
       setPuMap({ ...puMap, [key]: 0.5 })
     }
   }
 
   const addVufKey = () => {
-    const key = prompt('Faixa da Vida Util Futura (ex: 0-1):')
+    const key = prompt('Faixa da Vida Útil Futura (ex: 0-1):')
     if (key && !vufMap[key]) {
       setVufMap({ ...vufMap, [key]: 0.5 })
     }
@@ -142,7 +142,7 @@ export default function FatorReavaliacaoPage() {
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Fator de Reavaliacao</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Fator de Reavaliação</h1>
         <div className="card flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
@@ -154,21 +154,21 @@ export default function FatorReavaliacaoPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Fator de Reavaliacao</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100">Fator de Reavaliação</h1>
         <div className="flex gap-2">
           <button
             onClick={resetToDefaults}
-            className="btn-secondary"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
-            Restaurar Padroes
+            Restaurar
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="btn-primary"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {saving ? 'Salvando...' : 'Salvar Alteracoes'}
+            {saving ? 'Salvando...' : 'Salvar'}
           </button>
         </div>
       </div>
@@ -187,15 +187,15 @@ export default function FatorReavaliacaoPage() {
 
       <div className="card mb-6">
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Configure os fatores globais para calculo do valor de reavaliacao baseado em Estado de Conservacao (EC),
-          Periodo de Utilizacao (PU) e Vida Util Futura (VUF). Estes valores serao usados como padrao para novos projetos.
+          Configure os fatores globais para cálculo do valor de reavaliação baseado em Estado de Conservação (EC),
+          Período de Utilização (PU) e Vida Útil Futura (VUF). Estes valores serão usados como padrão para novos projetos.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Estado de Conservacao */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="font-medium text-gray-700 dark:text-gray-300">Estado de Conservacao (EC)</h4>
+              <h4 className="font-medium text-gray-700 dark:text-gray-300">Estado de Conservação (EC)</h4>
               <button
                 onClick={addEcKey}
                 className="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400"
@@ -231,7 +231,7 @@ export default function FatorReavaliacaoPage() {
           {/* Periodo de Utilizacao */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="font-medium text-gray-700 dark:text-gray-300">Periodo de Utilizacao (PU)</h4>
+              <h4 className="font-medium text-gray-700 dark:text-gray-300">Período de Utilização (PU)</h4>
               <button
                 onClick={addPuKey}
                 className="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400"
@@ -267,7 +267,7 @@ export default function FatorReavaliacaoPage() {
           {/* Vida Util Futura */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-3">
-              <h4 className="font-medium text-gray-700 dark:text-gray-300">Vida Util Futura (VUF)</h4>
+              <h4 className="font-medium text-gray-700 dark:text-gray-300">Vida Útil Futura (VUF)</h4>
               <button
                 onClick={addVufKey}
                 className="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400"
@@ -354,15 +354,15 @@ export default function FatorReavaliacaoPage() {
 
       {/* Informacoes adicionais */}
       <div className="card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Como funciona o calculo</h3>
+        <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Como funciona o cálculo</h3>
         <p className="text-sm text-blue-700 dark:text-blue-400 mb-3">
-          O fator de reavaliacao e calculado pela formula:
+          O fator de reavaliação é calculado pela fórmula:
         </p>
         <div className="bg-white dark:bg-gray-800 p-3 rounded font-mono text-sm text-gray-800 dark:text-gray-200">
           Fator = (EC_valor * Peso_EC) + (PU_valor * Peso_PU) + (VUF_valor * Peso_VUF)
         </div>
         <p className="text-sm text-blue-700 dark:text-blue-400 mt-3">
-          Onde EC_valor, PU_valor e VUF_valor sao os valores configurados para cada categoria do bem avaliado.
+          Onde EC_valor, PU_valor e VUF_valor são os valores configurados para cada categoria do bem avaliado.
         </p>
       </div>
     </div>

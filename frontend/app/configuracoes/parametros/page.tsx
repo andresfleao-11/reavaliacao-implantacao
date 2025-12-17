@@ -239,6 +239,31 @@ export default function ParametrosPage() {
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Validação de Preços</h3>
+
+          <div className="flex items-start">
+            <div className="flex items-center h-5">
+              <input
+                id="enable_price_mismatch"
+                type="checkbox"
+                defaultChecked={data.enable_price_mismatch_validation}
+                onChange={(e) => setFormData({...formData, enable_price_mismatch_validation: e.target.checked})}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+              />
+            </div>
+            <div className="ml-3">
+              <label htmlFor="enable_price_mismatch" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Validar diferença de preço (Google Shopping vs. Site)
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Quando habilitado, invalida produtos cuja diferença entre o preço do Google Shopping e o preço extraído do site excede 10%.
+                Se desabilitado, a diferença ainda será registrada no log mas não invalidará o produto.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Parâmetros de Busca (SerpAPI)</h3>
 
           <div>

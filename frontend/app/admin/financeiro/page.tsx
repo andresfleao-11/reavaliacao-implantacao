@@ -364,16 +364,16 @@ export default function FinanceiroPage() {
   return (
     <AdminRoute>
     <div className="max-w-7xl">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Financeiro</h1>
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-8 text-gray-900 dark:text-gray-100">Financeiro</h1>
 
       {/* Filtros */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">Filtros</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {/* Período */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
               Período
             </label>
             <select
@@ -384,7 +384,7 @@ export default function FinanceiroPage() {
                 setEndDate('')
                 setMonthRef('')
               }}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             >
               <option value="">Selecione...</option>
               <option value="7d">Últimos 7 dias</option>
@@ -399,25 +399,25 @@ export default function FinanceiroPage() {
           {periodType === 'specific' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                   Data Início
                 </label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                   Data Fim
                 </label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </>
@@ -426,13 +426,13 @@ export default function FinanceiroPage() {
           {/* Mês de Referência */}
           {periodType === 'month' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                 Mês de Referência
               </label>
               <select
                 value={monthRef}
                 onChange={(e) => setMonthRef(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="">Selecione...</option>
                 {monthOptions.map((opt) => (
@@ -445,15 +445,15 @@ export default function FinanceiroPage() {
           )}
 
           {/* Integrações */}
-          <div className="md:col-span-2 lg:col-span-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="sm:col-span-2 lg:col-span-3">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
               Integrações
             </label>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {integrationOptions.map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg border cursor-pointer transition-colors ${
                     selectedIntegrations.includes(opt.value)
                       ? 'bg-primary-100 border-primary-500 text-primary-700 dark:bg-primary-900 dark:border-primary-500 dark:text-primary-200'
                       : 'bg-white border-gray-300 text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
@@ -465,7 +465,7 @@ export default function FinanceiroPage() {
                     onChange={() => handleIntegrationToggle(opt.value)}
                     className="sr-only"
                   />
-                  <span className={`w-3 h-3 rounded-full ${
+                  <span className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
                     opt.value === 'anthropic' ? 'bg-orange-500' :
                     opt.value === 'serpapi' ? 'bg-green-500' :
                     'bg-blue-500'
@@ -478,11 +478,11 @@ export default function FinanceiroPage() {
         </div>
 
         {/* Botão Exibir */}
-        <div className="mt-6 flex justify-end">
+        <div className="mt-4 sm:mt-6 flex justify-end">
           <button
             onClick={handleSearch}
             disabled={loading || (!periodType && selectedIntegrations.length === 0)}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 sm:px-6 py-1.5 sm:py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading ? (
               <>
@@ -503,50 +503,50 @@ export default function FinanceiroPage() {
       {hasSearched && reportData && (
         <>
           {/* Totais */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
             {/* Total Geral */}
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 dark:border-gray-700 pb-3 sm:pb-4 mb-3 sm:mb-4 gap-2 sm:gap-0">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Geral</h3>
-                <div className="flex items-baseline gap-3 mt-1">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <h3 className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Geral</h3>
+                <div className="flex items-baseline gap-2 sm:gap-3 mt-1">
+                  <span className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {formatCurrency(reportData.total_brl)}
                   </span>
                   {reportData.total_usd > 0 && (
-                    <span className="text-lg text-gray-500 dark:text-gray-400">
+                    <span className="text-sm sm:text-lg text-gray-500 dark:text-gray-400">
                       ({formatCurrency(reportData.total_usd, 'USD')})
                     </span>
                   )}
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="sm:text-right">
+                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   Taxa: {formatCurrency(reportData.usd_to_brl_rate)} / USD
                 </span>
               </div>
             </div>
 
             {/* Totais por Integração */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
               {reportData.totals_by_integration.map((total) => (
                 <div
                   key={total.api}
-                  className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                  className="p-3 sm:p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getApiColor(total.api)}`}>
+                  <div className="flex items-center gap-2 mb-1 sm:mb-2">
+                    <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${getApiColor(total.api)}`}>
                       {getApiLabel(total.api)}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      ({total.transaction_count} transações)
+                    <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                      ({total.transaction_count} trans.)
                     </span>
                   </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="flex items-baseline gap-1 sm:gap-2">
+                    <span className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                       {formatCurrency(total.total_brl)}
                     </span>
                     {total.total_usd > 0 && (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                      <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                         ({formatCurrency(total.total_usd, 'USD')})
                       </span>
                     )}
@@ -558,12 +558,12 @@ export default function FinanceiroPage() {
 
           {/* Extrato */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                <h2 className="text-base sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                   Extrato Financeiro
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {reportData.transactions.length} transações
                   {reportData.period_start && reportData.period_end && (
                     <> | {new Date(reportData.period_start).toLocaleDateString('pt-BR')} a {new Date(reportData.period_end).toLocaleDateString('pt-BR')}</>
@@ -573,110 +573,153 @@ export default function FinanceiroPage() {
               {reportData.transactions.length > 0 && (
                 <button
                   onClick={generatePDF}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
-                  Gerar PDF
+                  <span className="hidden sm:inline">Gerar PDF</span>
+                  <span className="sm:hidden">PDF</span>
                 </button>
               )}
             </div>
 
             {reportData.transactions.length === 0 ? (
-              <div className="p-12 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-8 sm:p-12 text-center text-gray-500 dark:text-gray-400">
                 Nenhuma transação encontrada para os filtros selecionados.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
-                        Data
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
-                        API
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
-                        Cot.
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">
-                        Cliente
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">
-                        Projeto
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
-                        Usuário
-                      </th>
-                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
-                        Descrição
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
-                        Valor (R$)
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {reportData.transactions.map((tx, idx) => (
-                      <tr key={`${tx.quote_id}-${tx.api}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                          {formatDate(tx.date)}
+              <>
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-900">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                          Data
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-20">
+                          API
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">
+                          Cot.
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">
+                          Cliente
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">
+                          Projeto
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                          Usuário
+                        </th>
+                        <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-48">
+                          Descrição
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
+                          Valor (R$)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      {reportData.transactions.map((tx, idx) => (
+                        <tr key={`${tx.quote_id}-${tx.api}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                            {formatDate(tx.date)}
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getApiColor(tx.api)}`}>
+                              {getApiLabel(tx.api)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-sm">
+                            <a
+                              href={`/cotacao/${tx.quote_id}`}
+                              className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                            >
+                              #{tx.quote_id}
+                            </a>
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[112px]">
+                            {tx.client_name || '-'}
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[112px]">
+                            {tx.project_name || '-'}
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[96px]">
+                            {tx.user_name || '-'}
+                          </td>
+                          <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[192px]">
+                            {tx.description}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                            {formatCurrency(tx.cost_brl)}
+                            {tx.cost_usd > 0 && (
+                              <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                {formatCurrency(tx.cost_usd, 'USD')}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-gray-50 dark:bg-gray-900">
+                      <tr>
+                        <td colSpan={7} className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
+                          TOTAL:
                         </td>
-                        <td className="px-3 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getApiColor(tx.api)}`}>
-                            {getApiLabel(tx.api)}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-sm">
-                          <a
-                            href={`/cotacao/${tx.quote_id}`}
-                            className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-                          >
-                            #{tx.quote_id}
-                          </a>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[112px]">
-                          {tx.client_name || '-'}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[112px]">
-                          {tx.project_name || '-'}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[96px]">
-                          {tx.user_name || '-'}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[192px]">
-                          {tx.description}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-right font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                          {formatCurrency(tx.cost_brl)}
-                          {tx.cost_usd > 0 && (
-                            <span className="block text-xs text-gray-500 dark:text-gray-400">
-                              {formatCurrency(tx.cost_usd, 'USD')}
+                        <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
+                          {formatCurrency(reportData.total_brl)}
+                          {reportData.total_usd > 0 && (
+                            <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                              {formatCurrency(reportData.total_usd, 'USD')}
                             </span>
                           )}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <td colSpan={7} className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
-                        TOTAL:
-                      </td>
-                      <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
-                        {formatCurrency(reportData.total_brl)}
-                        {reportData.total_usd > 0 && (
-                          <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
-                            {formatCurrency(reportData.total_usd, 'USD')}
+                    </tfoot>
+                  </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                  {reportData.transactions.map((tx, idx) => (
+                    <a
+                      key={`${tx.quote_id}-${tx.api}-${idx}`}
+                      href={`/cotacao/${tx.quote_id}`}
+                      className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getApiColor(tx.api)}`}>
+                            {getApiLabel(tx.api)}
                           </span>
-                        )}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">#{tx.quote_id}</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          {formatCurrency(tx.cost_brl)}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+                        {tx.description}
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500">
+                        <span>{formatDate(tx.date)}</span>
+                        <span>{tx.client_name || tx.project_name || '-'}</span>
+                      </div>
+                    </a>
+                  ))}
+                  {/* Mobile Total */}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-900">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100">TOTAL:</span>
+                      <span className="text-base font-bold text-gray-900 dark:text-gray-100">
+                        {formatCurrency(reportData.total_brl)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </>

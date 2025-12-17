@@ -137,6 +137,7 @@ class ParametersResponse(BaseModel):
     local_padrao: str
     serpapi_location: str  # SerpAPI location for search (e.g., "Brazil", "Sao Paulo,State of Sao Paulo,Brazil")
     vigencia_cotacao_veiculos: int = 6  # Vigencia em meses para cotacoes de veiculos
+    enable_price_mismatch_validation: bool = True  # Habilita/desabilita validação de PRICE_MISMATCH
 
 
 class ParametersUpdateRequest(BaseModel):
@@ -146,6 +147,7 @@ class ParametersUpdateRequest(BaseModel):
     local_padrao: Optional[str] = None
     serpapi_location: Optional[str] = None
     vigencia_cotacao_veiculos: Optional[int] = None  # Vigencia em meses para cotacoes de veiculos
+    enable_price_mismatch_validation: Optional[bool] = None  # Habilita/desabilita validação de PRICE_MISMATCH
 
 
 # Mapeamento de estados brasileiros para siglas

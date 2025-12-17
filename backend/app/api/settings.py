@@ -69,7 +69,8 @@ def get_parameters(db: Session = Depends(get_db)):
         "pesquisador_padrao": "Sistema",
         "local_padrao": "Online",
         "serpapi_location": "Sao Paulo,State of Sao Paulo,Brazil",  # Use city-level for better results
-        "vigencia_cotacao_veiculos": 6  # Vigencia em meses para cotacoes de veiculos
+        "vigencia_cotacao_veiculos": 6,  # Vigencia em meses para cotacoes de veiculos
+        "enable_price_mismatch_validation": True  # Habilita/desabilita validação de PRICE_MISMATCH
     }
 
     if not setting:

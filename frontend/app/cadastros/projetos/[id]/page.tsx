@@ -651,18 +651,18 @@ export default function ProjectDetailsPage() {
     <AdminRoute>
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <Link href="/cadastros/projetos" className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-2 inline-block">
-            &larr; Voltar para projetos
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex-1 min-w-0">
+          <Link href="/cadastros/projetos" className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-1 sm:mb-2 inline-block">
+            &larr; Voltar
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{project.nome}</h1>
-          <div className="flex items-center gap-4 mt-1">
-            <span className="text-gray-500 dark:text-gray-400">{project.client?.nome || 'Sem cliente'}</span>
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">{project.nome}</h1>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate max-w-[150px] sm:max-w-none">{project.client?.nome || 'Sem cliente'}</span>
             {getStatusBadge(project.status)}
             {activeConfig && (
-              <span className="text-sm text-primary-600 dark:text-primary-400">
-                Config v{activeConfig.versao}
+              <span className="text-xs sm:text-sm text-primary-600 dark:text-primary-400">
+                v{activeConfig.versao}
               </span>
             )}
           </div>
@@ -670,9 +670,9 @@ export default function ProjectDetailsPage() {
         <button
           onClick={() => saveConfig()}
           disabled={saving}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+          className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 whitespace-nowrap"
         >
-          {saving ? 'Salvando...' : 'Salvar Configurações'}
+          {saving ? 'Salvando...' : 'Salvar Config'}
         </button>
       </div>
 
@@ -686,155 +686,190 @@ export default function ProjectDetailsPage() {
 
       {/* Tabs */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-        <div className="border-b dark:border-gray-700">
-          <nav className="flex">
+        <div className="border-b dark:border-gray-700 overflow-x-auto">
+          <nav className="flex min-w-max">
             {[
-              { id: 'cotacoes', label: `Cotações (${quotes.length})` },
-              { id: 'parametros', label: 'Parâmetros' },
-              { id: 'banco-precos', label: 'Banco de Preços' },
-              { id: 'fator-reavaliacao', label: 'Fator de Reavaliação' },
-              { id: 'versoes', label: 'Histórico de Versões' },
-              ...(user?.role === 'ADMIN' ? [{ id: 'financeiro', label: 'Financeiro' }] : []),
+              { id: 'cotacoes', label: `Cotações`, shortLabel: `Cot. (${quotes.length})` },
+              { id: 'parametros', label: 'Parâmetros', shortLabel: 'Parâm.' },
+              { id: 'banco-precos', label: 'Banco de Preços', shortLabel: 'Preços' },
+              { id: 'fator-reavaliacao', label: 'Fator Reavaliação', shortLabel: 'Fator' },
+              { id: 'versoes', label: 'Versões', shortLabel: 'Versões' },
+              ...(user?.role === 'ADMIN' ? [{ id: 'financeiro', label: 'Financeiro', shortLabel: 'Financ.' }] : []),
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-primary-600 text-primary-600 dark:text-primary-400'
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-3 sm:p-6">
           {/* Tab: Cotações */}
           {activeTab === 'cotacoes' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Cotações do Projeto</h3>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Cotações do Projeto</h3>
                 <Link
                   href={`/cotacao?project_id=${projectId}`}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  className="w-full sm:w-auto text-center px-3 sm:px-4 py-1.5 sm:py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   Nova Cotação
                 </Link>
               </div>
 
               {quotes.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-6 sm:py-8 text-sm text-gray-500 dark:text-gray-400">
                   Nenhuma cotação encontrada para este projeto
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-900">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Código</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Descrição</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Data</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Valor Médio</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                      {quotes.map((quote) => (
-                        <tr key={quote.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                            #{quote.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {quote.codigo_item || '-'}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                            {quote.nome_item || quote.input_text?.substring(0, 50) || 'Sem descrição'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(quote.created_at).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-100">
-                            {formatCurrency(quote.valor_medio)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              quote.status === 'DONE'
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                : quote.status === 'PROCESSING'
-                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
-                                : quote.status === 'CANCELLED'
-                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
-                                : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                            }`}>
-                              {quote.status === 'DONE' ? 'Concluída' :
-                               quote.status === 'PROCESSING' ? 'Processando' :
-                               quote.status === 'CANCELLED' ? 'Cancelada' : 'Erro'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <Link
-                              href={`/cotacao/${quote.id}`}
-                              className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium"
-                            >
-                              Ver detalhes
-                            </Link>
-                          </td>
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Código</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Descrição</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ações</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {quotes.map((quote) => (
+                          <tr key={quote.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                              #{quote.id}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {quote.codigo_item || '-'}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 max-w-[200px] truncate">
+                              {quote.nome_item || quote.input_text?.substring(0, 50) || 'Sem descrição'}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(quote.created_at).toLocaleDateString('pt-BR')}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {formatCurrency(quote.valor_medio)}
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                quote.status === 'DONE'
+                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                                  : quote.status === 'PROCESSING'
+                                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                                  : quote.status === 'CANCELLED'
+                                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                                  : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                              }`}>
+                                {quote.status === 'DONE' ? 'OK' : quote.status === 'PROCESSING' ? 'Proc.' : quote.status === 'CANCELLED' ? 'Canc.' : 'Erro'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                              <Link
+                                href={`/cotacao/${quote.id}`}
+                                className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium"
+                              >
+                                Ver
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Cards */}
+                  <div className="md:hidden space-y-2">
+                    {quotes.map((quote) => (
+                      <Link
+                        key={quote.id}
+                        href={`/cotacao/${quote.id}`}
+                        className="block p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">#{quote.id}</span>
+                            {quote.codigo_item && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{quote.codigo_item}</span>
+                            )}
+                          </div>
+                          <span className={`px-1.5 py-0.5 text-[10px] rounded-full ${
+                            quote.status === 'DONE'
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                              : quote.status === 'PROCESSING'
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          }`}>
+                            {quote.status === 'DONE' ? 'OK' : quote.status === 'PROCESSING' ? 'Proc.' : 'Erro'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600 dark:text-gray-300 truncate mb-1">
+                          {quote.nome_item || quote.input_text?.substring(0, 40) || 'Sem descrição'}
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                            {new Date(quote.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                          <span className="text-sm font-semibold text-primary-600 dark:text-primary-400">
+                            {formatCurrency(quote.valor_medio)}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}
 
           {/* Tab: Parâmetros */}
           {activeTab === 'parametros' && (
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {/* Parâmetros de Cotação */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Parâmetros de Cotação</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  Configure os parâmetros específicos para as cotações deste projeto. Valores em branco usarão os parâmetros do sistema.
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Parâmetros de Cotação</h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 sm:mb-4">
+                  Configure os parâmetros específicos para as cotações deste projeto.
                 </p>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Cotações por Pesquisa
                     </label>
                     <input
                       type="number"
                       value={paramForm.numero_cotacoes_por_pesquisa}
                       onChange={(e) => setParamForm({ ...paramForm, numero_cotacoes_por_pesquisa: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Variação Máxima (%)
                     </label>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fórmula: (MAX / MIN - 1) × 100</p>
                     <input
                       type="number"
                       step="0.1"
                       value={paramForm.variacao_maxima_percent}
                       onChange={(e) => setParamForm({ ...paramForm, variacao_maxima_percent: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Pesquisador Padrão
                     </label>
                     <input
@@ -842,11 +877,11 @@ export default function ProjectDetailsPage() {
                       value={paramForm.pesquisador_padrao}
                       readOnly
                       placeholder="Ex: Sistema"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 cursor-not-allowed text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-600 cursor-not-allowed text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Local Padrão
                     </label>
                     <input
@@ -854,7 +889,7 @@ export default function ProjectDetailsPage() {
                       value={paramForm.local_padrao}
                       onChange={(e) => setParamForm({ ...paramForm, local_padrao: e.target.value })}
                       placeholder="Ex: Online"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -862,10 +897,10 @@ export default function ProjectDetailsPage() {
 
               {/* Parâmetros de Busca */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Parâmetros de Busca (SerpAPI)</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Parâmetros de Busca (SerpAPI)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Localização
                     </label>
                     <input
@@ -873,62 +908,62 @@ export default function ProjectDetailsPage() {
                       value={paramForm.serpapi_location}
                       onChange={(e) => setParamForm({ ...paramForm, serpapi_location: e.target.value })}
                       placeholder="Ex: São Paulo, Brazil"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       País (gl)
                     </label>
                     <input
                       type="text"
                       value={paramForm.serpapi_gl}
                       onChange={(e) => setParamForm({ ...paramForm, serpapi_gl: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Idioma (hl)
                     </label>
                     <input
                       type="text"
                       value={paramForm.serpapi_hl}
                       onChange={(e) => setParamForm({ ...paramForm, serpapi_hl: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Número de Resultados
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Nº Resultados
                     </label>
                     <input
                       type="number"
                       value={paramForm.serpapi_num_results}
                       onChange={(e) => setParamForm({ ...paramForm, serpapi_num_results: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Timeout (segundos)
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Timeout (s)
                     </label>
                     <input
                       type="number"
                       value={paramForm.search_timeout}
                       onChange={(e) => setParamForm({ ...paramForm, search_timeout: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Máximo de Fontes
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Máx. Fontes
                     </label>
                     <input
                       type="number"
                       value={paramForm.max_sources}
                       onChange={(e) => setParamForm({ ...paramForm, max_sources: Number(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -938,47 +973,49 @@ export default function ProjectDetailsPage() {
 
           {/* Tab: Banco de Preços */}
           {activeTab === 'banco-precos' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Banco de Preços do Projeto</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Defina preços de referência para materiais específicos deste projeto.
-              </p>
+            <div className="space-y-4 sm:space-y-6">
+              <div>
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Banco de Preços do Projeto</h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Defina preços de referência para materiais específicos.
+                </p>
+              </div>
 
               {/* Formulário para adicionar item */}
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">Adicionar Item</h4>
-                <div className="grid grid-cols-5 gap-3">
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg">
+                <h4 className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3">Adicionar Item</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                   <input
                     type="text"
                     placeholder="Código"
                     value={newBankItem.codigo}
                     onChange={(e) => setNewBankItem({ ...newBankItem, codigo: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                   <input
                     type="text"
                     placeholder="Material"
                     value={newBankItem.material}
                     onChange={(e) => setNewBankItem({ ...newBankItem, material: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                   <input
                     type="text"
                     placeholder="Características"
                     value={newBankItem.caracteristicas}
                     onChange={(e) => setNewBankItem({ ...newBankItem, caracteristicas: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 col-span-2 sm:col-span-1"
                   />
                   <input
                     type="number"
                     placeholder="Valor (R$)"
                     value={newBankItem.vl_mercado || ''}
                     onChange={(e) => setNewBankItem({ ...newBankItem, vl_mercado: e.target.value ? Number(e.target.value) : null })}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                   <button
                     onClick={addBankItem}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-xs sm:text-sm"
                   >
                     Adicionar
                   </button>
@@ -987,31 +1024,75 @@ export default function ProjectDetailsPage() {
 
               {/* Lista de itens */}
               {bankPrices.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                   Nenhum item no banco de preços
                 </div>
               ) : (
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Código</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Material</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Características</th>
-                      <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
-                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Modo</th>
-                      <th className="px-4 py-2"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y dark:divide-gray-700">
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 dark:bg-gray-900">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Código</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Material</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Caract.</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
+                          <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Modo</th>
+                          <th className="px-3 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y dark:divide-gray-700">
+                        {bankPrices.map((item, index) => (
+                          <tr key={index}>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-gray-100">{item.codigo}</td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-900 dark:text-gray-100 max-w-[150px] truncate">{item.material}</td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden lg:table-cell max-w-[100px] truncate">{item.caracteristicas}</td>
+                            <td className="px-3 py-2 text-xs sm:text-sm text-right text-gray-900 dark:text-gray-100">
+                              {formatCurrency(item.vl_mercado)}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <select
+                                value={item.update_mode}
+                                onChange={(e) => {
+                                  const updated = [...bankPrices]
+                                  updated[index].update_mode = e.target.value
+                                  setBankPrices(updated)
+                                }}
+                                className="text-xs border dark:border-gray-600 rounded px-1 py-0.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                              >
+                                <option value="MARKET">Mercado</option>
+                                <option value="IPCA">IPCA</option>
+                                <option value="MANUAL">Manual</option>
+                                <option value="SKIP">Ignorar</option>
+                              </select>
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <button
+                                onClick={() => removeBankItem(index)}
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs"
+                              >
+                                Remover
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Cards */}
+                  <div className="sm:hidden space-y-2">
                     {bankPrices.map((item, index) => (
-                      <tr key={index}>
-                        <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{item.codigo}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">{item.material}</td>
-                        <td className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">{item.caracteristicas}</td>
-                        <td className="px-4 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                          {formatCurrency(item.vl_mercado)}
-                        </td>
-                        <td className="px-4 py-2 text-center">
+                      <div key={index} className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{item.codigo}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{item.material}</span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(item.vl_mercado)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
                           <select
                             value={item.update_mode}
                             onChange={(e) => {
@@ -1019,26 +1100,24 @@ export default function ProjectDetailsPage() {
                               updated[index].update_mode = e.target.value
                               setBankPrices(updated)
                             }}
-                            className="text-xs border dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="text-[10px] border dark:border-gray-600 rounded px-1 py-0.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                           >
                             <option value="MARKET">Mercado</option>
                             <option value="IPCA">IPCA</option>
                             <option value="MANUAL">Manual</option>
                             <option value="SKIP">Ignorar</option>
                           </select>
-                        </td>
-                        <td className="px-4 py-2 text-right">
                           <button
                             onClick={() => removeBankItem(index)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm"
+                            className="text-red-600 dark:text-red-400 text-xs"
                           >
                             Remover
                           </button>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -1259,15 +1338,15 @@ export default function ProjectDetailsPage() {
 
           {/* Tab: Financeiro */}
           {activeTab === 'financeiro' && user?.role === 'ADMIN' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Extrato Financeiro do Projeto</h3>
+            <div className="space-y-4 sm:space-y-6">
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Extrato Financeiro do Projeto</h3>
 
               {/* Filtros */}
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-4">
                   {/* Período */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período</label>
                     <select
                       value={financialPeriodType}
                       onChange={(e) => {
@@ -1276,7 +1355,7 @@ export default function ProjectDetailsPage() {
                         setFinancialEndDate('')
                         setFinancialMonthRef('')
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
                     >
                       <option value="">Selecione...</option>
                       <option value="7d">Últimos 7 dias</option>
@@ -1290,21 +1369,21 @@ export default function ProjectDetailsPage() {
                   {financialPeriodType === 'specific' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
                         <input
                           type="date"
                           value={financialStartDate}
                           onChange={(e) => setFinancialStartDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
                         <input
                           type="date"
                           value={financialEndDate}
                           onChange={(e) => setFinancialEndDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
                         />
                       </div>
                     </>
@@ -1312,11 +1391,11 @@ export default function ProjectDetailsPage() {
 
                   {financialPeriodType === 'month' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mês de Referência</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mês de Referência</label>
                       <select
                         value={financialMonthRef}
                         onChange={(e) => setFinancialMonthRef(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
+                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
                       >
                         <option value="">Selecione...</option>
                         {monthOptions.map((opt) => (
@@ -1328,13 +1407,13 @@ export default function ProjectDetailsPage() {
                 </div>
 
                 {/* Integrações */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Integrações</label>
+                <div className="mb-3 sm:mb-4">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">Integrações</label>
                   <div className="flex flex-wrap gap-2">
                     {integrationOptions.map((opt) => (
                       <label
                         key={opt.value}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer text-sm transition-colors ${
+                        className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border cursor-pointer text-xs sm:text-sm transition-colors ${
                           financialSelectedIntegrations.includes(opt.value)
                             ? 'bg-primary-100 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300'
                             : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -1360,11 +1439,11 @@ export default function ProjectDetailsPage() {
                   <button
                     onClick={fetchFinancialReport}
                     disabled={financialLoading || (!financialPeriodType && financialSelectedIntegrations.length === 0)}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm flex items-center gap-2"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-xs sm:text-sm flex items-center gap-2"
                   >
                     {financialLoading ? (
                       <>
-                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <svg className="animate-spin h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
@@ -1378,63 +1457,44 @@ export default function ProjectDetailsPage() {
               {/* Resultados */}
               {financialHasSearched && financialData && (
                 <>
-                  {/* Header com botão PDF */}
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {financialData.transactions.length} transações
-                      {financialData.period_start && financialData.period_end && (
-                        <> | {new Date(financialData.period_start).toLocaleDateString('pt-BR')} a {new Date(financialData.period_end).toLocaleDateString('pt-BR')}</>
-                      )}
-                    </p>
-                    {financialData.transactions.length > 0 && (
-                      <button
-                        onClick={generateFinancialPDF}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        Gerar PDF
-                      </button>
-                    )}
-                  </div>
-
                   {/* Totais */}
-                  <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between border-b dark:border-gray-700 pb-3 mb-3">
+                  <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-3 sm:p-4">
+                    {/* Total Geral */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b dark:border-gray-700 pb-3 mb-3 gap-2 sm:gap-0">
                       <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Geral</p>
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Geral</p>
                         <div className="flex items-baseline gap-2 mt-1">
-                          <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                             R$ {financialData.total_brl.toFixed(2)}
                           </span>
                           {financialData.total_usd > 0 && (
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                               (US$ {financialData.total_usd.toFixed(2)})
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="text-right text-sm text-gray-500 dark:text-gray-400">
+                      <div className="sm:text-right text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                         Taxa: R$ {financialData.usd_to_brl_rate.toFixed(2)} / USD
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    {/* Totais por Integração */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                       {financialData.totals_by_integration.map((total) => (
-                        <div key={total.api} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div key={total.api} className="p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getApiColor(total.api)}`}>
+                            <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${getApiColor(total.api)}`}>
                               {getApiLabel(total.api)}
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">({total.transaction_count})</span>
+                            <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">({total.transaction_count})</span>
                           </div>
                           <div className="flex items-baseline gap-1">
-                            <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                               R$ {total.total_brl.toFixed(2)}
                             </span>
                             {total.total_usd > 0 && (
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                                 (US$ {total.total_usd.toFixed(2)})
                               </span>
                             )}
@@ -1444,92 +1504,163 @@ export default function ProjectDetailsPage() {
                     </div>
                   </div>
 
-                  {/* Tabela - sem coluna Projeto */}
-                  {financialData.transactions.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                      Nenhuma transação encontrada para os filtros selecionados.
+                  {/* Extrato */}
+                  <div className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg overflow-hidden">
+                    {/* Header com botão PDF */}
+                    <div className="p-3 sm:p-4 border-b dark:border-gray-700 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        {financialData.transactions.length} transações
+                        {financialData.period_start && financialData.period_end && (
+                          <> | {new Date(financialData.period_start).toLocaleDateString('pt-BR')} a {new Date(financialData.period_end).toLocaleDateString('pt-BR')}</>
+                        )}
+                      </p>
+                      {financialData.transactions.length > 0 && (
+                        <button
+                          onClick={generateFinancialPDF}
+                          className="flex items-center justify-center gap-2 px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-xs sm:text-sm"
+                        >
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          <span className="hidden sm:inline">Gerar PDF</span>
+                          <span className="sm:hidden">PDF</span>
+                        </button>
+                      )}
                     </div>
-                  ) : (
-                    <div className="overflow-x-auto border dark:border-gray-700 rounded-lg">
-                      <table className="w-full">
-                        <thead className="bg-gray-50 dark:bg-gray-900">
-                          <tr>
-                            <th className="text-left py-3 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-28">Data</th>
-                            <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">API</th>
-                            <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-14">Cot.</th>
-                            <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">Usuário</th>
-                            <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Descrição</th>
-                            <th className="text-right py-3 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">Valor (R$)</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+
+                    {financialData.transactions.length === 0 ? (
+                      <div className="p-6 sm:p-8 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                        Nenhuma transação encontrada para os filtros selecionados.
+                      </div>
+                    ) : (
+                      <>
+                        {/* Desktop Table */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 dark:bg-gray-900">
+                              <tr>
+                                <th className="text-left py-3 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-28">Data</th>
+                                <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-20">API</th>
+                                <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-14">Cot.</th>
+                                <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">Usuário</th>
+                                <th className="text-left py-3 px-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Descrição</th>
+                                <th className="text-right py-3 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-24">Valor (R$)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                              {financialData.transactions.map((tx, idx) => (
+                                <tr key={`${tx.quote_id}-${tx.api}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                  <td className="py-3 px-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    {new Date(tx.date).toLocaleString('pt-BR', {
+                                      day: '2-digit', month: '2-digit', year: '2-digit',
+                                      hour: '2-digit', minute: '2-digit'
+                                    })}
+                                  </td>
+                                  <td className="py-3 px-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getApiColor(tx.api)}`}>
+                                      {getApiLabel(tx.api)}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-2 text-sm">
+                                    <Link
+                                      href={`/cotacao/${tx.quote_id}`}
+                                      className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
+                                    >
+                                      #{tx.quote_id}
+                                    </Link>
+                                  </td>
+                                  <td className="py-3 px-2 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[96px]">
+                                    {tx.user_name || '-'}
+                                  </td>
+                                  <td className="py-3 px-2 text-sm text-gray-500 dark:text-gray-400 break-words">
+                                    {tx.description}
+                                  </td>
+                                  <td className="py-3 px-3 text-sm text-right font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                    R$ {tx.cost_brl.toFixed(2)}
+                                    {tx.cost_usd > 0 && (
+                                      <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                        US$ {tx.cost_usd.toFixed(2)}
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="bg-gray-50 dark:bg-gray-900">
+                              <tr>
+                                <td colSpan={5} className="py-3 px-3 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
+                                  TOTAL:
+                                </td>
+                                <td className="py-3 px-3 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
+                                  R$ {financialData.total_brl.toFixed(2)}
+                                  {financialData.total_usd > 0 && (
+                                    <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                      US$ {financialData.total_usd.toFixed(2)}
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+
+                        {/* Mobile Cards */}
+                        <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
                           {financialData.transactions.map((tx, idx) => (
-                            <tr key={`${tx.quote_id}-${tx.api}-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                              <td className="py-3 px-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                                {new Date(tx.date).toLocaleString('pt-BR', {
-                                  day: '2-digit', month: '2-digit', year: '2-digit',
-                                  hour: '2-digit', minute: '2-digit'
-                                })}
-                              </td>
-                              <td className="py-3 px-2">
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getApiColor(tx.api)}`}>
-                                  {getApiLabel(tx.api)}
-                                </span>
-                              </td>
-                              <td className="py-3 px-2 text-sm">
-                                <Link
-                                  href={`/cotacao/${tx.quote_id}`}
-                                  className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
-                                >
-                                  #{tx.quote_id}
-                                </Link>
-                              </td>
-                              <td className="py-3 px-2 text-sm text-gray-500 dark:text-gray-400 break-words max-w-[96px]">
-                                {tx.user_name || '-'}
-                              </td>
-                              <td className="py-3 px-2 text-sm text-gray-500 dark:text-gray-400 break-words">
-                                {tx.description}
-                              </td>
-                              <td className="py-3 px-3 text-sm text-right font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                                R$ {tx.cost_brl.toFixed(2)}
-                                {tx.cost_usd > 0 && (
-                                  <span className="block text-xs text-gray-500 dark:text-gray-400">
-                                    US$ {tx.cost_usd.toFixed(2)}
+                            <Link
+                              key={`${tx.quote_id}-${tx.api}-${idx}`}
+                              href={`/cotacao/${tx.quote_id}`}
+                              className="block p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${getApiColor(tx.api)}`}>
+                                    {getApiLabel(tx.api)}
                                   </span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot className="bg-gray-50 dark:bg-gray-900">
-                          <tr>
-                            <td colSpan={5} className="py-3 px-3 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
-                              TOTAL:
-                            </td>
-                            <td className="py-3 px-3 text-sm font-bold text-gray-900 dark:text-gray-100 text-right">
-                              R$ {financialData.total_brl.toFixed(2)}
-                              {financialData.total_usd > 0 && (
-                                <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                  US$ {financialData.total_usd.toFixed(2)}
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">#{tx.quote_id}</span>
+                                </div>
+                                <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                  R$ {tx.cost_brl.toFixed(2)}
                                 </span>
-                              )}
-                            </td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
-                  )}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+                                {tx.description}
+                              </div>
+                              <div className="flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-500">
+                                <span>
+                                  {new Date(tx.date).toLocaleString('pt-BR', {
+                                    day: '2-digit', month: '2-digit', year: '2-digit',
+                                    hour: '2-digit', minute: '2-digit'
+                                  })}
+                                </span>
+                                <span>{tx.user_name || '-'}</span>
+                              </div>
+                            </Link>
+                          ))}
+                          {/* Mobile Total */}
+                          <div className="p-3 bg-gray-50 dark:bg-gray-900">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-gray-100">TOTAL:</span>
+                              <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100">
+                                R$ {financialData.total_brl.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </>
               )}
 
               {/* Mensagem inicial */}
               {!financialHasSearched && (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <svg className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <svg className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-base mb-1">Selecione os filtros</p>
-                  <p className="text-sm">Escolha um período e/ou integrações e clique em &quot;Exibir&quot;</p>
+                  <p className="text-sm sm:text-base mb-1">Selecione os filtros</p>
+                  <p className="text-xs sm:text-sm">Escolha um período e/ou integrações e clique em &quot;Exibir&quot;</p>
                 </div>
               )}
             </div>

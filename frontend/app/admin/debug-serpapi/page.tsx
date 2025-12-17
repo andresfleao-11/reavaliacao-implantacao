@@ -227,7 +227,7 @@ export default function DebugSerpApiPage() {
           Debug SerpAPI
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Analise um JSON do Google Shopping e visualize cada etapa do processamento de cotacao
+          Analise um JSON do Google Shopping e visualize cada etapa do processamento de cotação
         </p>
       </div>
 
@@ -261,7 +261,7 @@ export default function DebugSerpApiPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Numero de Cotacoes (limit)
+                Número de Cotações (limit)
               </label>
               <input
                 type="number"
@@ -275,7 +275,7 @@ export default function DebugSerpApiPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Variacao Maxima (%)
+                Variação Máxima (%)
               </label>
               <input
                 type="number"
