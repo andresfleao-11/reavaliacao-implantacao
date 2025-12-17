@@ -3,7 +3,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' && window.location.hostname.includes('railway.app')
+    ? 'https://backend-production-78bb.up.railway.app'
+    : 'http://localhost:8000')
 
 interface User {
   id: number
