@@ -204,8 +204,9 @@ def process_quote_request(self, quote_request_id: int):
         # Get parameters for search (prioridade: projeto > global > default)
         num_quotes = int(_get_parameter(db, "numero_cotacoes_por_pesquisa", 3, config_version_id))
         variacao_maxima = float(_get_parameter(db, "variacao_maxima_percent", 25, config_version_id)) / 100
+        enable_price_mismatch = _get_parameter(db, "enable_price_mismatch_validation", True, config_version_id)
 
-        logger.info(f"Quote {quote_request_id} using parameters: num_quotes={num_quotes}, variacao_maxima={variacao_maxima*100}%, config_version_id={config_version_id}")
+        logger.info(f"Quote {quote_request_id} using parameters: num_quotes={num_quotes}, variacao_maxima={variacao_maxima*100}%, enable_price_mismatch={enable_price_mismatch}, config_version_id={config_version_id}")
 
         # Validar se a query foi gerada
         if not analysis_result.query_principal or not analysis_result.query_principal.strip():
@@ -261,416 +262,69 @@ def process_quote_request(self, quote_request_id: int):
         }
         db.commit()
 
-        # Extraindo preços usando lógica de blocos com recálculo INTEGRADO
-        # NOVO FLUXO: Para cada produto do bloco:
-        # 1. Chamar Immersive API para obter URL da loja
-        # 2. Validar URL (domínio bloqueado, estrangeiro, listagem, duplicado)
-        # 3. Capturar screenshot e extrair preço
-        # 4. Validar PRICE_MISMATCH
-        # 5. Se falhar, próximo produto; se bloco esgota, recalcular bloco
+        # ============================================================================
+        # SISTEMA DE COTAÇÃO DE PREÇOS - LÓGICA DE BLOCOS
+        # ============================================================================
+        # Objetivo: Obter NUM_COTACOES válidas de um ÚNICO BLOCO garantindo
+        # variação máxima de VAR_MAX_PERCENT entre menor e maior preço.
+        # ============================================================================
         _update_progress(db, quote_request, "extracting_prices", 60, f"Processando {len(shopping_products)} produtos...")
 
-        valid_sources = []
-        valid_sources_by_url = {}  # {url: source} - para reutilização
-        valid_prices = {}  # {product_key: price} - preços já validados
-        failed_product_keys = set()  # Produtos que falharam (title_price como key)
-        urls_seen = set()  # URLs já usadas (evitar duplicatas)
+        # Estado global da cotação
+        valid_sources = []                    # Fontes validadas
+        valid_sources_by_product_key = {}     # {product_key: source}
+        validated_product_keys = set()        # Produtos já validados com sucesso
+        failed_product_keys = set()           # Produtos que falharam (descartados)
+        domains_in_block = set()              # Domínios já usados no bloco atual
+        urls_seen = set()                     # URLs já usadas
 
-        # Estatísticas para o log detalhado de busca
+        # Estatísticas para log detalhado
         search_stats = {
             "products_tested": 0,
             "blocks_recalculated": 0,
             "immersive_api_calls": 0,
-            "validation_failures": [],  # Lista de falhas com detalhes
-            "successful_products": [],  # Lista de produtos com sucesso
+            "tolerance_increases": 0,
+            "validation_failures": [],
+            "successful_products": [],
+            # Novos campos para histórico de blocos
+            "initial_products_sorted": [],  # Lista inicial ordenada por preço
+            "block_history": [],  # Histórico de cada iteração de bloco
         }
 
-        async def extract_prices_integrated():
+        # Parâmetros
+        INCREMENTO_VAR = 0.05  # 5% de aumento na tolerância quando fallback
+        current_var_max = variacao_maxima  # Variação máxima atual
+
+        # ============================================================================
+        # FUNÇÕES HELPER
+        # ============================================================================
+        def _normalize_price(price) -> str:
+            """Normaliza preço para string com 2 casas decimais."""
+            try:
+                return f"{float(price):.2f}"
+            except (ValueError, TypeError):
+                return str(price)
+
+        def _make_product_key(title: str, price) -> str:
+            """Cria chave normalizada para produto."""
+            return f"{title}_{_normalize_price(price)}"
+
+        def _form_blocks(products, max_variation, min_size):
             """
-            NOVO FLUXO INTEGRADO: Immersive API + validações + captura em um único loop.
-            Para cada produto do bloco:
-            1. Chamar Immersive API para obter URL da loja
-            2. Validar URL (domínio bloqueado, estrangeiro, listagem, duplicado)
-            3. Capturar screenshot e extrair preço
-            4. Validar PRICE_MISMATCH
-            5. Se passar tudo → cotação válida
-            6. Se falhar → marcar como falho, próximo produto
-            7. Se bloco esgota sem N cotações → recalcular bloco
+            ETAPA 1.4: Forma blocos consecutivos de produtos onde:
+            - Mínimo de min_size produtos
+            - Variação: (preço_max - preço_min) / preço_min × 100 ≤ max_variation
+            Retorna lista de blocos ordenada por: maior tamanho, depois menor preço inicial.
             """
-            from app.models.quote_source import ExtractionMethod
-            nonlocal valid_sources, valid_sources_by_url, valid_prices, failed_product_keys, urls_seen
-
-            all_products = list(shopping_products)
-            iteration = 0
-            max_iterations = 30  # Mais iterações pois agora processa produto por produto
-
-            # Sistema de reserva para quando precisamos tentar bloco alternativo
-            reserve_sources = []
-            reserve_sources_by_url = {}
-            reserve_prices = {}
-            has_reserve = False
-
-            async with PriceExtractor() as extractor:
-                while len(valid_sources) < num_quotes and iteration < max_iterations:
-                    iteration += 1
-
-                    # Construir lista de produtos disponíveis (excluir falhas)
-                    available_products = [
-                        p for p in all_products
-                        if f"{p.title}_{p.extracted_price}" not in failed_product_keys
-                    ]
-
-                    if not available_products:
-                        logger.info(f"Iteration {iteration}: No products remaining")
-                        break
-
-                    # Ordenar por preço
-                    available_products.sort(key=lambda p: float(p.extracted_price) if p.extracted_price else 0)
-
-                    # Calcular UM bloco único
-                    block = _calculate_best_block_shopping(
-                        available_products,
-                        valid_prices,
-                        variacao_maxima,
-                        num_quotes
-                    )
-
-                    if not block:
-                        logger.info(f"Iteration {iteration}: No valid block could be created")
-                        break
-
-                    # Verificar quantos produtos validados estão no bloco
-                    block_keys = {f"{p.title}_{p.extracted_price}" for p in block}
-                    valid_keys = set(valid_prices.keys())
-                    valid_in_block = len(valid_keys & block_keys)
-                    valid_outside_block = len(valid_keys - block_keys)
-                    untried_in_block = [p for p in block if f"{p.title}_{p.extracted_price}" not in valid_prices and f"{p.title}_{p.extracted_price}" not in failed_product_keys]
-                    needed = num_quotes - len(valid_sources)
-
-                    logger.info(
-                        f"Iteration {iteration}: Block with {len(block)} products "
-                        f"(R$ {block[0].extracted_price} - R$ {block[-1].extracted_price}), "
-                        f"{valid_in_block} valid in block, {valid_outside_block} valid outside, "
-                        f"{len(untried_in_block)} untried, need {needed} more"
-                    )
-
-                    # Se há validados fora do bloco, decidir o que fazer
-                    if valid_outside_block and not has_reserve:
-                        potential = valid_in_block + len(untried_in_block)
-                        if potential < num_quotes:
-                            logger.info(
-                                f"  Block potential ({potential}) < required ({num_quotes}). "
-                                f"Saving {len(valid_sources)} as reserve, trying fresh block."
-                            )
-                            reserve_sources = list(valid_sources)
-                            reserve_sources_by_url = dict(valid_sources_by_url)
-                            reserve_prices = dict(valid_prices)
-                            has_reserve = True
-
-                            valid_sources = []
-                            valid_sources_by_url = {}
-                            valid_prices = {}
-                            continue
-
-                    # Incrementar contador de recalculo de blocos
-                    search_stats["blocks_recalculated"] += 1
-
-                    # Processar produtos do bloco UM POR UM
-                    new_failures = []
-
-                    for product in block:
-                        if len(valid_sources) >= num_quotes:
-                            break
-
-                        product_key = f"{product.title}_{product.extracted_price}"
-
-                        # Já processado?
-                        if product_key in valid_prices or product_key in failed_product_keys:
-                            continue
-
-                        logger.info(f"    → Processing: {product.source} - R$ {product.extracted_price}")
-
-                        # Incrementar contador de produtos testados
-                        search_stats["products_tested"] += 1
-
-                        try:
-                            # PASSO 1: Chamar Immersive API para obter URL da loja
-                            store_result = await search_provider.get_store_link_for_product(product)
-                            search_stats["immersive_api_calls"] += 1
-
-                            if not store_result:
-                                raise ValueError("NO_STORE_LINK: Immersive API não retornou URL de loja")
-
-                            # Registrar chamada Immersive API
-                            log_serpapi_call(
-                                db=db,
-                                quote_request_id=quote_request.id,
-                                api_used="google_immersive_product",
-                                search_url="",
-                                activity=f"Busca de loja para: {product.title[:50]}...",
-                                request_data={"product_title": product.title, "price": str(product.extracted_price)},
-                                response_summary={"url": store_result.url, "domain": store_result.domain} if store_result else None,
-                                product_link=store_result.url if store_result else None
-                            )
-
-                            # PASSO 2: Validar URL
-                            if search_provider._is_blocked_domain(store_result.domain):
-                                raise ValueError(f"BLOCKED_DOMAIN: {store_result.domain}")
-
-                            if search_provider._is_foreign_domain(store_result.domain):
-                                raise ValueError(f"FOREIGN_DOMAIN: {store_result.domain}")
-
-                            if search_provider._is_listing_url(store_result.url):
-                                raise ValueError(f"LISTING_URL: {store_result.url[:50]}")
-
-                            if store_result.url in urls_seen:
-                                raise ValueError(f"DUPLICATE_URL: {store_result.url[:50]}")
-
-                            # PASSO 3: Capturar screenshot e extrair preço
-                            screenshot_filename = f"screenshot_{quote_request_id}_{len(valid_sources)}.png"
-                            screenshot_path = os.path.join(settings.STORAGE_PATH, "screenshots", screenshot_filename)
-                            os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
-
-                            price, method = await extractor.extract_price_and_screenshot(
-                                store_result.url,
-                                screenshot_path
-                            )
-
-                            if not price or price <= Decimal("1"):
-                                raise ValueError(f"INVALID_PRICE: {price}")
-
-                            # PASSO 4: Validar PRICE_MISMATCH
-                            google_price = product.extracted_price
-                            if google_price and google_price > 0:
-                                if not prices_match(float(price), float(google_price)):
-                                    price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
-                                    raise ValueError(f"PRICE_MISMATCH: Site R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)")
-
-                            # PASSO 5: Tudo OK - criar cotação válida
-                            urls_seen.add(store_result.url)
-
-                            screenshot_file = File(
-                                type=FileType.SCREENSHOT,
-                                mime_type="image/png",
-                                storage_path=screenshot_path,
-                                sha256=_calculate_sha256(screenshot_path)
-                            )
-                            db.add(screenshot_file)
-                            db.flush()
-
-                            source = QuoteSource(
-                                quote_request_id=quote_request_id,
-                                url=store_result.url,
-                                domain=store_result.domain,
-                                page_title=product.title,
-                                price_value=price,
-                                currency="BRL",
-                                extraction_method=method,
-                                screenshot_file_id=screenshot_file.id,
-                                is_accepted=True
-                            )
-                            db.add(source)
-                            valid_sources.append(source)
-                            valid_sources_by_url[store_result.url] = source
-                            valid_prices[product_key] = float(price)
-
-                            logger.info(f"    ✓ Added [{len(valid_sources)}/{num_quotes}]: {store_result.domain} - R$ {price}")
-
-                            # Registrar produto bem-sucedido
-                            search_stats["successful_products"].append({
-                                "title": product.title,
-                                "source": product.source,
-                                "google_price": float(product.extracted_price) if product.extracted_price else None,
-                                "extracted_price": float(price),
-                                "url": store_result.url,
-                                "domain": store_result.domain
-                            })
-
-                        except Exception as e:
-                            error_msg = str(e)
-                            logger.error(f"    ✗ Failed: {error_msg[:100]}")
-                            new_failures.append(product_key)
-
-                            # Determinar tipo de falha e registrar
-                            failure_reason = CaptureFailureReason.OTHER
-                            extracted_price_value = None
-                            failure_url = ""
-                            failure_domain = ""
-                            failure_step = "UNKNOWN"  # Passo em que falhou
-
-                            try:
-                                if store_result:
-                                    failure_url = store_result.url
-                                    failure_domain = store_result.domain
-                            except:
-                                pass
-
-                            # Determinar passo da falha baseado na mensagem de erro
-                            if "NO_STORE_LINK" in error_msg:
-                                failure_step = "IMMERSIVE_API"
-                            elif "BLOCKED_DOMAIN" in error_msg:
-                                failure_step = "URL_VALIDATION"
-                            elif "FOREIGN_DOMAIN" in error_msg:
-                                failure_step = "URL_VALIDATION"
-                            elif "LISTING_URL" in error_msg:
-                                failure_step = "URL_VALIDATION"
-                            elif "DUPLICATE_URL" in error_msg:
-                                failure_step = "URL_VALIDATION"
-                            elif "INVALID_PRICE" in error_msg:
-                                failure_step = "PRICE_EXTRACTION"
-                            elif "PRICE_MISMATCH" in error_msg:
-                                failure_step = "PRICE_VALIDATION"
-                            elif "timeout" in error_msg.lower() or "screenshot" in error_msg.lower():
-                                failure_step = "SCREENSHOT_CAPTURE"
-                            elif "load" in error_msg.lower() or "navigate" in error_msg.lower():
-                                failure_step = "PAGE_LOAD"
-
-                            # Registrar falha nas estatísticas
-                            search_stats["validation_failures"].append({
-                                "title": product.title,
-                                "source": product.source,
-                                "google_price": float(product.extracted_price) if product.extracted_price else None,
-                                "url": failure_url,
-                                "domain": failure_domain,
-                                "failure_step": failure_step,
-                                "error_message": error_msg[:200]
-                            })
-
-                            if "NO_STORE_LINK" in error_msg:
-                                failure_reason = CaptureFailureReason.OTHER
-                            elif "BLOCKED_DOMAIN" in error_msg:
-                                failure_reason = CaptureFailureReason.OTHER
-                            elif "FOREIGN_DOMAIN" in error_msg:
-                                failure_reason = CaptureFailureReason.OTHER
-                            elif "LISTING_URL" in error_msg:
-                                failure_reason = CaptureFailureReason.OTHER
-                            elif "DUPLICATE_URL" in error_msg:
-                                failure_reason = CaptureFailureReason.OTHER
-                            elif "PRICE_MISMATCH" in error_msg:
-                                failure_reason = CaptureFailureReason.PRICE_MISMATCH
-                                try:
-                                    extracted_price_value = price if 'price' in dir() and price else None
-                                except:
-                                    pass
-                            elif "INVALID_PRICE" in error_msg:
-                                failure_reason = CaptureFailureReason.INVALID_PRICE
-                            elif "timeout" in error_msg.lower():
-                                failure_reason = CaptureFailureReason.TIMEOUT
-                            elif "403" in error_msg or "captcha" in error_msg.lower() or "blocked" in error_msg.lower():
-                                failure_reason = CaptureFailureReason.BLOCKED_BY_SITE
-                            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
-                                failure_reason = CaptureFailureReason.NETWORK_ERROR
-                            elif "screenshot" in error_msg.lower():
-                                failure_reason = CaptureFailureReason.SCREENSHOT_ERROR
-                            elif "load" in error_msg.lower() or "navigate" in error_msg.lower():
-                                failure_reason = CaptureFailureReason.PAGE_LOAD_ERROR
-
-                            # Registrar falha no banco
-                            try:
-                                failure_record = QuoteSourceFailure(
-                                    quote_request_id=quote_request_id,
-                                    url=failure_url or f"product:{product.source}",
-                                    domain=failure_domain or product.source,
-                                    product_title=product.title,
-                                    google_price=Decimal(str(product.extracted_price)) if product.extracted_price else None,
-                                    extracted_price=extracted_price_value,
-                                    failure_reason=failure_reason,
-                                    error_message=error_msg[:1000]
-                                )
-                                db.add(failure_record)
-                                db.flush()
-                            except Exception as save_error:
-                                logger.warning(f"Failed to save capture failure record: {save_error}")
-
-                    # Atualizar falhas
-                    failed_product_keys.update(new_failures)
-
-                    # Verificar resultado
-                    if len(valid_sources) >= num_quotes:
-                        logger.info(f"Success! Got {len(valid_sources)} quotes after {iteration} iterations")
-                        break
-
-                    # Verificar produtos restantes
-                    untried_global = [p for p in all_products if f"{p.title}_{p.extracted_price}" not in valid_prices and f"{p.title}_{p.extracted_price}" not in failed_product_keys]
-
-                    logger.info(
-                        f"  End iteration {iteration}: {len(valid_sources)}/{num_quotes} quotes, "
-                        f"{len(new_failures)} new failures, {len(untried_global)} untried globally"
-                    )
-
-                    if not untried_global:
-                        if has_reserve and len(reserve_sources) > len(valid_sources):
-                            logger.info(
-                                f"  No more products. Reserve ({len(reserve_sources)}) > current ({len(valid_sources)}). Using reserve."
-                            )
-                            valid_sources = reserve_sources
-                            valid_sources_by_url = reserve_sources_by_url
-                            valid_prices = reserve_prices
-
-                        logger.info(
-                            f"All products tested. Final: {len(valid_sources)}/{num_quotes} quotes, "
-                            f"{len(failed_product_keys)} failed"
-                        )
-                        break
-
-                    if new_failures:
-                        logger.info(f"  {len(new_failures)} failures. Recalculating block...")
-
-        def _calculate_best_block_shopping(products, valid_prices, max_variation, num_quotes):
-            """
-            Calcula o melhor bloco baseado em ShoppingProducts (sem URL ainda).
-            Usa title_price como chave única.
-            """
-            if not products:
-                return None
-
-            valid_keys = set(valid_prices.keys())
-            best_block = None
-            best_score = (-1, -1, float('inf'))
-
-            for start_idx, start_product in enumerate(products):
-                if not start_product.extracted_price:
-                    continue
-
-                min_price = float(start_product.extracted_price)
-                max_allowed = min_price * (1 + max_variation)
-
-                block = []
-                for product in products[start_idx:]:
-                    if product.extracted_price and float(product.extracted_price) <= max_allowed:
-                        block.append(product)
-                    else:
-                        break
-
-                if not block:
-                    continue
-
-                block_keys = {f"{p.title}_{p.extracted_price}" for p in block}
-                valid_in_block = len(valid_keys & block_keys)
-                contains_all_valid = valid_in_block == len(valid_keys) if valid_keys else True
-                untried = len([p for p in block if f"{p.title}_{p.extracted_price}" not in valid_prices])
-
-                score = (
-                    1 if contains_all_valid else 0,
-                    untried,
-                    -min_price
-                )
-
-                if score > best_score:
-                    best_score = score
-                    best_block = block
-
-            return best_block
-
-        def _create_variation_blocks_local(products, max_variation, min_size=1):
-            """Cria blocos de variação localmente (mantido para compatibilidade)"""
             if not products:
                 return []
 
             blocks = []
-            for start_idx, start_product in enumerate(products):
+            for start_idx in range(len(products)):
+                start_product = products[start_idx]
                 if not start_product.extracted_price:
                     continue
+
                 min_price = float(start_product.extracted_price)
                 max_allowed = min_price * (1 + max_variation)
 
@@ -679,14 +333,446 @@ def process_quote_request(self, quote_request_id: int):
                     if product.extracted_price and float(product.extracted_price) <= max_allowed:
                         block.append(product)
                     else:
-                        break
+                        break  # Produtos estão ordenados, então podemos parar
 
                 if len(block) >= min_size:
-                    blocks.append(block)
+                    blocks.append({
+                        "products": block,
+                        "min_price": min_price,
+                        "max_price": float(block[-1].extracted_price),
+                        "size": len(block)
+                    })
 
+            # Ordenar: maior tamanho primeiro, depois menor preço inicial
+            blocks.sort(key=lambda b: (-b["size"], b["min_price"]))
             return blocks
 
-        asyncio.run(extract_prices_integrated())
+        def _get_block_id(block):
+            """Gera um ID único para o bloco baseado nos produtos."""
+            keys = sorted([_make_product_key(p.title, p.extracted_price) for p in block])
+            return hash(tuple(keys))
+
+        def _rank_blocks(blocks, validated_keys, failed_keys):
+            """
+            Retorna lista de blocos ordenados por prioridade, com métricas.
+            Blocos sem potencial suficiente são excluídos.
+            """
+            ranked = []
+
+            for block_info in blocks:
+                block = block_info["products"]
+                block_keys = {_make_product_key(p.title, p.extracted_price) for p in block}
+
+                valid_in_block = len(validated_keys & block_keys)
+                failed_in_block = len(failed_keys & block_keys)
+                untried_in_block = len(block_keys - validated_keys - failed_keys)
+
+                # Potencial = validados + não testados
+                potential = valid_in_block + untried_in_block
+
+                # Se não pode atingir NUM_COTACOES, pular este bloco
+                if potential < num_quotes:
+                    continue
+
+                # Score: prioriza blocos com mais validados, mais não testados, menor preço
+                score = (valid_in_block, untried_in_block, -block_info["min_price"])
+
+                ranked.append({
+                    "block": block,
+                    "block_info": block_info,
+                    "score": score,
+                    "valid_in_block": valid_in_block,
+                    "untried_count": untried_in_block,
+                    "potential": potential,
+                    "block_id": _get_block_id(block)
+                })
+
+            # Ordenar por score decrescente
+            ranked.sort(key=lambda x: x["score"], reverse=True)
+            return ranked
+
+        # ============================================================================
+        # FUNÇÃO PRINCIPAL DE EXTRAÇÃO
+        # ============================================================================
+        async def extract_prices_with_blocks():
+            """
+            Implementação corrigida - RECALCULA blocos após cada falha:
+            1. Formar blocos com produtos disponíveis
+            2. Escolher o melhor bloco
+            3. Testar produtos do bloco
+            4. Se falhar → RECALCULAR blocos (produtos falhos removidos) → voltar ao passo 2
+            5. Só aumentar tolerância quando não consegue formar blocos válidos
+            """
+            from app.models.quote_source import ExtractionMethod
+            nonlocal valid_sources, valid_sources_by_product_key, validated_product_keys
+            nonlocal failed_product_keys, domains_in_block, urls_seen, current_var_max
+
+            all_products = list(shopping_products)
+            max_tolerance_increases = 5  # Máximo de aumentos de tolerância
+            max_iterations = 100  # Limite de segurança
+
+            async with PriceExtractor() as extractor:
+                first_run = True
+                global_iteration = 0
+
+                # LOOP EXTERNO: Tolerância de variação
+                for tolerance_round in range(max_tolerance_increases + 1):
+                    if tolerance_round > 0:
+                        # Aumentar tolerância
+                        current_var_max += INCREMENTO_VAR
+                        search_stats["tolerance_increases"] += 1
+                        logger.info(f"=== FALLBACK #{tolerance_round}: Aumentando tolerância para {current_var_max*100:.0f}% ===")
+                        # Resetar domínios do bloco mas manter validados
+                        domains_in_block.clear()
+
+                    # LOOP INTERNO: Formar blocos → tentar → recalcular → repetir
+                    while global_iteration < max_iterations:
+                        global_iteration += 1
+
+                        # Construir lista de produtos disponíveis (excluindo falhos)
+                        available_products = [
+                            p for p in all_products
+                            if _make_product_key(p.title, p.extracted_price) not in failed_product_keys
+                        ]
+
+                        if not available_products:
+                            logger.info(f"Iteração {global_iteration}: Nenhum produto disponível")
+                            break
+
+                        # Ordenar por preço crescente
+                        available_products.sort(key=lambda p: float(p.extracted_price) if p.extracted_price else 0)
+
+                        # Registrar lista inicial de produtos (apenas na primeira vez)
+                        if first_run:
+                            first_run = False
+                            search_stats["initial_products_sorted"] = [
+                                {
+                                    "index": idx,
+                                    "title": p.title[:60],
+                                    "source": p.source,
+                                    "price": float(p.extracted_price) if p.extracted_price else 0
+                                }
+                                for idx, p in enumerate(available_products)
+                            ]
+
+                        # ETAPA 1: Formar blocos com produtos disponíveis
+                        blocks = _form_blocks(available_products, current_var_max, num_quotes)
+
+                        if not blocks:
+                            logger.info(f"Iteração {global_iteration}: Nenhum bloco pode ser formado com var_max={current_var_max*100:.0f}%")
+                            break  # Ir para próxima tolerância
+
+                        # ETAPA 2: Rankear e selecionar melhor bloco
+                        ranked_blocks = _rank_blocks(blocks, validated_product_keys, failed_product_keys)
+
+                        if not ranked_blocks:
+                            logger.info(f"Iteração {global_iteration}: Nenhum bloco elegível (todos sem potencial suficiente)")
+                            break  # Ir para próxima tolerância
+
+                        # Pegar o melhor bloco
+                        best = ranked_blocks[0]
+                        block = best["block"]
+                        block_info = best["block_info"]
+
+                        search_stats["blocks_recalculated"] += 1
+
+                        # Calcular métricas atuais do bloco
+                        block_keys = {_make_product_key(p.title, p.extracted_price) for p in block}
+                        valid_in_block = len(validated_product_keys & block_keys)
+                        untried_in_block = [p for p in block
+                            if _make_product_key(p.title, p.extracted_price) not in validated_product_keys
+                            and _make_product_key(p.title, p.extracted_price) not in failed_product_keys]
+
+                        # Criar registro do histórico de bloco
+                        block_record = {
+                            "iteration": global_iteration,
+                            "tolerance_round": tolerance_round,
+                            "var_max_percent": current_var_max * 100,
+                            "total_blocks_formed": len(blocks),
+                            "blocks_eligible": len(ranked_blocks),
+                            "block_size": len(block),
+                            "price_range": {
+                                "min": float(block[0].extracted_price),
+                                "max": float(block[-1].extracted_price)
+                            },
+                            "validated_in_block": valid_in_block,
+                            "untried_count": len(untried_in_block),
+                            "products_in_block": [
+                                {
+                                    "index": available_products.index(p) if p in available_products else -1,
+                                    "title": p.title[:40],
+                                    "source": p.source,
+                                    "price": float(p.extracted_price) if p.extracted_price else 0,
+                                    "status": "validated" if _make_product_key(p.title, p.extracted_price) in validated_product_keys
+                                             else "failed" if _make_product_key(p.title, p.extracted_price) in failed_product_keys
+                                             else "untried"
+                                }
+                                for p in block
+                            ],
+                            "tests": [],
+                            "result": None
+                        }
+
+                        logger.info(
+                            f"Iteração {global_iteration} (tol {tolerance_round}): "
+                            f"{len(blocks)} blocos formados, {len(ranked_blocks)} elegíveis. "
+                            f"Melhor bloco: {len(block)} produtos (R$ {block[0].extracted_price:.2f} - R$ {block[-1].extracted_price:.2f}), "
+                            f"{valid_in_block} validados, {len(untried_in_block)} a testar"
+                        )
+
+                        # VERIFICAÇÃO DE SUCESSO ANTECIPADO
+                        if valid_in_block >= num_quotes:
+                            logger.info(f"✅ SUCESSO! Bloco já tem {valid_in_block} cotações válidas")
+                            block_record["result"] = "success_early"
+                            search_stats["block_history"].append(block_record)
+                            valid_sources = [
+                                s for pk, s in valid_sources_by_product_key.items()
+                                if pk in block_keys
+                            ]
+                            return  # Sucesso!
+
+                        # ETAPA 3: Testar TODOS os produtos do bloco
+                        # Só recalculamos blocos APÓS testar todos os produtos do bloco atual
+
+                        for product in untried_in_block:
+                            product_key = _make_product_key(product.title, product.extracted_price)
+
+                            # Verificar se já atingimos a meta
+                            valid_in_block_now = len(validated_product_keys & block_keys)
+                            if valid_in_block_now >= num_quotes:
+                                logger.info(f"✅ SUCESSO! Atingido {valid_in_block_now} cotações no bloco")
+                                block_record["result"] = "success"
+                                search_stats["block_history"].append(block_record)
+                                valid_sources = [
+                                    s for pk, s in valid_sources_by_product_key.items()
+                                    if pk in block_keys
+                                ]
+                                return  # Sucesso!
+
+                            # Processar produto
+                            logger.info(f"  → Validando: {product.source} - R$ {product.extracted_price}")
+                            search_stats["products_tested"] += 1
+
+                            # Preparar registro do teste
+                            test_record = {
+                                "product_index": available_products.index(product) if product in available_products else -1,
+                                "title": product.title[:50],
+                                "source": product.source,
+                                "google_price": float(product.extracted_price) if product.extracted_price else 0,
+                                "result": None,
+                                "failure_step": None,
+                                "error_message": None,
+                                "extracted_price": None,
+                                "domain": None
+                            }
+
+                            try:
+                                # PASSO 1: Chamar Immersive API
+                                store_result = await search_provider.get_store_link_for_product(product)
+                                search_stats["immersive_api_calls"] += 1
+
+                                if not store_result:
+                                    raise ValueError("NO_STORE_LINK: Immersive API não retornou URL")
+
+                                # Registrar chamada
+                                log_serpapi_call(
+                                    db=db, quote_request_id=quote_request.id,
+                                    api_used="google_immersive_product", search_url="",
+                                    activity=f"Busca de loja para: {product.title[:50]}...",
+                                    request_data={"product_title": product.title, "price": str(product.extracted_price)},
+                                    response_summary={"url": store_result.url, "domain": store_result.domain},
+                                    product_link=store_result.url
+                                )
+
+                                # PASSO 2: Validações de URL
+                                if search_provider._is_blocked_domain(store_result.domain):
+                                    raise ValueError(f"BLOCKED_DOMAIN: {store_result.domain}")
+
+                                if search_provider._is_foreign_domain(store_result.domain):
+                                    raise ValueError(f"FOREIGN_DOMAIN: {store_result.domain}")
+
+                                if search_provider._is_listing_url(store_result.url):
+                                    raise ValueError(f"LISTING_URL: {store_result.url[:50]}")
+
+                                # DUPLICATE_DOMAIN: verificar apenas domínios já validados nesta cotação
+                                if store_result.domain in domains_in_block:
+                                    raise ValueError(f"DUPLICATE_DOMAIN: {store_result.domain}")
+
+                                if store_result.url in urls_seen:
+                                    raise ValueError(f"DUPLICATE_URL: {store_result.url[:50]}")
+
+                                # PASSO 3: Capturar screenshot e extrair preço
+                                screenshot_filename = f"screenshot_{quote_request_id}_{len(valid_sources)}.png"
+                                screenshot_path = os.path.join(settings.STORAGE_PATH, "screenshots", screenshot_filename)
+                                os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
+
+                                price, method = await extractor.extract_price_and_screenshot(
+                                    store_result.url, screenshot_path
+                                )
+
+                                if not price or price <= Decimal("1"):
+                                    raise ValueError(f"EXTRACTION_ERROR: preço inválido {price}")
+
+                                # Rejeitar preços absurdamente altos (provavelmente erro de parsing)
+                                if price > Decimal("10000000"):  # > 10 milhões
+                                    raise ValueError(f"EXTRACTION_ERROR: preço absurdo R$ {price} (provável erro de parsing)")
+
+                                # PASSO 4: Validar PRICE_MISMATCH (se habilitado)
+                                google_price = product.extracted_price
+                                if enable_price_mismatch and google_price and google_price > 0:
+                                    if not prices_match(float(price), float(google_price)):
+                                        price_diff = abs(float(price) - float(google_price)) / float(google_price) * 100
+                                        raise ValueError(f"PRICE_MISMATCH: Site R$ {price} vs Google R$ {google_price} (diff: {price_diff:.1f}%)")
+
+                                # ✅ SUCESSO - Produto validado!
+                                urls_seen.add(store_result.url)
+                                domains_in_block.add(store_result.domain)
+
+                                screenshot_file = File(
+                                    type=FileType.SCREENSHOT,
+                                    mime_type="image/png",
+                                    storage_path=screenshot_path,
+                                    sha256=_calculate_sha256(screenshot_path)
+                                )
+                                db.add(screenshot_file)
+                                db.flush()
+
+                                source = QuoteSource(
+                                    quote_request_id=quote_request_id,
+                                    url=store_result.url,
+                                    domain=store_result.domain,
+                                    page_title=product.title,
+                                    price_value=price,
+                                    currency="BRL",
+                                    extraction_method=method,
+                                    screenshot_file_id=screenshot_file.id,
+                                    is_accepted=True
+                                )
+                                db.add(source)
+                                valid_sources.append(source)
+                                valid_sources_by_product_key[product_key] = source
+                                validated_product_keys.add(product_key)
+
+                                logger.info(f"  ✓ Validado [{len(validated_product_keys & block_keys)}/{num_quotes}]: {store_result.domain} - R$ {price}")
+
+                                # Registrar teste bem-sucedido
+                                test_record["result"] = "success"
+                                test_record["extracted_price"] = float(price)
+                                test_record["domain"] = store_result.domain
+                                block_record["tests"].append(test_record)
+
+                                search_stats["successful_products"].append({
+                                    "title": product.title,
+                                    "source": product.source,
+                                    "google_price": float(product.extracted_price) if product.extracted_price else None,
+                                    "extracted_price": float(price),
+                                    "url": store_result.url,
+                                    "domain": store_result.domain
+                                })
+
+                            except Exception as e:
+                                # ❌ FALHA - Descartar produto (mas continuar testando os outros do bloco)
+                                error_msg = str(e)
+                                logger.error(f"  ✗ Falha: {error_msg[:100]}")
+                                failed_product_keys.add(product_key)
+
+                                # Determinar passo da falha
+                                failure_step = "UNKNOWN"
+                                if "NO_STORE_LINK" in error_msg:
+                                    failure_step = "IMMERSIVE_API"
+                                elif any(x in error_msg for x in ["BLOCKED_DOMAIN", "FOREIGN_DOMAIN", "LISTING_URL", "DUPLICATE"]):
+                                    failure_step = "URL_VALIDATION"
+                                elif "EXTRACTION_ERROR" in error_msg:
+                                    failure_step = "PRICE_EXTRACTION"
+                                elif "PRICE_MISMATCH" in error_msg:
+                                    failure_step = "PRICE_VALIDATION"
+
+                                # Registrar teste falho
+                                test_record["result"] = "failed"
+                                test_record["failure_step"] = failure_step
+                                test_record["error_message"] = error_msg[:100]
+                                if 'store_result' in dir() and store_result:
+                                    test_record["domain"] = store_result.domain
+                                block_record["tests"].append(test_record)
+
+                                search_stats["validation_failures"].append({
+                                    "title": product.title,
+                                    "source": product.source,
+                                    "google_price": float(product.extracted_price) if product.extracted_price else None,
+                                    "url": store_result.url if 'store_result' in dir() and store_result else "",
+                                    "domain": store_result.domain if 'store_result' in dir() and store_result else "",
+                                    "failure_step": failure_step,
+                                    "error_message": error_msg[:200]
+                                })
+
+                                # Registrar falha no banco
+                                try:
+                                    failure_reason = CaptureFailureReason.OTHER
+                                    if "PRICE_MISMATCH" in error_msg:
+                                        failure_reason = CaptureFailureReason.PRICE_MISMATCH
+                                    elif "EXTRACTION" in error_msg or "INVALID_PRICE" in error_msg:
+                                        failure_reason = CaptureFailureReason.INVALID_PRICE
+
+                                    # Sanitizar preços para evitar overflow no banco (max 10^10)
+                                    MAX_PRICE = Decimal("9999999999.99")
+                                    safe_google_price = None
+                                    if product.extracted_price:
+                                        gp = Decimal(str(product.extracted_price))
+                                        safe_google_price = min(gp, MAX_PRICE) if gp > 0 else None
+
+                                    failure_record = QuoteSourceFailure(
+                                        quote_request_id=quote_request_id,
+                                        url=store_result.url if 'store_result' in dir() and store_result else f"product:{product.source}",
+                                        domain=store_result.domain if 'store_result' in dir() and store_result else product.source,
+                                        product_title=product.title,
+                                        google_price=safe_google_price,
+                                        failure_reason=failure_reason,
+                                        error_message=error_msg[:1000]
+                                    )
+                                    db.add(failure_record)
+                                    db.flush()
+                                except Exception as save_error:
+                                    logger.warning(f"Erro ao salvar falha: {save_error}")
+                                    db.rollback()  # Rollback para continuar processamento
+
+                                # NÃO sair do loop - continuar testando outros produtos do bloco
+
+                        # Fim do for - todos os produtos do bloco foram testados
+                        # Verificar resultado final deste bloco
+                        valid_in_block_final = len(validated_product_keys & block_keys)
+
+                        if valid_in_block_final >= num_quotes:
+                            logger.info(f"✅ SUCESSO! {valid_in_block_final} cotações válidas no bloco")
+                            block_record["result"] = "success"
+                            search_stats["block_history"].append(block_record)
+                            valid_sources = [
+                                s for pk, s in valid_sources_by_product_key.items()
+                                if pk in block_keys
+                            ]
+                            return
+
+                        # BLOCO FALHOU: testamos todos os produtos e temos < N válidos
+                        # Recalcular blocos (produtos falhos serão excluídos)
+                        block_record["result"] = "failed"
+                        block_record["final_valid_count"] = valid_in_block_final
+                        search_stats["block_history"].append(block_record)
+                        logger.info(
+                            f"  ❌ BLOCO FALHOU: apenas {valid_in_block_final}/{num_quotes} válidos após testar todos os produtos. "
+                            f"Recalculando blocos..."
+                        )
+
+                    # Fim do while interno - não conseguiu neste nível de tolerância
+                    logger.info(f"Tolerância {current_var_max*100:.0f}% esgotada após {global_iteration} iterações")
+
+                # Se chegou aqui, não conseguiu mesmo com todos os fallbacks
+                total_validated = len(validated_product_keys)
+                logger.warning(
+                    f"Não foi possível obter {num_quotes} cotações em um único bloco. "
+                    f"Total validado: {total_validated}. Tolerância final: {current_var_max*100:.0f}%"
+                )
+
+        # Executar a nova lógica
+        asyncio.run(extract_prices_with_blocks())
 
         # Salvar estatísticas detalhadas de busca no JSON da cotação
         if quote_request.google_shopping_response_json:
@@ -848,6 +934,7 @@ def _get_parameter(db: Session, key: str, default, config_version_id: int = None
                 "pesquisador_padrao": config_version.pesquisador_padrao,
                 "local_padrao": config_version.local_padrao,
                 "serpapi_location": config_version.serpapi_location,
+                "enable_price_mismatch_validation": config_version.enable_price_mismatch_validation if hasattr(config_version, 'enable_price_mismatch_validation') else True,
             }
             if key in field_mapping and field_mapping[key] is not None:
                 logger.info(f"Using project config parameter {key}={field_mapping[key]} from config_version_id={config_version_id}")
