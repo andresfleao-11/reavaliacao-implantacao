@@ -26,7 +26,7 @@ export default function QuoteDetailPage() {
   const [googleShoppingExpanded, setGoogleShoppingExpanded] = useState(false)
   const [fipeExpanded, setFipeExpanded] = useState(true)
   const [fipeApiCallsExpanded, setFipeApiCallsExpanded] = useState(false)
-  const [searchStatsExpanded, setSearchStatsExpanded] = useState(true)
+  const [searchStatsExpanded, setSearchStatsExpanded] = useState(false)
   const [expandedFailures, setExpandedFailures] = useState<Set<number>>(new Set())
   const [showPromptModal, setShowPromptModal] = useState(false)
   const [selectedPrompt, setSelectedPrompt] = useState<string | null>(null)
@@ -1083,464 +1083,6 @@ export default function QuoteDetailPage() {
             </div>
           )}
 
-          {/* Log de Busca Detalhado (from google_shopping_response_json.search_stats) */}
-          {quote?.google_shopping_response_json?.search_stats && (
-            <div className="mb-6">
-              <button
-                onClick={() => setSearchStatsExpanded(!searchStatsExpanded)}
-                className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
-              >
-                <span>📊 Log de Busca Detalhado</span>
-                <svg
-                  className={`w-5 h-5 transform transition-transform ${searchStatsExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {searchStatsExpanded && (() => {
-                const searchStats = quote.google_shopping_response_json.search_stats
-                const shoppingLog = quote.google_shopping_response_json.shopping_log || {}
-                return (
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                    {/* Statistics Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Retornados</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.total_raw_products || 0}</p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Após Filtro Fontes</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.after_source_filter || 0}</p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Testados</p>
-                        <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{searchStats.products_tested || 0}</p>
-                      </div>
-                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Blocos Calculados</p>
-                        <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{searchStats.blocks_recalculated || 0}</p>
-                      </div>
-                    </div>
-
-                    {/* Summary Stats */}
-                    <div className="flex flex-wrap gap-4 mb-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                        <span className="text-gray-600 dark:text-gray-400">Sucesso: {searchStats.final_valid_sources || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                        <span className="text-gray-600 dark:text-gray-400">Falhas: {searchStats.final_failed_products || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                        <span className="text-gray-600 dark:text-gray-400">Immersive API: {searchStats.immersive_api_calls || 0} chamadas</span>
-                      </div>
-                    </div>
-
-                    {/* Price Mismatch Validation Status */}
-                    {searchStats.enable_price_mismatch !== undefined && (
-                      <div className={`mb-4 p-3 rounded-lg border ${searchStats.enable_price_mismatch
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                        : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'}`}>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-lg ${searchStats.enable_price_mismatch ? 'text-green-600' : 'text-yellow-600'}`}>
-                            {searchStats.enable_price_mismatch ? '✓' : '⚠'}
-                          </span>
-                          <div>
-                            <p className={`font-medium ${searchStats.enable_price_mismatch
-                              ? 'text-green-800 dark:text-green-200'
-                              : 'text-yellow-800 dark:text-yellow-200'}`}>
-                              Validação de Preço: {searchStats.enable_price_mismatch ? 'HABILITADA' : 'DESABILITADA'}
-                            </p>
-                            <p className={`text-sm ${searchStats.enable_price_mismatch
-                              ? 'text-green-700 dark:text-green-300'
-                              : 'text-yellow-700 dark:text-yellow-300'}`}>
-                              {searchStats.price_mismatch_note || (searchStats.enable_price_mismatch
-                                ? 'Produtos com diferença > 5% entre preço Google e Site são rejeitados'
-                                : 'Usando preço do Google Shopping (consistente com seleção de bloco)')}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                              Fonte de preço: <span className="font-mono">{searchStats.price_source || (searchStats.enable_price_mismatch ? 'site' : 'google')}</span>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Validation Failures Table */}
-                    {searchStats.validation_failures && searchStats.validation_failures.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          ❌ Produtos que Falharam ({searchStats.validation_failures.length}):
-                        </p>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-100 dark:bg-gray-700">
-                              <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Fonte</th>
-                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
-                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Detalhes</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                              {searchStats.validation_failures.map((failure: any, idx: number) => {
-                                const isExpanded = expandedFailures.has(idx)
-                                const stepLabels: Record<string, string> = {
-                                  'IMMERSIVE_API': 'Immersive API',
-                                  'URL_VALIDATION': 'Validação URL',
-                                  'PRICE_EXTRACTION': 'Extração Preço',
-                                  'PRICE_VALIDATION': 'Validação Preço',
-                                  'SCREENSHOT_CAPTURE': 'Captura Screenshot',
-                                  'PAGE_LOAD': 'Carregamento Página',
-                                  'UNKNOWN': 'Desconhecido'
-                                }
-                                return (
-                                  <>
-                                    <tr key={idx} className={isExpanded ? 'bg-red-50 dark:bg-red-900/20' : ''}>
-                                      <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
-                                      <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={failure.title}>
-                                        {failure.title?.substring(0, 50)}...
-                                      </td>
-                                      <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{failure.source}</td>
-                                      <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                                        {failure.google_price ? `R$ ${failure.google_price.toFixed(2)}` : '-'}
-                                      </td>
-                                      <td className="px-3 py-2 text-sm text-center">
-                                        <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                          ✗ Inválido
-                                        </span>
-                                      </td>
-                                      <td className="px-3 py-2 text-sm text-center">
-                                        <button
-                                          onClick={() => {
-                                            const newSet = new Set(expandedFailures)
-                                            if (isExpanded) {
-                                              newSet.delete(idx)
-                                            } else {
-                                              newSet.add(idx)
-                                            }
-                                            setExpandedFailures(newSet)
-                                          }}
-                                          className="text-primary-600 hover:text-primary-800 dark:text-primary-400 underline"
-                                        >
-                                          {isExpanded ? 'ocultar' : 'ver'}
-                                        </button>
-                                      </td>
-                                    </tr>
-                                    {isExpanded && (
-                                      <tr key={`${idx}-detail`} className="bg-red-50 dark:bg-red-900/20">
-                                        <td colSpan={6} className="px-3 py-3">
-                                          <div className="space-y-2 text-sm">
-                                            <div className="flex items-center gap-2">
-                                              <span className="font-medium text-gray-700 dark:text-gray-300">Etapa da Falha:</span>
-                                              <span className="px-2 py-1 text-xs rounded bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
-                                                {stepLabels[failure.failure_step] || failure.failure_step}
-                                              </span>
-                                            </div>
-                                            {failure.domain && (
-                                              <div>
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">Domínio:</span>{' '}
-                                                <span className="text-gray-600 dark:text-gray-400">{failure.domain}</span>
-                                              </div>
-                                            )}
-                                            {failure.url && (
-                                              <div>
-                                                <span className="font-medium text-gray-700 dark:text-gray-300">URL:</span>{' '}
-                                                <a href={failure.url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline break-all">
-                                                  {failure.url.substring(0, 80)}...
-                                                </a>
-                                              </div>
-                                            )}
-                                            <div>
-                                              <span className="font-medium text-gray-700 dark:text-gray-300">Erro:</span>{' '}
-                                              <span className="text-red-600 dark:text-red-400 font-mono text-xs">{failure.error_message}</span>
-                                            </div>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    )}
-                                  </>
-                                )
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Successful Products */}
-                    {searchStats.successful_products && searchStats.successful_products.length > 0 && (
-                      <div className="mt-4">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          ✓ Produtos com Sucesso ({searchStats.successful_products.length}):
-                        </p>
-                        <div className="overflow-x-auto">
-                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead className="bg-gray-100 dark:bg-gray-700">
-                              <tr>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
-                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Domínio</th>
-                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
-                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Extraído</th>
-                                <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                              {searchStats.successful_products.map((product: any, idx: number) => (
-                                <tr key={idx}>
-                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
-                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={product.title}>
-                                    {product.title?.substring(0, 50)}...
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{product.domain}</td>
-                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                                    {product.google_price ? `R$ ${product.google_price.toFixed(2)}` : '-'}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-right font-medium text-green-600 dark:text-green-400">
-                                    R$ {product.extracted_price?.toFixed(2)}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-center">
-                                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                      ✓ OK
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Histórico Cronológico de Blocos */}
-                    {(searchStats.initial_products_sorted?.length > 0 || searchStats.block_history?.length > 0) && (
-                      <div className="mt-4 border-t border-gray-300 dark:border-gray-600 pt-4">
-                        <details className="group" open>
-                          <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 cursor-pointer list-none flex items-center gap-2">
-                            <svg className="w-4 h-4 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                            📊 Histórico de Blocos ({searchStats.block_history?.length || 0} blocos criados)
-                          </summary>
-
-                          <div className="mt-3 space-y-4">
-                            {/* 1. Lista inicial de produtos ordenados por preço */}
-                            {searchStats.initial_products_sorted && searchStats.initial_products_sorted.length > 0 && (
-                              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                                <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-                                  📋 Lista Inicial de Produtos (ordenados por preço crescente)
-                                </h4>
-                                <div className="max-h-48 overflow-y-auto">
-                                  <table className="w-full text-xs">
-                                    <thead className="bg-blue-100 dark:bg-blue-900/40 sticky top-0">
-                                      <tr>
-                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">#</th>
-                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Produto</th>
-                                        <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Fonte</th>
-                                        <th className="px-2 py-1 text-right text-blue-700 dark:text-blue-300">Preço</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {searchStats.initial_products_sorted.map((p: any) => (
-                                        <tr key={p.index} className="border-b border-blue-100 dark:border-blue-800/50 hover:bg-blue-100/50 dark:hover:bg-blue-900/30">
-                                          <td className="px-2 py-1 font-mono text-blue-600 dark:text-blue-400">{p.index}</td>
-                                          <td className="px-2 py-1 truncate max-w-[200px]" title={p.title}>{p.title}</td>
-                                          <td className="px-2 py-1 text-gray-600 dark:text-gray-400">{p.source}</td>
-                                          <td className="px-2 py-1 text-right font-mono">R$ {p.price?.toFixed(2)}</td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* 2. Blocos criados cronologicamente */}
-                            {searchStats.block_history && searchStats.block_history.map((block: any, blockIdx: number) => (
-                              <div key={blockIdx} className="bg-white dark:bg-gray-700 rounded-lg border-2 border-purple-300 dark:border-purple-700 overflow-hidden">
-                                {/* Header da Iteração */}
-                                <div className="bg-purple-100 dark:bg-purple-900/40 px-3 py-2 border-b border-purple-200 dark:border-purple-800">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <span className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded">
-                                        Iteração #{block.iteration}
-                                      </span>
-                                      <span className="text-xs text-gray-600 dark:text-gray-300">
-                                        {block.status_before?.valid_count || 0} válidas, faltam {block.status_before?.needed || 0}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="p-3 space-y-3">
-                                  {/* ETAPA 1: Produtos disponíveis para cálculo */}
-                                  {block.available_for_calculation && (
-                                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2 border border-yellow-200 dark:border-yellow-800">
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-semibold text-yellow-800 dark:text-yellow-300">
-                                          1️⃣ Produtos disponíveis para cálculo de blocos
-                                        </span>
-                                        <div className="flex items-center gap-2 text-[10px]">
-                                          <span className="text-yellow-700 dark:text-yellow-400">
-                                            {block.available_for_calculation.count} produtos
-                                          </span>
-                                          {block.available_for_calculation.discarded_failures > 0 && (
-                                            <span className="text-red-600 dark:text-red-400">
-                                              ({block.available_for_calculation.discarded_failures} descartados por falha)
-                                            </span>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <details className="group">
-                                        <summary className="text-[10px] text-yellow-700 dark:text-yellow-400 cursor-pointer">
-                                          Ver lista de produtos [{block.available_for_calculation.indices?.join(', ')}]
-                                        </summary>
-                                        <div className="mt-1 flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-                                          {block.available_for_calculation.products?.map((p: any, pIdx: number) => (
-                                            <span
-                                              key={pIdx}
-                                              className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${
-                                                p.status === 'validated'
-                                                  ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300'
-                                                  : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300'
-                                              }`}
-                                              title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
-                                            >
-                                              {p.status === 'validated' && <span>✓</span>}
-                                              <span className="font-mono">#{p.index}</span>
-                                              <span>R$ {p.price?.toFixed(2)}</span>
-                                            </span>
-                                          ))}
-                                        </div>
-                                      </details>
-                                    </div>
-                                  )}
-
-                                  {/* ETAPA 2: Bloco selecionado */}
-                                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <span className="text-xs font-semibold text-blue-800 dark:text-blue-300">
-                                        2️⃣ Bloco selecionado: [{block.products_indices?.join(', ')}]
-                                      </span>
-                                      <div className="flex items-center gap-2 text-[10px]">
-                                        <span className="px-2 py-0.5 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded">
-                                          {block.block_size || block.products_in_block?.length} produtos
-                                        </span>
-                                        <span className="text-blue-600 dark:text-blue-400">
-                                          R$ {block.price_range?.min?.toFixed(2)} - R$ {block.price_range?.max?.toFixed(2)}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    {block.selection_criteria && (
-                                      <div className="text-[10px] text-blue-600 dark:text-blue-400 italic mb-2">
-                                        {block.selection_criteria}
-                                      </div>
-                                    )}
-                                    <div className="flex flex-wrap gap-1">
-                                      {block.products_in_block?.map((p: any, pIdx: number) => (
-                                        <span
-                                          key={pIdx}
-                                          className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
-                                            p.status === 'validated'
-                                              ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'
-                                              : 'bg-white dark:bg-gray-600 border-blue-200 dark:border-blue-700'
-                                          }`}
-                                          title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
-                                        >
-                                          {p.status === 'validated' && <span className="text-green-600">✓</span>}
-                                          <span className="font-mono text-blue-600 dark:text-blue-400">#{p.index}</span>
-                                          <span className="truncate max-w-[80px]">{p.title?.substring(0, 15)}...</span>
-                                          <span className="text-gray-500">R$ {p.price?.toFixed(2)}</span>
-                                        </span>
-                                      ))}
-                                    </div>
-                                    <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
-                                      {block.validated_in_block > 0 && (
-                                        <span><span className="inline-block w-2 h-2 bg-green-500 rounded mr-1"></span>{block.validated_in_block} já validado(s)</span>
-                                      )}
-                                      {block.untried_count > 0 && (
-                                        <span><span className="inline-block w-2 h-2 bg-blue-400 rounded mr-1"></span>{block.untried_count} a testar</span>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* ETAPA 3: Testes realizados */}
-                                  {block.tests && block.tests.length > 0 && (
-                                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-600">
-                                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
-                                        3️⃣ Testes realizados ({block.tests.length})
-                                      </span>
-                                      <div className="space-y-1">
-                                        {block.tests.map((test: any, testIdx: number) => (
-                                          <div key={testIdx} className={`text-xs p-2 rounded ${test.result === 'success' ? 'bg-green-100 dark:bg-green-900/30 border-l-3 border-green-500' : 'bg-red-100 dark:bg-red-900/30 border-l-3 border-red-500'}`}>
-                                            <div className="flex items-center justify-between">
-                                              <div className="flex items-center gap-2">
-                                                <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">#{test.product_index}</span>
-                                                <span className="truncate max-w-[180px]" title={test.title}>{test.title}</span>
-                                              </div>
-                                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${test.result === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                                                {test.result === 'success' ? '✓ VÁLIDO' : '✗ FALHA'}
-                                              </span>
-                                            </div>
-                                            <div className="text-gray-600 dark:text-gray-400 mt-1 text-[11px]">
-                                              {test.source} | Google: R$ {test.google_price?.toFixed(2)}
-                                              {test.result === 'success' && (
-                                                <span className="text-green-700 dark:text-green-400 ml-2">
-                                                  → Extraído: R$ {test.extracted_price?.toFixed(2)} ({test.domain})
-                                                </span>
-                                              )}
-                                              {test.result === 'failed' && (
-                                                <span className="text-red-700 dark:text-red-400 ml-2">
-                                                  → {test.failure_step}: {test.error_message?.substring(0, 60)}
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {/* Resultado da iteração */}
-                                  {block.status_after && (
-                                    <div className="bg-gray-100 dark:bg-gray-600 rounded-lg p-2 flex items-center justify-between text-xs">
-                                      <span className="text-gray-600 dark:text-gray-300">
-                                        Resultado: <span className="text-green-600 dark:text-green-400 font-medium">{block.status_after.successes_this_block} sucesso(s)</span>,{' '}
-                                        <span className="text-red-600 dark:text-red-400 font-medium">{block.status_after.failures_this_block} falha(s)</span>
-                                      </span>
-                                      <span className="font-bold text-purple-700 dark:text-purple-300">
-                                        Total válidas: {block.status_after.valid_count}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-
-                            {/* Caso não tenha block_history mas tenha block_iterations (dados antigos) */}
-                            {(!searchStats.block_history || searchStats.block_history.length === 0) && searchStats.block_iterations && searchStats.block_iterations.length > 0 && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-                                Dados de blocos no formato antigo ({searchStats.block_iterations.length} iterações). Execute uma nova cotação para ver o formato atualizado.
-                              </div>
-                            )}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                  </div>
-                )
-              })()}
-            </div>
-          )}
-
           {/* SerpAPI Logs */}
           {integrationLogs.some(log => log.integration_type === 'serpapi') && (
             <div>
@@ -1936,6 +1478,464 @@ export default function QuoteDetailPage() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Log de Busca Detalhado - Seção separada no final da página */}
+      {quote?.google_shopping_response_json?.search_stats && (
+        <div className="card mt-6">
+          <button
+            onClick={() => setSearchStatsExpanded(!searchStatsExpanded)}
+            className="w-full flex items-center justify-between text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 hover:text-primary-600 transition-colors"
+          >
+            <span>📊 Log de Busca Detalhado</span>
+            <svg
+              className={`w-5 h-5 transform transition-transform ${searchStatsExpanded ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {searchStatsExpanded && (() => {
+            const searchStats = quote.google_shopping_response_json.search_stats
+            const shoppingLog = quote.google_shopping_response_json.shopping_log || {}
+            return (
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                {/* Statistics Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Retornados</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.total_raw_products || 0}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Após Filtro Fontes</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{shoppingLog.after_source_filter || 0}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Produtos Testados</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{searchStats.products_tested || 0}</p>
+                  </div>
+                  <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Blocos Calculados</p>
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{searchStats.blocks_recalculated || 0}</p>
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                <div className="flex flex-wrap gap-4 mb-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                    <span className="text-gray-600 dark:text-gray-400">Sucesso: {searchStats.final_valid_sources || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                    <span className="text-gray-600 dark:text-gray-400">Falhas: {searchStats.final_failed_products || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                    <span className="text-gray-600 dark:text-gray-400">Immersive API: {searchStats.immersive_api_calls || 0} chamadas</span>
+                  </div>
+                </div>
+
+                {/* Price Mismatch Validation Status */}
+                {searchStats.enable_price_mismatch !== undefined && (
+                  <div className={`mb-4 p-3 rounded-lg border ${searchStats.enable_price_mismatch
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-lg ${searchStats.enable_price_mismatch ? 'text-green-600' : 'text-yellow-600'}`}>
+                        {searchStats.enable_price_mismatch ? '✓' : '⚠'}
+                      </span>
+                      <div>
+                        <p className={`font-medium ${searchStats.enable_price_mismatch
+                          ? 'text-green-800 dark:text-green-200'
+                          : 'text-yellow-800 dark:text-yellow-200'}`}>
+                          Validação de Preço: {searchStats.enable_price_mismatch ? 'HABILITADA' : 'DESABILITADA'}
+                        </p>
+                        <p className={`text-sm ${searchStats.enable_price_mismatch
+                          ? 'text-green-700 dark:text-green-300'
+                          : 'text-yellow-700 dark:text-yellow-300'}`}>
+                          {searchStats.price_mismatch_note || (searchStats.enable_price_mismatch
+                            ? 'Produtos com diferença > 5% entre preço Google e Site são rejeitados'
+                            : 'Usando preço do Google Shopping (consistente com seleção de bloco)')}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Fonte de preço: <span className="font-mono">{searchStats.price_source || (searchStats.enable_price_mismatch ? 'site' : 'google')}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Validation Failures Table */}
+                {searchStats.validation_failures && searchStats.validation_failures.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      ❌ Produtos que Falharam ({searchStats.validation_failures.length}):
+                    </p>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Fonte</th>
+                            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
+                            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Detalhes</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          {searchStats.validation_failures.map((failure: any, idx: number) => {
+                            const isExpanded = expandedFailures.has(idx)
+                            const stepLabels: Record<string, string> = {
+                              'IMMERSIVE_API': 'Immersive API',
+                              'URL_VALIDATION': 'Validação URL',
+                              'PRICE_EXTRACTION': 'Extração Preço',
+                              'PRICE_VALIDATION': 'Validação Preço',
+                              'SCREENSHOT_CAPTURE': 'Captura Screenshot',
+                              'PAGE_LOAD': 'Carregamento Página',
+                              'UNKNOWN': 'Desconhecido'
+                            }
+                            return (
+                              <>
+                                <tr key={idx} className={isExpanded ? 'bg-red-50 dark:bg-red-900/20' : ''}>
+                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
+                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={failure.title}>
+                                    {failure.title?.substring(0, 50)}...
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{failure.source}</td>
+                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                                    {failure.google_price ? `R$ ${failure.google_price.toFixed(2)}` : '-'}
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-center">
+                                    <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                      ✗ Inválido
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-2 text-sm text-center">
+                                    <button
+                                      onClick={() => {
+                                        const newSet = new Set(expandedFailures)
+                                        if (isExpanded) {
+                                          newSet.delete(idx)
+                                        } else {
+                                          newSet.add(idx)
+                                        }
+                                        setExpandedFailures(newSet)
+                                      }}
+                                      className="text-primary-600 hover:text-primary-800 dark:text-primary-400 underline"
+                                    >
+                                      {isExpanded ? 'ocultar' : 'ver'}
+                                    </button>
+                                  </td>
+                                </tr>
+                                {isExpanded && (
+                                  <tr key={`${idx}-detail`} className="bg-red-50 dark:bg-red-900/20">
+                                    <td colSpan={6} className="px-3 py-3">
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-gray-700 dark:text-gray-300">Etapa da Falha:</span>
+                                          <span className="px-2 py-1 text-xs rounded bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200">
+                                            {stepLabels[failure.failure_step] || failure.failure_step}
+                                          </span>
+                                        </div>
+                                        {failure.domain && (
+                                          <div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300">Domínio:</span>{' '}
+                                            <span className="text-gray-600 dark:text-gray-400">{failure.domain}</span>
+                                          </div>
+                                        )}
+                                        {failure.url && (
+                                          <div>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300">URL:</span>{' '}
+                                            <a href={failure.url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline break-all">
+                                              {failure.url.substring(0, 80)}...
+                                            </a>
+                                          </div>
+                                        )}
+                                        <div>
+                                          <span className="font-medium text-gray-700 dark:text-gray-300">Erro:</span>{' '}
+                                          <span className="text-red-600 dark:text-red-400 font-mono text-xs">{failure.error_message}</span>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )}
+                              </>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Successful Products */}
+                {searchStats.successful_products && searchStats.successful_products.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      ✓ Produtos com Sucesso ({searchStats.successful_products.length}):
+                    </p>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead className="bg-gray-100 dark:bg-gray-700">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Produto</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Domínio</th>
+                            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Google</th>
+                            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Preço Extraído</th>
+                            <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          {searchStats.successful_products.map((product: any, idx: number) => (
+                            <tr key={idx}>
+                              <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">#{idx + 1}</td>
+                              <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate" title={product.title}>
+                                {product.title?.substring(0, 50)}...
+                              </td>
+                              <td className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{product.domain}</td>
+                              <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                                {product.google_price ? `R$ ${product.google_price.toFixed(2)}` : '-'}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-right font-medium text-green-600 dark:text-green-400">
+                                R$ {product.extracted_price?.toFixed(2)}
+                              </td>
+                              <td className="px-3 py-2 text-sm text-center">
+                                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  ✓ OK
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Histórico Cronológico de Blocos */}
+                {(searchStats.initial_products_sorted?.length > 0 || searchStats.block_history?.length > 0) && (
+                  <div className="mt-4 border-t border-gray-300 dark:border-gray-600 pt-4">
+                    <details className="group">
+                      <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 cursor-pointer list-none flex items-center gap-2">
+                        <svg className="w-4 h-4 transform group-open:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        📊 Histórico de Blocos ({searchStats.block_history?.length || 0} blocos criados)
+                      </summary>
+
+                      <div className="mt-3 space-y-4">
+                        {/* 1. Lista inicial de produtos ordenados por preço */}
+                        {searchStats.initial_products_sorted && searchStats.initial_products_sorted.length > 0 && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                            <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                              📋 Lista Inicial de Produtos (ordenados por preço crescente)
+                            </h4>
+                            <div className="max-h-48 overflow-y-auto">
+                              <table className="w-full text-xs">
+                                <thead className="bg-blue-100 dark:bg-blue-900/40 sticky top-0">
+                                  <tr>
+                                    <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">#</th>
+                                    <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Produto</th>
+                                    <th className="px-2 py-1 text-left text-blue-700 dark:text-blue-300">Fonte</th>
+                                    <th className="px-2 py-1 text-right text-blue-700 dark:text-blue-300">Preço</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {searchStats.initial_products_sorted.map((p: any) => (
+                                    <tr key={p.index} className="border-b border-blue-100 dark:border-blue-800/50 hover:bg-blue-100/50 dark:hover:bg-blue-900/30">
+                                      <td className="px-2 py-1 font-mono text-blue-600 dark:text-blue-400">{p.index}</td>
+                                      <td className="px-2 py-1 truncate max-w-[200px]" title={p.title}>{p.title}</td>
+                                      <td className="px-2 py-1 text-gray-600 dark:text-gray-400">{p.source}</td>
+                                      <td className="px-2 py-1 text-right font-mono">R$ {p.price?.toFixed(2)}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 2. Blocos criados cronologicamente */}
+                        {searchStats.block_history && searchStats.block_history.map((block: any, blockIdx: number) => (
+                          <div key={blockIdx} className="bg-white dark:bg-gray-700 rounded-lg border-2 border-purple-300 dark:border-purple-700 overflow-hidden">
+                            {/* Header da Iteração */}
+                            <div className="bg-purple-100 dark:bg-purple-900/40 px-3 py-2 border-b border-purple-200 dark:border-purple-800">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="bg-purple-600 text-white text-sm font-bold px-3 py-1 rounded">
+                                    Iteração #{block.iteration}
+                                  </span>
+                                  <span className="text-xs text-gray-600 dark:text-gray-300">
+                                    {block.status_before?.valid_count || 0} válidas, faltam {block.status_before?.needed || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-3 space-y-3">
+                              {/* ETAPA 1: Produtos disponíveis para cálculo */}
+                              {block.available_for_calculation && (
+                                <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-2 border border-yellow-200 dark:border-yellow-800">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold text-yellow-800 dark:text-yellow-300">
+                                      1️⃣ Produtos disponíveis para cálculo de blocos
+                                    </span>
+                                    <div className="flex items-center gap-2 text-[10px]">
+                                      <span className="text-yellow-700 dark:text-yellow-400">
+                                        {block.available_for_calculation.count} produtos
+                                      </span>
+                                      {block.available_for_calculation.discarded_failures > 0 && (
+                                        <span className="text-red-600 dark:text-red-400">
+                                          ({block.available_for_calculation.discarded_failures} descartados por falha)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <details className="group">
+                                    <summary className="text-[10px] text-yellow-700 dark:text-yellow-400 cursor-pointer">
+                                      Ver lista de produtos [{block.available_for_calculation.indices?.join(', ')}]
+                                    </summary>
+                                    <div className="mt-1 flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                                      {block.available_for_calculation.products?.map((p: any, pIdx: number) => (
+                                        <span
+                                          key={pIdx}
+                                          className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${
+                                            p.status === 'validated'
+                                              ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300'
+                                              : 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300'
+                                          }`}
+                                          title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
+                                        >
+                                          {p.status === 'validated' && <span>✓</span>}
+                                          <span className="font-mono">#{p.index}</span>
+                                          <span>R$ {p.price?.toFixed(2)}</span>
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </details>
+                                </div>
+                              )}
+
+                              {/* ETAPA 2: Bloco selecionado */}
+                              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 border border-blue-200 dark:border-blue-800">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-xs font-semibold text-blue-800 dark:text-blue-300">
+                                    2️⃣ Bloco selecionado: [{block.products_indices?.join(', ')}]
+                                  </span>
+                                  <div className="flex items-center gap-2 text-[10px]">
+                                    <span className="px-2 py-0.5 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded">
+                                      {block.block_size || block.products_in_block?.length} produtos
+                                    </span>
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                      R$ {block.price_range?.min?.toFixed(2)} - R$ {block.price_range?.max?.toFixed(2)}
+                                    </span>
+                                  </div>
+                                </div>
+                                {block.selection_criteria && (
+                                  <div className="text-[10px] text-blue-600 dark:text-blue-400 italic mb-2">
+                                    {block.selection_criteria}
+                                  </div>
+                                )}
+                                <div className="flex flex-wrap gap-1">
+                                  {block.products_in_block?.map((p: any, pIdx: number) => (
+                                    <span
+                                      key={pIdx}
+                                      className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
+                                        p.status === 'validated'
+                                          ? 'bg-green-100 dark:bg-green-900/40 border-green-300 dark:border-green-700 text-green-800 dark:text-green-300'
+                                          : 'bg-white dark:bg-gray-600 border-blue-200 dark:border-blue-700'
+                                      }`}
+                                      title={`${p.title} - ${p.source} - R$ ${p.price?.toFixed(2)}`}
+                                    >
+                                      {p.status === 'validated' && <span className="text-green-600">✓</span>}
+                                      <span className="font-mono text-blue-600 dark:text-blue-400">#{p.index}</span>
+                                      <span className="truncate max-w-[80px]">{p.title?.substring(0, 15)}...</span>
+                                      <span className="text-gray-500">R$ {p.price?.toFixed(2)}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                                <div className="mt-1 flex gap-3 text-[10px] text-gray-400">
+                                  {block.validated_in_block > 0 && (
+                                    <span><span className="inline-block w-2 h-2 bg-green-500 rounded mr-1"></span>{block.validated_in_block} já validado(s)</span>
+                                  )}
+                                  {block.untried_count > 0 && (
+                                    <span><span className="inline-block w-2 h-2 bg-blue-400 rounded mr-1"></span>{block.untried_count} a testar</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* ETAPA 3: Testes realizados */}
+                              {block.tests && block.tests.length > 0 && (
+                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-600">
+                                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                                    3️⃣ Testes realizados ({block.tests.length})
+                                  </span>
+                                  <div className="space-y-1">
+                                    {block.tests.map((test: any, testIdx: number) => (
+                                      <div key={testIdx} className={`text-xs p-2 rounded ${test.result === 'success' ? 'bg-green-100 dark:bg-green-900/30 border-l-3 border-green-500' : 'bg-red-100 dark:bg-red-900/30 border-l-3 border-red-500'}`}>
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">#{test.product_index}</span>
+                                            <span className="truncate max-w-[180px]" title={test.title}>{test.title}</span>
+                                          </div>
+                                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${test.result === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                                            {test.result === 'success' ? '✓ VÁLIDO' : '✗ FALHA'}
+                                          </span>
+                                        </div>
+                                        <div className="text-gray-600 dark:text-gray-400 mt-1 text-[11px]">
+                                          {test.source} | Google: R$ {test.google_price?.toFixed(2)}
+                                          {test.result === 'success' && (
+                                            <span className="text-green-700 dark:text-green-400 ml-2">
+                                              → Extraído: R$ {test.extracted_price?.toFixed(2)} ({test.domain})
+                                            </span>
+                                          )}
+                                          {test.result === 'failed' && (
+                                            <span className="text-red-700 dark:text-red-400 ml-2">
+                                              → {test.failure_step}: {test.error_message?.substring(0, 60)}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Resultado da iteração */}
+                              {block.status_after && (
+                                <div className="bg-gray-100 dark:bg-gray-600 rounded-lg p-2 flex items-center justify-between text-xs">
+                                  <span className="text-gray-600 dark:text-gray-300">
+                                    Resultado: <span className="text-green-600 dark:text-green-400 font-medium">{block.status_after.successes_this_block} sucesso(s)</span>,{' '}
+                                    <span className="text-red-600 dark:text-red-400 font-medium">{block.status_after.failures_this_block} falha(s)</span>
+                                  </span>
+                                  <span className="font-bold text-purple-700 dark:text-purple-300">
+                                    Total válidas: {block.status_after.valid_count}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Caso não tenha block_history mas tenha block_iterations (dados antigos) */}
+                        {(!searchStats.block_history || searchStats.block_history.length === 0) && searchStats.block_iterations && searchStats.block_iterations.length > 0 && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+                            Dados de blocos no formato antigo ({searchStats.block_iterations.length} iterações). Execute uma nova cotação para ver o formato atualizado.
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </div>
       )}
 
