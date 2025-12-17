@@ -584,7 +584,7 @@ Part Number: i3501-5081BLK | Número de Série: 7XK9M33
 
 ## INSTRUÇÃO FINAL
 
-1. Busque especificações priorizando **Marca + Modelo**
+1. Execute `web_search` priorizando **Marca + Modelo**
 2. Use **Part Number** para refinar se houver variantes
 3. Extraia specs de fontes confiáveis
 4. Retorne **APENAS o JSON**
