@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AdminRoute from '@/components/AdminRoute'
+import { API_URL } from '@/lib/api'
 
 interface Client {
   id: number
@@ -42,8 +43,6 @@ interface StatusOption {
   value: string
   label: string
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const emptyProject = {
   client_id: 0,

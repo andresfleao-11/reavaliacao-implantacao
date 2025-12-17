@@ -1,6 +1,24 @@
 import axios from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Função para obter URL da API com fallback para Railway
+const getApiUrl = () => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL
+
+  // Se tiver variável de ambiente válida com protocolo, usar ela
+  if (envUrl && envUrl.startsWith('http')) {
+    return envUrl
+  }
+
+  // Se estiver no Railway, usar URL do backend de produção
+  if (typeof window !== 'undefined' && window.location.hostname.includes('railway.app')) {
+    return 'https://backend-production-78bb.up.railway.app'
+  }
+
+  // Fallback para desenvolvimento local
+  return 'http://localhost:8000'
+}
+
+export const API_URL = getApiUrl()
 
 export const api = axios.create({
   baseURL: API_URL,

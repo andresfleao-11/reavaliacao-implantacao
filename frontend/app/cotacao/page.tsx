@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
-import { quotesApi } from '@/lib/api'
+import { quotesApi, API_URL } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface Project {
@@ -12,8 +12,6 @@ interface Project {
   nome: string
   client?: { nome: string; nome_curto?: string }
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 type SearchTab = 'descricao' | 'imagens'
 

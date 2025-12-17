@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminRoute from '@/components/AdminRoute'
+import { API_URL } from '@/lib/api'
 
 interface Client {
   id: number
@@ -30,8 +31,6 @@ interface CharacteristicValue {
   nome: string
   valor: string
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function GerarItensPage() {
   const router = useRouter()

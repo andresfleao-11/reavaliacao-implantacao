@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
-import { lensApi, LensProduct, LensSpecs } from '@/lib/api'
+import { lensApi, LensProduct, LensSpecs, API_URL } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface Project {
@@ -12,8 +12,6 @@ interface Project {
   nome: string
   client?: { nome: string; nome_curto?: string }
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 type LensStep = 'upload' | 'select' | 'confirm'
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import useSWR from 'swr'
-import { quotesApi, QuoteDetail, materialsApi, SuggestedMaterial, IntegrationLog } from '@/lib/api'
+import { quotesApi, QuoteDetail, materialsApi, SuggestedMaterial, IntegrationLog, API_URL } from '@/lib/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -121,7 +121,6 @@ export default function QuoteDetailPage() {
   // Load quote costs
   useEffect(() => {
     if (quote && !quoteCosts) {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       fetch(`${API_URL}/api/v2/financial/quote/${id}/costs`)
         .then(res => res.json())
         .then(data => setQuoteCosts(data))
@@ -650,7 +649,7 @@ export default function QuoteDetailPage() {
                         {source.domain === 'fipe.org.br' ? 'Tabela FIPE' : source.domain}
                       </p>
                       <img
-                        src={`${process.env.NEXT_PUBLIC_API_URL}${source.screenshot_url}`}
+                        src={`${API_URL}${source.screenshot_url}`}
                         alt={`Screenshot ${source.domain}`}
                         className="w-full rounded-lg max-h-[40vh] object-contain"
                       />

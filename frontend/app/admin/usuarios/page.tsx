@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AdminRoute from '@/components/AdminRoute'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { API_URL } from '@/lib/api'
 
 // Helper para obter headers com autenticação
 const getAuthHeaders = () => {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { settingsApi, IntegrationSetting, AnthropicModelOption, OpenAIModelOption, AIProviderOption } from '@/lib/api'
+import { settingsApi, IntegrationSetting, AnthropicModelOption, OpenAIModelOption, AIProviderOption, API_URL } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function IntegracoesPage() {
@@ -37,8 +37,6 @@ export default function IntegracoesPage() {
   // USD to BRL exchange rate
   const [usdToBrl, setUsdToBrl] = useState('')
   const [exchangeRateConfig, setExchangeRateConfig] = useState<{ rate: number | null; updated_at: string | null } | null>(null)
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
   useEffect(() => {
     const loadAll = async () => {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { API_URL } from '@/lib/api'
 
 interface CharacteristicType {
   id: number
@@ -13,8 +14,6 @@ interface CharacteristicType {
   ativo: boolean
   created_at: string
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 const emptyType = {
   nome: '',
