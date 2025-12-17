@@ -22,6 +22,7 @@ interface Material {
   id: number
   nome: string
   codigo: string | null
+  client_id: number | null
   caracteristicas: MaterialCharacteristic[]
 }
 
