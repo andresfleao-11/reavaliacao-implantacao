@@ -44,4 +44,4 @@ RUN mkdir -p /app/data/uploads /app/data/documents /app/data/screenshots/fipe /a
 EXPOSE 8000
 
 # Run migrations and start server
-CMD ["sh", "-c", "alembic upgrade head && python start_server.py"]
+CMD ["sh", "-c", "mkdir -p /app/data/uploads /app/data/documents /app/data/screenshots/fipe /app/data/pdfs /app/data/lens_temp && alembic upgrade head && python start_server.py"]

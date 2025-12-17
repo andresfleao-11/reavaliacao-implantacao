@@ -648,6 +648,7 @@ def process_quote_request(self, quote_request_id: int):
 
                                 # PASSO 4: Capturar screenshot (OPCIONAL - se falhar, continua)
                                 screenshot_file = None
+                                screenshot_path = None
                                 try:
                                     from app.services.price_extractor import PriceExtractor
                                     extractor = PriceExtractor()
@@ -655,23 +656,25 @@ def process_quote_request(self, quote_request_id: int):
 
                                     if screenshot_bytes:
                                         file_hash = hashlib.sha256(screenshot_bytes).hexdigest()
+                                        screenshot_path = f"storage/screenshots/{file_hash}_screenshot.png"
+
+                                        # Salvar arquivo no disco primeiro
+                                        os.makedirs("storage/screenshots", exist_ok=True)
+                                        with open(screenshot_path, "wb") as f:
+                                            f.write(screenshot_bytes)
+
+                                        # Criar registro no banco com campos corretos
                                         screenshot_file = File(
-                                            original_filename=f"screenshot_{quote_request_id}_{product_key[:20]}.png",
-                                            stored_filename=f"{file_hash}_screenshot.png",
-                                            file_hash=file_hash,
-                                            file_size=len(screenshot_bytes),
+                                            type=FileType.SCREENSHOT,
                                             mime_type="image/png",
-                                            file_type=FileType.SCREENSHOT,
-                                            file_path=f"storage/screenshots/{file_hash}_screenshot.png"
+                                            storage_path=screenshot_path,
+                                            sha256=file_hash,
+                                            quote_request_id=quote_request_id
                                         )
                                         db.add(screenshot_file)
                                         db.flush()
 
-                                        os.makedirs("storage/screenshots", exist_ok=True)
-                                        with open(screenshot_file.file_path, "wb") as f:
-                                            f.write(screenshot_bytes)
-
-                                        logger.info(f"    Screenshot capturado: {screenshot_file.file_path}")
+                                        logger.info(f"    Screenshot capturado: {screenshot_path}")
                                 except Exception as screenshot_error:
                                     logger.warning(f"    Screenshot falhou (continuando sem): {str(screenshot_error)[:50]}")
                                     # Continua sem screenshot - não é motivo de falha
@@ -755,16 +758,18 @@ def process_quote_request(self, quote_request_id: int):
 
                                 # Salvar falha no banco
                                 try:
+                                    # URL é obrigatório - usar URL da loja se disponível, senão usar API URL
+                                    failure_url = (store_result.url if store_result else None) or product.serpapi_immersive_product_api or f"google_shopping://{product.title[:100]}"
+                                    failure_domain = (store_result.domain if store_result else None)
+
                                     failure_record = QuoteSourceFailure(
                                         quote_request_id=quote_request_id,
-                                        product_title=product.title,
-                                        product_source=product.source,
+                                        product_title=f"{product.title} ({product.source})",  # Incluir fonte no título
                                         google_price=Decimal(str(google_price)) if google_price else None,
-                                        url=store_result.url if 'store_result' in dir() and store_result else None,
-                                        domain=store_result.domain if 'store_result' in dir() and store_result else None,
+                                        url=failure_url,
+                                        domain=failure_domain,
                                         failure_reason=failure_reason,
-                                        failure_step=failure_step,
-                                        error_message=error_msg[:500]
+                                        error_message=f"[{failure_step}] {error_msg[:450]}"  # Incluir step no error_message
                                     )
                                     db.add(failure_record)
                                     db.flush()

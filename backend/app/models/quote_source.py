@@ -11,6 +11,7 @@ class ExtractionMethod(str, enum.Enum):
     DOM = "DOM"
     LLM = "LLM"
     API_FIPE = "API_FIPE"  # Preço obtido via API Tabela FIPE
+    GOOGLE_SHOPPING = "GOOGLE_SHOPPING"  # Preço obtido diretamente do Google Shopping (sem validação)
 
 
 class QuoteSource(Base):
