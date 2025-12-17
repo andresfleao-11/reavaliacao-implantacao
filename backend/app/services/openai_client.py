@@ -344,10 +344,19 @@ Extraia **APENAS** o que estiver **VISÍVEL na imagem**:
         logger.info(f"OCR resultado: tipo={tipo_produto}, marca={marca}, modelo={modelo}, S/N={numero_serie}")
         logger.info(f"Tem specs relevantes: {ocr_data.get('tem_specs_relevantes')}, Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante')}")
 
-        # ETAPA 2: Gerar resultado final com query otimizada
-        final_prompt = self._build_final_prompt(ocr_data)
+        # ETAPA 2: Busca de specs se necessário (specs não visíveis na imagem)
+        specs_from_web = {}
+        if not ocr_data.get('tem_specs_relevantes', False) and marca and modelo:
+            tipo = tipo_produto or 'produto'
 
-        logger.info(f"Etapa 2: Gerando análise final com {self.model}")
+            logger.info(f"Etapa 2: Buscando specs para {marca} {modelo} (S/N: {numero_serie}, P/N: {part_number})")
+            specs_from_web = await self._search_specs_on_web(marca, modelo, tipo, numero_serie, part_number)
+            logger.info(f"Specs encontradas: {specs_from_web}")
+
+        # ETAPA 3: Gerar resultado final com query otimizada
+        final_prompt = self._build_final_prompt(ocr_data, specs_from_web)
+
+        logger.info(f"Etapa 3: Gerando análise final com {self.model}")
         final_response = self._call_with_retry(
             lambda: self.client.chat.completions.create(
                 model=self.model,
@@ -382,8 +391,92 @@ Extraia **APENAS** o que estiver **VISÍVEL na imagem**:
 
         return ItemAnalysisResult(**data)
 
-    def _build_final_prompt(self, ocr_data: Dict) -> str:
+    async def _search_specs_on_web(self, marca: str, modelo: str, tipo: str, numero_serie: Optional[str] = None, part_number: Optional[str] = None) -> Dict[str, Any]:
+        """Busca especificações técnicas usando conhecimento do modelo OpenAI"""
+
+        search_prompt = f"""# AGENTE: Especialista em Especificações Técnicas
+
+## TAREFA
+Com base no seu conhecimento, forneça as especificações técnicas do produto abaixo.
+
+## DADOS DE ENTRADA
+- Marca: {marca}
+- Modelo: {modelo}
+- Tipo: {tipo}
+- Part Number: {part_number or 'não informado'}
+- Número de Série: {numero_serie or 'não informado'}
+
+## INSTRUÇÕES
+1. Use seu conhecimento sobre este produto para listar as especificações técnicas
+2. Se não conhecer o produto exato, retorne especificações típicas para este tipo de equipamento
+3. Seja preciso e objetivo
+
+## FORMATO DE SAÍDA (JSON)
+{{
+  "tipo_produto": "{tipo}",
+  "identificacao": {{
+    "marca": "{marca}",
+    "modelo": "{modelo}",
+    "part_number": "{part_number or 'null'}"
+  }},
+  "especificacoes": {{
+    // specs relevantes para o tipo de produto
+  }},
+  "fonte": {{
+    "tipo": "conhecimento_modelo",
+    "confiabilidade": "media"
+  }},
+  "observacoes": "notas relevantes"
+}}
+
+Retorne APENAS o JSON válido."""
+
+        try:
+            response = self._call_with_retry(
+                lambda: self.client.chat.completions.create(
+                    model=self.model,
+                    max_completion_tokens=1500,
+                    messages=[{"role": "user", "content": search_prompt}]
+                )
+            )
+
+            # Registrar tokens usados
+            if hasattr(response, 'usage'):
+                input_tokens = response.usage.prompt_tokens
+                output_tokens = response.usage.completion_tokens
+                total_tokens = input_tokens + output_tokens
+                self.total_tokens_used += total_tokens
+
+                self.call_logs.append(OpenAICallLog(
+                    activity=f"Busca de especificações técnicas: {marca} {modelo}",
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    total_tokens=total_tokens,
+                    prompt=search_prompt
+                ))
+
+                logger.info(f"Specs search tokens: {total_tokens}")
+
+            result_text = response.choices[0].message.content
+            if result_text:
+                return self._parse_json(result_text)
+            return {}
+
+        except Exception as e:
+            logger.warning(f"Erro ao buscar specs: {e}")
+            return {}
+
+    def _build_final_prompt(self, ocr_data: Dict, web_specs: Dict = None) -> str:
         """Constrói o prompt final para geração de query (igual ao Claude)"""
+
+        specs_info = ""
+        if web_specs:
+            specs_info = f"""
+## ESPECIFICAÇÕES ENCONTRADAS:
+{json.dumps(web_specs, indent=2, ensure_ascii=False)}
+
+Use estas especificações para criar a query de busca.
+"""
 
         return f"""
 # AGENTE: Gerador de Queries para Cotação de Preços
@@ -408,7 +501,7 @@ Gerar queries otimizadas para buscar **cotações de preços** no Google Shoppin
 - Specs visíveis na imagem: {json.dumps(ocr_data.get('specs_visiveis') or {}, ensure_ascii=False)}
 - Tem specs relevantes: {ocr_data.get('tem_specs_relevantes', False)}
 - Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante', False)}
-
+{specs_info}
 ---
 
 ## REGRAS DE GERAÇÃO DE QUERY

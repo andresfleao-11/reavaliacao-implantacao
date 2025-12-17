@@ -129,6 +129,7 @@ export interface Parameters {
   local_padrao: string
   serpapi_location: string
   vigencia_cotacao_veiculos: number  // Vigência em meses para cotações de veículos
+  enable_price_mismatch_validation: boolean  // Habilita/desabilita validação de PRICE_MISMATCH
 }
 
 export interface SerpApiLocationOption {
@@ -770,5 +771,41 @@ export const vehiclePricesApi = {
   getReferenceMonths: async (): Promise<string[]> => {
     const response = await api.get('/api/vehicle-prices/filters/reference-months')
     return response.data
+  },
+
+  exportCSV: async (params?: {
+    brand_name?: string
+    year_model?: number
+    reference_month?: string
+    status?: 'Vigente' | 'Expirada' | 'Pendente'
+  }): Promise<void> => {
+    const queryParams = new URLSearchParams()
+    if (params?.brand_name) queryParams.append('brand_name', params.brand_name)
+    if (params?.year_model) queryParams.append('year_model', String(params.year_model))
+    if (params?.reference_month) queryParams.append('reference_month', params.reference_month)
+    if (params?.status) queryParams.append('status', params.status)
+
+    const url = `/api/vehicle-prices/export/csv${queryParams.toString() ? '?' + queryParams.toString() : ''}`
+    const response = await api.get(url, { responseType: 'blob' })
+
+    // Criar link para download
+    const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const urlBlob = window.URL.createObjectURL(blob)
+    link.href = urlBlob
+
+    // Extrair nome do arquivo do header ou usar padrão
+    const contentDisposition = response.headers['content-disposition']
+    let filename = `banco_precos_veiculos_${new Date().toISOString().split('T')[0]}.csv`
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename=(.+)/)
+      if (match) filename = match[1]
+    }
+
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(urlBlob)
   },
 }
