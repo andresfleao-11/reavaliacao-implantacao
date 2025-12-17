@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
@@ -17,7 +17,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 type SearchTab = 'descricao' | 'imagens'
 
-export default function CotacaoPage() {
+function CotacaoContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user } = useAuth()
@@ -342,5 +342,13 @@ export default function CotacaoPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function CotacaoPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div></div>}>
+      <CotacaoContent />
+    </Suspense>
   )
 }

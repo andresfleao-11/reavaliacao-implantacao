@@ -626,12 +626,12 @@ Part Number: i3501-5081BLK | Número de Série: 7XK9M33
             return {}
 
     def _build_final_prompt(self, ocr_data: Dict, web_specs: Dict = None) -> str:
-        """Constrói o prompt final para geração de query (igual ao Claude)"""
+        """Constrói o prompt final combinando OCR + specs da web"""
 
         specs_info = ""
         if web_specs:
             specs_info = f"""
-## ESPECIFICAÇÕES ENCONTRADAS:
+## ESPECIFICAÇÕES ENCONTRADAS NA WEB:
 {json.dumps(web_specs, indent=2, ensure_ascii=False)}
 
 Use estas especificações para criar a query de busca.
@@ -655,12 +655,9 @@ Gerar queries otimizadas para buscar **cotações de preços** no Google Shoppin
 - Tipo de produto: {ocr_data.get('tipo_produto', 'N/A')}
 - Marca: {ocr_data.get('marca', 'N/A')}
 - Modelo: {ocr_data.get('modelo', 'N/A')}
-- Número de série: {ocr_data.get('numero_serie', 'N/A')}
-- Part Number: {ocr_data.get('part_number', 'N/A')}
 - Specs visíveis na imagem: {json.dumps(ocr_data.get('specs_visiveis') or {}, ensure_ascii=False)}
-- Tem specs relevantes: {ocr_data.get('tem_specs_relevantes', False)}
-- Pode consultar fabricante: {ocr_data.get('pode_consultar_fabricante', False)}
 {specs_info}
+
 ---
 
 ## REGRAS DE GERAÇÃO DE QUERY
@@ -673,18 +670,10 @@ Gerar queries otimizadas para buscar **cotações de preços** no Google Shoppin
 5. **Gerar alternativas** com variações de termos
 
 ### ❌ NÃO FAZER:
-1. **Nunca usar marca** na query principal (Dell, HP, Samsung, etc.) - EXCETO quando não há specs
-2. **Nunca usar modelo específico** (Inspiron, Vostro, etc.) - EXCETO quando não há specs
+1. **Nunca usar marca** na query principal (Dell, HP, Samsung, etc.)
+2. **Nunca usar modelo específico** (Inspiron, Vostro, etc.)
 3. **Evitar termos vagos**: "bom", "qualidade", "melhor"
 4. **Não incluir preço**: "barato", "promoção"
-5. **NUNCA incluir voltagem, corrente ou potência de fonte** (19V, 2.37A, 45W)
-6. **NUNCA incluir chip WiFi** (RTL8821CE)
-7. **NUNCA incluir certificações** (ANATEL, FCC, CE)
-
-### 🔴 REGRA ESPECIAL - SEM SPECS RELEVANTES:
-Se tem_specs_relevantes = false (não encontrou processador/RAM/SSD na imagem):
-- Use APENAS: "notebook [marca] [modelo]" ou "[tipo_produto] [marca] [modelo]"
-- Exemplo: "notebook ASUS M1502Y"
 
 ---
 
@@ -695,18 +684,10 @@ Se tem_specs_relevantes = false (não encontrou processador/RAM/SSD na imagem):
 
 ### Exemplos por categoria:
 
-**NOTEBOOK (com specs):**
+**NOTEBOOK:**
 - ✅ `notebook i5 8gb ssd 256gb`
 - ✅ `notebook i7 16gb ssd 512gb 15.6`
-- ✅ `notebook ryzen 7 8gb ssd 512gb`
 - ❌ `notebook dell inspiron 15`
-- ❌ `notebook 19V 2.37A 45W` (NUNCA!)
-- ❌ `notebook RTL8821CE` (NUNCA!)
-
-**NOTEBOOK (sem specs - usar marca/modelo):**
-- ✅ `notebook ASUS M1502Y`
-- ✅ `notebook Lenovo IdeaPad 3`
-- ❌ `notebook ASUS M1502Y 19V 2.37A 45W` (NUNCA!)
 
 **AR CONDICIONADO:**
 - ✅ `ar condicionado split 12000 btus 220v`
@@ -734,8 +715,7 @@ Se tem_specs_relevantes = false (não encontrou processador/RAM/SSD na imagem):
   "part_number": null,
   "codigo_interno": null,
   "especificacoes_tecnicas": {{
-    // APENAS specs RELEVANTES (processador, RAM, SSD, BTUs)
-    // NUNCA incluir: voltagem, corrente, potência, WiFi chip, certificações
+    // TODAS as specs relevantes (OCR + web)
   }},
   "palavras_chave": ["spec1", "spec2", "spec3"],
   "sinonimos": ["termo_alternativo1", "termo_alternativo2"],
