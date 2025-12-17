@@ -248,7 +248,7 @@ export default function ItensPage() {
       observacoes: item.observacoes || '',
     })
     setFormCharacteristics(item.caracteristicas.map(c => ({
-      tipo_id: c.tipo_id,
+      nome: c.tipo_nome,
       valor: c.valor
     })))
     setError('')
