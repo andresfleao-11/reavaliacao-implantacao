@@ -392,44 +392,203 @@ Extraia **APENAS** o que estiver **VISÍVEL na imagem**:
         return ItemAnalysisResult(**data)
 
     async def _search_specs_on_web(self, marca: str, modelo: str, tipo: str, numero_serie: Optional[str] = None, part_number: Optional[str] = None) -> Dict[str, Any]:
-        """Busca especificações técnicas usando conhecimento do modelo OpenAI"""
+        """Busca especificações técnicas na web usando conhecimento do modelo OpenAI"""
 
-        search_prompt = f"""# AGENTE: Especialista em Especificações Técnicas
+        search_prompt = f"""# AGENTE: Especialista em Pesquisa de Especificações Técnicas para Reavaliação Patrimonial
 
-## TAREFA
-Com base no seu conhecimento, forneça as especificações técnicas do produto abaixo.
+## CONTEXTO
+
+Você pesquisa especificações técnicas de bens patrimoniais para subsidiar **cotação de preços de reposição** em órgãos públicos brasileiros.
+
+**Base normativa:** NBC TSP 07 | MCASP | Lei 14.133/2021
+
+---
 
 ## DADOS DE ENTRADA
-- Marca: {marca}
-- Modelo: {modelo}
-- Tipo: {tipo}
-- Part Number: {part_number or 'não informado'}
-- Número de Série: {numero_serie or 'não informado'}
 
-## INSTRUÇÕES
-1. Use seu conhecimento sobre este produto para listar as especificações técnicas
-2. Se não conhecer o produto exato, retorne especificações típicas para este tipo de equipamento
-3. Seja preciso e objetivo
+```
+Marca: {marca}
+Modelo: {modelo}
+Tipo: {tipo}
+Part Number: {part_number or 'null'}  // pode ser null
+Número de Série: {numero_serie or 'null'}  // pode ser null
+```
 
-## FORMATO DE SAÍDA (JSON)
-{{
-  "tipo_produto": "{tipo}",
-  "identificacao": {{
-    "marca": "{marca}",
-    "modelo": "{modelo}",
-    "part_number": "{part_number or 'null'}"
-  }},
-  "especificacoes": {{
-    // specs relevantes para o tipo de produto
-  }},
-  "fonte": {{
-    "tipo": "conhecimento_modelo",
-    "confiabilidade": "media"
-  }},
+---
+
+## ESTRATÉGIA DE BUSCA
+
+| Prioridade | Estratégia | Query |
+|------------|------------|-------|
+| **1ª** | Marca + Modelo | `"{marca}" "{modelo}" ficha técnica especificações` |
+| **2ª** | Part Number + Marca | `"{marca}" "{part_number}" especificações` |
+| **3ª** | S/N + Marca (suporte) | `"{marca}" suporte "{numero_serie}"` |
+| **4ª** | Modelo genérico | `"{modelo}" specs datasheet` |
+
+> **Marca + Modelo** é a busca mais direta e comum.
+> **Part Number** refina para configuração exata quando o modelo tem variantes.
+> **Número de série** permite consulta ao suporte do fabricante.
+
+### Fontes prioritárias:
+1. Site oficial do fabricante
+2. Lojas especializadas (Kabum, Pichau, Fast Shop)
+3. Reviews técnicos
+
+### Evitar: Mercado Livre, OLX, fóruns
+
+---
+
+## ESPECIFICAÇÕES POR TIPO
+
+| Tipo | Specs críticas | Specs complementares |
+|------|----------------|---------------------|
+| **Notebook** | Processador, RAM, Armazenamento | Tela, Placa vídeo, SO |
+| **Ar-condicionado** | BTUs, Tecnologia (Inverter), Ciclo | Tensão, Selo Procel |
+| **Impressora** | Tecnologia (Laser/Jato), Funções | Velocidade, Conectividade, Duplex |
+| **Monitor** | Tamanho, Resolução | Painel, Taxa Hz, Conectores |
+
+---
+
+## FORMATO DE SAÍDA
+
+```json
+{{{{
+  "tipo_produto": "notebook | ar_condicionado | impressora | monitor",
+  "identificacao": {{{{
+    "marca": "string",
+    "modelo": "string",
+    "part_number": "string ou null"
+  }}}},
+  "especificacoes": {{{{
+    "// campos conforme tipo do produto": "valores encontrados ou null"
+  }}}},
+  "fonte": {{{{
+    "url": "URL da fonte",
+    "tipo": "fabricante | loja | review",
+    "confiabilidade": "alta | media | baixa"
+  }}}},
   "observacoes": "notas relevantes"
-}}
+}}}}
+```
 
-Retorne APENAS o JSON válido."""
+### Specs por tipo:
+
+**Notebook:**
+```json
+"especificacoes": {{{{
+  "processador": "Intel Core i5-1135G7",
+  "geracao": "11ª geração",
+  "ram": "8GB DDR4",
+  "armazenamento": "SSD 256GB NVMe",
+  "tela": "15.6\\" Full HD",
+  "placa_video": "Integrada ou modelo",
+  "sistema_operacional": "Windows 11"
+}}}}
+```
+
+**Ar-condicionado:**
+```json
+"especificacoes": {{{{
+  "capacidade_btus": "12000",
+  "tecnologia": "Inverter | Convencional",
+  "ciclo": "Frio | Quente/Frio",
+  "tensao": "220V",
+  "classificacao_energetica": "A"
+}}}}
+```
+
+**Impressora:**
+```json
+"especificacoes": {{{{
+  "tecnologia": "Laser Mono | Laser Color | Jato de Tinta",
+  "funcoes": "Impressora | Multifuncional",
+  "velocidade_ppm": "40",
+  "conectividade": ["WiFi", "USB", "Ethernet"],
+  "duplex": "Automático | Manual"
+}}}}
+```
+
+**Monitor:**
+```json
+"especificacoes": {{{{
+  "tamanho": "24\\"",
+  "resolucao": "1920x1080",
+  "tipo_painel": "IPS | VA | TN",
+  "taxa_atualizacao": "60Hz",
+  "conectores": ["HDMI", "VGA"]
+}}}}
+```
+
+### Se não encontrar:
+```json
+{{{{
+  "tipo_produto": "{tipo}",
+  "identificacao": {{{{ "marca": "{marca}", "modelo": "{modelo}", "part_number": null }}}},
+  "especificacoes": null,
+  "fonte": null,
+  "erro": "Especificações não encontradas",
+  "tentativas": ["query 1", "query 2"],
+  "sugestao": "alternativa para busca manual"
+}}}}
+```
+
+---
+
+## REGRAS
+
+1. Use seu conhecimento para buscar especificações
+2. **Marca + Modelo primeiro** - busca mais direta
+3. Usar **Part Number** para refinar quando houver variantes
+4. Validar specs conflitantes: fabricante > loja > review
+5. **Não inventar dados** - retornar `null` se não encontrar
+6. Sempre documentar a fonte (URL) quando possível
+
+---
+
+## EXEMPLO
+
+**Entrada:**
+```
+Marca: Dell | Modelo: Inspiron 15 3501 | Tipo: notebook
+Part Number: i3501-5081BLK | Número de Série: 7XK9M33
+```
+
+**Saída:**
+```json
+{{{{
+  "tipo_produto": "notebook",
+  "identificacao": {{{{
+    "marca": "Dell",
+    "modelo": "Inspiron 15 3501",
+    "part_number": "i3501-5081BLK"
+  }}}},
+  "especificacoes": {{{{
+    "processador": "Intel Core i5-1135G7",
+    "geracao": "11ª geração",
+    "ram": "8GB DDR4 2666MHz",
+    "armazenamento": "SSD 256GB PCIe NVMe",
+    "tela": "15.6\\" Full HD (1920x1080)",
+    "placa_video": "Intel Iris Xe (integrada)",
+    "sistema_operacional": "Windows 11 Home"
+  }}}},
+  "fonte": {{{{
+    "url": "https://www.dell.com/pt-br/shop/notebooks/inspiron-15/spd/inspiron-15-3501-laptop",
+    "tipo": "fabricante",
+    "confiabilidade": "alta"
+  }}}},
+  "observacoes": "Modelo possui variantes (i3/i5/i7). Part Number i3501-5081BLK confirma configuração i5/8GB/256GB."
+}}}}
+```
+
+---
+
+## INSTRUÇÃO FINAL
+
+1. Busque especificações priorizando **Marca + Modelo**
+2. Use **Part Number** para refinar se houver variantes
+3. Extraia specs de fontes confiáveis
+4. Retorne **APENAS o JSON**
+"""
 
         try:
             response = self._call_with_retry(
@@ -448,7 +607,7 @@ Retorne APENAS o JSON válido."""
                 self.total_tokens_used += total_tokens
 
                 self.call_logs.append(OpenAICallLog(
-                    activity=f"Busca de especificações técnicas: {marca} {modelo}",
+                    activity=f"Busca de especificações técnicas na web: {marca} {modelo}",
                     input_tokens=input_tokens,
                     output_tokens=output_tokens,
                     total_tokens=total_tokens,
