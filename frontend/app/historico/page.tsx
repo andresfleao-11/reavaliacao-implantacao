@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import useSWR from 'swr'
-import { quotesApi } from '@/lib/api'
+import { quotesApi, QuoteListItem } from '@/lib/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -272,78 +272,52 @@ export default function HistoricoPage() {
             {data.total} cotação(ões) encontrada(s)
           </div>
 
-          <div className="card overflow-hidden">
+          {/* Desktop Table */}
+          <div className="card overflow-hidden hidden md:block">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
-                      Código
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Descrição
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
-                      Projeto
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
-                      Data
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Valor
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-
-                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Código</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Descrição</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Projeto</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Data</th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Valor</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.items.map((quote) => (
+                  {data.items.map((quote: QuoteListItem) => (
                     <tr key={quote.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                         #{quote.id}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {quote.codigo_item || '-'}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-900 dark:text-gray-100 max-w-[120px] sm:max-w-[200px] lg:max-w-none truncate">
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 max-w-[200px] truncate">
                         {quote.nome_item || 'Sem descrição'}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden lg:table-cell">
+                      <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 hidden lg:table-cell">
                         {quote.project_nome ? (
-                          <Link
-                            href={`/cadastros/projetos/${quote.project_id}`}
-                            className="hover:text-primary-600 dark:hover:text-primary-400"
-                          >
-                            <div className="font-medium truncate max-w-[150px]">{quote.project_nome}</div>
-                            {quote.cliente_nome && (
-                              <div className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[150px]">{quote.cliente_nome}</div>
-                            )}
+                          <Link href={`/cadastros/projetos/${quote.project_id}`} className="hover:text-primary-600">
+                            <div className="truncate max-w-[120px]">{quote.project_nome}</div>
                           </Link>
-                        ) : (
-                          <span className="text-gray-400 dark:text-gray-500">-</span>
-                        )}
+                        ) : '-'}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">
-                        {formatDate(quote.created_at)}
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {format(new Date(quote.created_at), "dd/MM/yy", { locale: ptBR })}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-gray-100 text-right">
                         {formatCurrency(quote.valor_medio)}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap">
+                      <td className="px-4 py-3 whitespace-nowrap text-center">
                         {getStatusBadge(quote.status)}
                       </td>
-                      <td className="px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 whitespace-nowrap text-xs sm:text-sm">
-                        <Link
-                          href={`/cotacao/${quote.id}`}
-                          className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium"
-                        >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <Link href={`/cotacao/${quote.id}`} className="text-primary-600 dark:text-primary-400 hover:text-primary-800 font-medium">
                           Ver
                         </Link>
                       </td>
@@ -352,6 +326,38 @@ export default function HistoricoPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden space-y-2">
+            {data.items.map((quote: QuoteListItem) => (
+              <Link
+                key={quote.id}
+                href={`/cotacao/${quote.id}`}
+                className="block card p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">#{quote.id}</span>
+                    {quote.codigo_item && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{quote.codigo_item}</span>
+                    )}
+                  </div>
+                  {getStatusBadge(quote.status)}
+                </div>
+                <div className="text-xs text-gray-700 dark:text-gray-300 truncate mb-2">
+                  {quote.nome_item || 'Sem descrição'}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                    {format(new Date(quote.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
+                  </span>
+                  <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                    {formatCurrency(quote.valor_medio)}
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
 
           {totalPages > 1 && (
