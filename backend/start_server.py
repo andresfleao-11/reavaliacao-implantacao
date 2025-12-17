@@ -8,6 +8,17 @@ import os
 import sys
 import subprocess
 
+def create_directories():
+    """Create necessary directories for uploads and storage"""
+    directories = [
+        '/app/data/uploads',
+        '/app/data/documents',
+        '/app/storage/uploads',
+    ]
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+        print(f"Directory ensured: {directory}")
+
 def run_migrations():
     """Run alembic migrations"""
     print("Running database migrations...")
@@ -28,7 +39,10 @@ def run_migrations():
         print(f"Migration error (continuing anyway): {e}")
 
 def main():
-    # Run migrations first
+    # Create necessary directories
+    create_directories()
+
+    # Run migrations
     run_migrations()
 
     port = os.environ.get('PORT', '8000')
