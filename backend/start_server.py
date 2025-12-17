@@ -10,12 +10,20 @@ import subprocess
 
 def create_directories():
     """Create necessary directories for uploads and storage"""
-    directories = [
-        '/app/data/uploads',
-        '/app/data/documents',
-        '/app/storage/uploads',
+    # Base path for Railway
+    base_path = '/app/data' if os.path.exists('/app') else '../data'
+
+    subdirs = [
+        'uploads',
+        'documents',
+        'screenshots',
+        'screenshots/fipe',
+        'pdfs',
+        'lens_temp',
     ]
-    for directory in directories:
+
+    for subdir in subdirs:
+        directory = os.path.join(base_path, subdir)
         os.makedirs(directory, exist_ok=True)
         print(f"Directory ensured: {directory}")
 

@@ -1,10 +1,18 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
+import os
+
+
+# Detectar se está no Railway (container Docker)
+def get_default_storage_path():
+    if os.path.exists('/app'):
+        return '/app/data'
+    return '../data'
 
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    STORAGE_PATH: str = "../data"
+    STORAGE_PATH: str = get_default_storage_path()
     SEARCH_PROVIDER: str = "serpapi"
     SERPAPI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
