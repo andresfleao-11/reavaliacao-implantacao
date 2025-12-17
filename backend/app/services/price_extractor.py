@@ -100,6 +100,63 @@ class PriceExtractor:
             await page.close()
             await context.close()
 
+    async def capture_screenshot_only(self, url: str) -> Optional[bytes]:
+        """
+        Captura apenas o screenshot de uma URL, sem extrair preço.
+        Usado quando enable_price_mismatch=False (fluxo Google Only).
+
+        Returns:
+            bytes do screenshot ou None se falhar
+        """
+        async with PriceExtractor() as extractor:
+            if not extractor.browser:
+                logger.error("Browser not initialized")
+                return None
+
+            context = await extractor.browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1366, 'height': 1229},
+                locale='pt-BR',
+                timezone_id='America/Sao_Paulo',
+            )
+            page = await context.new_page()
+
+            try:
+                try:
+                    await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                except Exception as e:
+                    logger.warning(f"First load attempt failed for {url}: {e}")
+                    await page.goto(url, wait_until="load", timeout=45000)
+
+                await page.wait_for_timeout(3000)
+                await extractor._close_popups(page)
+                await page.evaluate("window.scrollTo(0, 0)")
+                await page.wait_for_timeout(500)
+
+                viewport_size = page.viewport_size
+                page_height = await page.evaluate("document.body.scrollHeight")
+                clip_height = min(max(int(page_height * 0.45), 900), 1800)
+
+                screenshot_bytes = await page.screenshot(
+                    clip={
+                        "x": 0,
+                        "y": 0,
+                        "width": viewport_size["width"],
+                        "height": clip_height
+                    }
+                )
+
+                logger.info(f"Screenshot captured for {url} ({len(screenshot_bytes)} bytes)")
+                return screenshot_bytes
+
+            except Exception as e:
+                logger.error(f"Failed to capture screenshot for {url}: {e}")
+                return None
+
+            finally:
+                await page.close()
+                await context.close()
+
     async def _close_popups(self, page: Page) -> None:
         """
         Fecha popups, modais, banners de cookies e overlays comuns em sites de e-commerce.
