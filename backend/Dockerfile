@@ -40,5 +40,5 @@ COPY . .
 
 EXPOSE 8000
 
-# Use Python startup script to properly read PORT environment variable
-CMD ["python", "start_server.py"]
+# Run migrations and start server
+CMD ["sh", "-c", "alembic upgrade head && python start_server.py"]
