@@ -214,7 +214,7 @@ export interface BlockedDomain {
 
 export interface IntegrationLog {
   id: number
-  integration_type: 'anthropic' | 'openai' | 'serpapi' | 'search_log' | 'fipe'
+  integration_type: 'anthropic' | 'openai' | 'serpapi' | 'search_log' | 'fipe' | 'vehicle_price_bank'
   activity: string | null
   created_at: string
   // Anthropic fields
