@@ -29,14 +29,17 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configurar origens CORS dinamicamente
-cors_origins = ["http://localhost:3000"]
+cors_origins = [
+    "http://localhost:3000",
+    "https://frontend-production-4989.up.railway.app",  # Produção Railway
+]
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
-    cors_origins.append(frontend_url)
-# Também adicionar variantes comuns do Railway
-railway_frontend = os.getenv("RAILWAY_PUBLIC_DOMAIN_FRONTEND")
-if railway_frontend:
-    cors_origins.append(f"https://{railway_frontend}")
+    # Garantir que tenha protocolo
+    if not frontend_url.startswith("http"):
+        frontend_url = f"https://{frontend_url}"
+    if frontend_url not in cors_origins:
+        cors_origins.append(frontend_url)
 
 logger.info(f"CORS origins configured: {cors_origins}")
 
