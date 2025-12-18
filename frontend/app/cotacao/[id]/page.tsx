@@ -1947,8 +1947,6 @@ export default function QuoteDetailPage() {
               </div>
             )
           })()}
-        </div>
-      )}
 
       {/* Modal de Visualização do Prompt */}
       {showPromptModal && (
