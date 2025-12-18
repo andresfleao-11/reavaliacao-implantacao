@@ -1,24 +1,28 @@
 """
-Endpoint de Debug para SerpAPI.
-Permite simular o processamento de um JSON do Google Shopping
-e visualizar cada etapa do fluxo de cotacao.
+Debug SerpAPI - Simulador Visual do Fluxo de Cotação
+
+Objetivo: Obter N cotações válidas de um ÚNICO BLOCO de produtos,
+garantindo que a variação de preço entre a menor e maior cotação não exceda X%.
+
+Este endpoint permite visualizar cada etapa do processamento de forma
+intuitiva e detalhada, facilitando a compreensão e debug do sistema.
 """
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from decimal import Decimal
+from enum import Enum
 import json
 import logging
 
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from app.models import User, Setting, IntegrationSetting
+from app.models import User, IntegrationSetting
 from app.services.search_provider import (
     BLOCKED_DOMAINS,
     FOREIGN_DOMAIN_PATTERNS,
     ALLOWED_FOREIGN_DOMAINS,
-    SerpApiProvider
 )
 from app.core.config import settings
 from app.core.security import decrypt_value
@@ -28,215 +32,281 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin/debug-serpapi", tags=["Debug SerpAPI"])
 
 
-class ProductInfo(BaseModel):
-    """Informacoes de um produto do Google Shopping"""
-    title: str
-    price: str
-    extracted_price: Optional[float]
-    source: str
-    domain: Optional[str]
+# =============================================================================
+# CONSTANTES DO SISTEMA
+# =============================================================================
+INCREMENTO_VAR = 0.05  # 5% de aumento por rodada de fallback
+MAX_TOLERANCE_INCREASES = 5  # Máximo de aumentos de tolerância
+PRICE_MISMATCH_THRESHOLD = 0.05  # 5% diferença máxima para PRICE_MISMATCH
+
+
+# =============================================================================
+# ENUMS E STATUS
+# =============================================================================
+class ProductStatus(str, Enum):
+    """Status de um produto no fluxo de validação"""
+    NAO_TESTADO = "NAO_TESTADO"
+    VALIDADO = "VALIDADO"
+    DESCARTADO = "DESCARTADO"
+
+
+class FailureCode(str, Enum):
+    """Códigos de falha na validação de produto"""
+    NO_STORE_LINK = "NO_STORE_LINK"  # API não retornou URL
+    BLOCKED_DOMAIN = "BLOCKED_DOMAIN"  # Domínio na lista de bloqueio
+    FOREIGN_DOMAIN = "FOREIGN_DOMAIN"  # TLD não é .br
+    DUPLICATE_URL = "DUPLICATE_URL"  # URL já usada nesta cotação
+    LISTING_URL = "LISTING_URL"  # URL de busca/listagem
+    PRICE_MISMATCH = "PRICE_MISMATCH"  # Preço site ≠ Google
+    EXTRACTION_ERROR = "EXTRACTION_ERROR"  # Erro ao extrair preço
+    API_ERROR = "API_ERROR"  # Erro na chamada da API
+    NO_IMMERSIVE_URL = "NO_IMMERSIVE_URL"  # Produto sem URL Immersive
+
+
+# =============================================================================
+# MODELOS DE RESPOSTA - ETAPA 1
+# =============================================================================
+class ParametrosSistema(BaseModel):
+    """Parâmetros configurados para esta simulação"""
+    NUM_COTACOES: int
+    VAR_MAX_PERCENT: float
+    MAX_VALID_PRODUCTS: int = 150
+    INCREMENTO_VAR: float = 5.0
+    VALIDAR_PRECO_SITE: bool
+    DOMINIOS_BLOQUEADOS_SAMPLE: List[str]  # Amostra dos domínios bloqueados
+
+
+class ProdutoExtraido(BaseModel):
+    """Produto extraído do Google Shopping"""
     position: int
-    is_blocked: bool
-    block_reason: Optional[str]
-    has_valid_price: bool
-    serpapi_immersive_url: Optional[str]
-
-
-class BlockInfo(BaseModel):
-    """Informacoes de um bloco de variacao"""
-    index: int
-    size: int
-    min_price: float
-    max_price: float
-    variation_percent: float
-    products: List[Dict[str, Any]]
-    is_valid: bool  # True se tem produtos suficientes
-
-
-class StepResult(BaseModel):
-    """Resultado de uma etapa do processamento"""
-    step_number: int
-    step_name: str
-    description: str
-    input_count: int
-    output_count: int
-    filtered_count: int
-    details: Optional[Dict[str, Any]] = None
-
-
-class ImmersiveResult(BaseModel):
-    """Resultado de uma chamada ao Google Immersive"""
-    product_title: str
+    title: str
     source: str
-    google_price: float
-    immersive_url: str
-    stores_found: int
-    stores: List[Dict[str, Any]]
-    selected_store: Optional[Dict[str, Any]]
-    success: bool
-    error: Optional[str]
+    extracted_price: Optional[float]
+    has_immersive_url: bool
+    status: ProductStatus = ProductStatus.NAO_TESTADO
+    failure_code: Optional[FailureCode] = None
+    failure_reason: Optional[str] = None
 
 
-class ProductValidation(BaseModel):
-    """Validacao detalhada de um produto durante o processamento Immersive"""
-    product_title: str
-    product_price: float
-    product_source: str
-    iteration: int
-    block_index: int
-    step: int  # Numero sequencial da validacao
-    immersive_called: bool
-    stores_returned: int
-    validations: List[Dict[str, Any]]  # Lista de validacoes aplicadas
-    final_status: str  # "SUCCESS", "FAILED", "SKIPPED"
-    failure_reason: Optional[str]
-    selected_store: Optional[Dict[str, Any]]
+class FiltroAplicado(BaseModel):
+    """Resultado de um filtro aplicado"""
+    nome: str
+    descricao: str
+    entrada: int
+    saida: int
+    removidos: int
+    detalhes: Optional[Dict[str, Any]] = None
 
 
-class BlockIteration(BaseModel):
-    """Detalhes de uma iteracao de bloco"""
-    iteration: int
-    block_size: int
-    block_min_price: float
-    block_max_price: float
-    products_processed: int
-    results_obtained: int
-    results_total: int
-    failures_in_iteration: int
-    total_failures: int
-    skipped_reasons: Dict[str, int]
-    status: str  # "SUCCESS", "FAILED", "CONTINUING"
-    action: str  # "completed", "recreating_blocks", "trying_next_block"
-    block_failure_reason: Optional[str] = None  # Motivo da falha do bloco
-    failed_products_details: List[Dict[str, Any]] = []  # Detalhes dos produtos que falharam
+class BlocoFormado(BaseModel):
+    """Bloco de produtos formado"""
+    indice: int
+    tamanho: int
+    preco_min: float
+    preco_max: float
+    variacao_percent: float
+    elegivel: bool  # True se tamanho >= NUM_COTACOES
+    potencial: int  # validados + não_testados
+    produtos: List[Dict[str, Any]]
+
+
+class Etapa1Result(BaseModel):
+    """Resultado da ETAPA 1: Processamento Google Shopping"""
+    total_extraidos: int
+    filtros_aplicados: List[FiltroAplicado]
+    produtos_apos_filtros: int
+    blocos_formados: int
+    blocos_elegiveis: int
+    melhor_bloco: Optional[BlocoFormado]
+    produtos_ordenados: List[ProdutoExtraido]
+
+
+# =============================================================================
+# MODELOS DE RESPOSTA - ETAPA 2
+# =============================================================================
+class ValidacaoProduto(BaseModel):
+    """Resultado da validação de um produto via Immersive API"""
+    produto_titulo: str
+    produto_preco: float
+    produto_source: str
+    ordem_validacao: int
+    sucesso: bool
+    failure_code: Optional[FailureCode] = None
+    failure_reason: Optional[str] = None
+    loja_selecionada: Optional[Dict[str, Any]] = None
+    lojas_encontradas: int = 0
+    lojas_rejeitadas: List[Dict[str, Any]] = []
+
+
+class IteracaoBloco(BaseModel):
+    """Uma iteração de validação de bloco"""
+    numero_iteracao: int
+    tolerancia_atual: float
+    tolerancia_round: int
+
+    # Métricas do bloco selecionado
+    bloco_tamanho: int
+    bloco_preco_min: float
+    bloco_preco_max: float
+    bloco_variacao: float
+
+    # Contadores de progresso
+    produtos_no_bloco: int
+    produtos_validados_inicio: int  # Já validados antes desta iteração
+    produtos_nao_testados: int
+    potencial_bloco: int
+
+    # Resultados da iteração
+    validacoes_realizadas: List[ValidacaoProduto]
+    novos_validados: int
+    novos_descartados: int
+
+    # Status final
+    total_validados_apos: int
+    status: str  # "SUCESSO", "BLOCO_FALHOU", "CONTINUAR"
+    acao_tomada: str  # Descrição da próxima ação
+    motivo: Optional[str] = None
+
+
+class Etapa2Result(BaseModel):
+    """Resultado da ETAPA 2: Validação de Bloco"""
+    iteracoes: List[IteracaoBloco]
+    total_iteracoes: int
+    aumentos_tolerancia: int
+    tolerancia_inicial: float
+    tolerancia_final: float
+    produtos_validados_final: int
+    produtos_descartados_final: int
+    sucesso: bool
+    cotacoes_obtidas: List[Dict[str, Any]]
+
+
+# =============================================================================
+# MODELO DE RESPOSTA PRINCIPAL
+# =============================================================================
+class FluxoVisual(BaseModel):
+    """Representação visual do fluxo executado"""
+    etapa_atual: str
+    status_geral: str  # "SUCESSO", "PARCIAL", "FALHA"
+    progresso: str  # Ex: "3/3 cotações obtidas"
+    resumo_fluxo: List[str]  # Lista de passos executados
 
 
 class DebugResponse(BaseModel):
-    """Resposta completa do debug"""
-    success: bool
+    """Resposta completa do debug - formato intuitivo"""
+    sucesso: bool
     query: str
-    parameters: Dict[str, Any]
-    steps: List[StepResult]
-    blocks: List[BlockInfo]
-    immersive_results: List[ImmersiveResult]
-    product_validations: List[ProductValidation] = []  # Validacoes detalhadas
-    block_iterations: List[BlockIteration] = []  # Iteracoes de blocos
-    final_results: List[Dict[str, Any]]
-    summary: Dict[str, Any]
-    error: Optional[str] = None
+
+    # Parâmetros utilizados
+    parametros: ParametrosSistema
+
+    # Resultados por etapa
+    etapa1: Etapa1Result
+    etapa2: Optional[Etapa2Result] = None
+
+    # Visualização do fluxo
+    fluxo_visual: FluxoVisual
+
+    # Resultado final
+    cotacoes_finais: List[Dict[str, Any]]
+
+    # Erro (se houver)
+    erro: Optional[str] = None
 
 
-def extract_price(price_str: str) -> Optional[float]:
-    """Extrai valor numerico de uma string de preco"""
+# =============================================================================
+# FUNÇÕES AUXILIARES
+# =============================================================================
+def _make_product_key(title: str, price: float) -> str:
+    """Cria chave única para um produto"""
+    return f"{title}_{price}"
+
+
+def _extract_price(price_str: str) -> Optional[float]:
+    """Extrai valor numérico de uma string de preço"""
     if not price_str:
         return None
     import re
-    # Remove currency symbols and extract number
-    price_clean = re.sub(r'[R$\s.]', '', price_str).replace(',', '.')
+    price_clean = re.sub(r'[R$\s.]', '', str(price_str)).replace(',', '.')
     try:
         return float(price_clean)
     except ValueError:
         return None
 
 
-def get_domain_from_source(source: str) -> str:
-    """Extrai dominio de uma string source"""
-    source_lower = source.lower()
-    # Remove prefixos comuns
-    for prefix in ['www.', 'http://', 'https://']:
-        if source_lower.startswith(prefix):
-            source_lower = source_lower[len(prefix):]
-    # Pega apenas o dominio
-    return source_lower.split('/')[0]
-
-
-def is_blocked_source(source: str, blocked_domains: set = None) -> tuple:
-    """
-    Verifica se uma fonte esta bloqueada.
-    Replica exatamente a logica de _is_blocked_source do search_provider.py
-    Retorna (is_blocked, reason)
-    """
-    if blocked_domains is None:
-        blocked_domains = BLOCKED_DOMAINS
-
+def _is_blocked_source(source: str) -> tuple:
+    """Verifica se uma fonte está bloqueada. Retorna (is_blocked, reason)"""
     if not source:
-        return False, None  # Empty source is not blocked, just ignored
+        return False, None
 
     source_lower = source.lower()
 
-    # Map common source names to their domains - EXATAMENTE como no search_provider.py
+    # Mapeamento de nomes de fonte para domínios
     source_to_domain_map = {
         "mercado livre": "mercadolivre.com.br",
         "mercadolivre": "mercadolivre.com.br",
         "amazon": "amazon.com.br",
-        "amazon.com.br": "amazon.com.br",
         "shopee": "shopee.com.br",
         "aliexpress": "aliexpress.com",
         "shein": "shein.com",
-        "wish": "wish.com",
         "temu": "temu.com",
         "carrefour": "carrefour.com.br",
         "casas bahia": "casasbahia.com.br",
-        "ponto frio": "pontofrio.com.br",
-        "extra": "extra.com.br",
         "magazine luiza": "magazineluiza.com.br",
         "magalu": "magalu.com.br",
         "americanas": "americanas.com.br",
-        "submarino": "submarino.com.br",
-        "shoptime": "shoptime.com.br",
     }
 
-    # Check if the source matches any blocked domain mapping
     for source_name, domain in source_to_domain_map.items():
         if source_name in source_lower:
-            if domain in blocked_domains:
-                return True, f"source_map:{source_name}→{domain}"
+            if domain in BLOCKED_DOMAINS:
+                return True, f"Fonte '{source}' → domínio bloqueado: {domain}"
 
-    # Also check if the source directly contains a blocked domain's base name
-    for blocked_domain in blocked_domains:
+    for blocked_domain in BLOCKED_DOMAINS:
         base_name = blocked_domain.split('.')[0]
         if base_name in source_lower:
-            return True, f"contains_blocked:{base_name}"
+            return True, f"Fonte '{source}' contém domínio bloqueado: {base_name}"
 
     return False, None
 
 
-def is_foreign_domain(domain: str) -> tuple:
-    """
-    Verifica se um dominio e estrangeiro (nao brasileiro).
-    Replica exatamente a logica de _is_foreign_domain do search_provider.py
-    Retorna (is_foreign, reason)
-    """
+def _is_blocked_domain(domain: str) -> tuple:
+    """Verifica se um domínio está bloqueado"""
+    if not domain:
+        return False, None
+
+    domain_lower = domain.lower()
+    for blocked in BLOCKED_DOMAINS:
+        if domain_lower == blocked or domain_lower.endswith("." + blocked):
+            return True, f"Domínio bloqueado: {blocked}"
+
+    return False, None
+
+
+def _is_foreign_domain(domain: str) -> tuple:
+    """Verifica se é domínio estrangeiro"""
     if not domain:
         return False, None
 
     domain_lower = domain.lower()
 
-    # Allow Brazilian domains
     if domain_lower.endswith(".com.br") or domain_lower.endswith(".br"):
         return False, None
 
-    # Allow specific foreign domains (major manufacturers that sell in Brazil)
     if domain_lower in ALLOWED_FOREIGN_DOMAINS:
         return False, None
 
-    # Check for foreign TLDs
     for pattern in FOREIGN_DOMAIN_PATTERNS:
-        # Make sure we're checking the TLD, not part of the domain name
         if domain_lower.endswith(pattern) and not domain_lower.endswith(".com.br"):
-            return True, f"foreign_domain:{pattern}"
+            return True, f"Domínio estrangeiro ({pattern})"
 
     return False, None
 
 
-def is_listing_url(url: str) -> tuple:
-    """
-    Verifica se a URL e uma pagina de busca/listagem em vez de pagina de produto.
-    Replica exatamente a logica de _is_listing_url do search_provider.py
-    Retorna (is_listing, reason)
-    """
+def _is_listing_url(url: str) -> tuple:
+    """Verifica se é URL de listagem/busca"""
     if not url:
-        return True, "empty_url"
+        return True, "URL vazia"
 
     url_lower = url.lower()
 
@@ -253,535 +323,497 @@ def is_listing_url(url: str) -> tuple:
 
     for pattern in listing_patterns:
         if pattern in url_lower:
-            return True, f"listing_pattern:{pattern}"
+            return True, f"URL de listagem (contém '{pattern}')"
 
     return False, None
 
 
-def is_blocked_domain(domain: str) -> tuple:
-    """
-    Verifica se um dominio esta na lista de bloqueados.
-    Retorna (is_blocked, reason)
-    """
-    if not domain:
-        return False, None
-
-    domain_lower = domain.lower()
-
-    for blocked in BLOCKED_DOMAINS:
-        if domain_lower == blocked or domain_lower.endswith("." + blocked):
-            return True, f"blocked_domain:{blocked}"
-
-    return False, None
-
-
-def create_variation_blocks(products: List[Dict], variacao_maxima: float, min_block_size: int = 1) -> List[List[Dict]]:
-    """
-    Cria blocos de variacao a partir de uma lista de produtos.
-    Replica a logica de _create_variation_blocks do search_provider.py
-    """
+def _form_blocks(products: List[Dict], var_max: float, min_size: int) -> List[Dict]:
+    """Forma blocos de variação a partir de produtos ordenados por preço"""
     if not products:
-        return []
-
-    # Ordenar por preco
-    sorted_products = sorted(products, key=lambda x: x['extracted_price'])
-
-    # Filtrar precos invalidos
-    sorted_products = [p for p in sorted_products if p.get('extracted_price') and p['extracted_price'] > 0]
-
-    if not sorted_products:
         return []
 
     blocks = []
 
-    for start_idx, start_product in enumerate(sorted_products):
+    for start_idx, start_product in enumerate(products):
         min_price = start_product['extracted_price']
-        max_allowed_price = min_price * (1 + variacao_maxima)
+        if not min_price or min_price <= 0:
+            continue
 
-        # Construir bloco
-        block = []
-        for product in sorted_products[start_idx:]:
-            if product['extracted_price'] <= max_allowed_price:
-                block.append(product)
+        max_allowed = min_price * (1 + var_max)
+
+        block_products = []
+        for p in products[start_idx:]:
+            if p['extracted_price'] and p['extracted_price'] <= max_allowed:
+                block_products.append(p)
             else:
                 break
 
-        # Apenas adicionar blocos que atendem o tamanho minimo
-        if len(block) >= min_block_size:
-            blocks.append(block)
+        if len(block_products) >= 1:  # Formar todos os blocos, filtrar depois
+            variation = ((block_products[-1]['extracted_price'] / block_products[0]['extracted_price']) - 1) * 100
+            blocks.append({
+                "indice": start_idx,
+                "produtos": block_products,
+                "tamanho": len(block_products),
+                "preco_min": block_products[0]['extracted_price'],
+                "preco_max": block_products[-1]['extracted_price'],
+                "variacao_percent": round(variation, 2),
+                "elegivel": len(block_products) >= min_size
+            })
 
     return blocks
 
 
+def _rank_blocks(blocks: List[Dict], validated_keys: set, failed_keys: set, num_quotes: int) -> List[Dict]:
+    """Rankeia blocos por potencial de sucesso"""
+    ranked = []
+
+    for block in blocks:
+        block_keys = {_make_product_key(p['title'], p['extracted_price']) for p in block['produtos']}
+
+        valid_in_block = len(validated_keys & block_keys)
+        untried_in_block = len(block_keys - validated_keys - failed_keys)
+        potential = valid_in_block + untried_in_block
+
+        if potential < num_quotes:
+            continue
+
+        block_copy = block.copy()
+        block_copy['potencial'] = potential
+        block_copy['validados_no_bloco'] = valid_in_block
+        block_copy['nao_testados_no_bloco'] = untried_in_block
+
+        # Score: prioriza mais validados, mais não testados, menor preço
+        block_copy['score'] = (valid_in_block, untried_in_block, -block['preco_min'])
+        ranked.append(block_copy)
+
+    ranked.sort(key=lambda x: x['score'], reverse=True)
+    return ranked
+
+
+# =============================================================================
+# ENDPOINT PRINCIPAL
+# =============================================================================
 @router.post("/analyze", response_model=DebugResponse)
 async def analyze_shopping_json(
     file: UploadFile = File(...),
-    limit: int = Form(default=3),
+    num_cotacoes: int = Form(default=3, alias="limit"),
     variacao_maxima: float = Form(default=25.0),
-    execute_immersive: bool = Form(default=False),
+    execute_immersive: str = Form(default="false"),
+    validar_preco_site: str = Form(default="true", alias="enable_price_mismatch"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Analisa um JSON do Google Shopping e simula todas as etapas do processamento.
+    Analisa um JSON do Google Shopping e simula o fluxo completo de cotação.
 
-    - file: Arquivo JSON com resposta do Google Shopping
-    - limit: Numero de cotacoes desejadas (default: 3)
-    - variacao_maxima: Variacao maxima em porcentagem (default: 25%)
-    - execute_immersive: Se True, executa chamadas reais ao Google Immersive API
+    OBJETIVO: Obter N cotações válidas de um ÚNICO BLOCO de produtos,
+    garantindo variação máxima de X% entre menor e maior preço.
+
+    Parâmetros:
+    - file: JSON do Google Shopping (ou JSON de cotação com raw_api_response)
+    - num_cotacoes (limit): Quantidade de cotações desejadas (default: 3)
+    - variacao_maxima: Variação máxima em % (default: 25%)
+    - execute_immersive: Se True, executa chamadas reais à API Immersive
+    - validar_preco_site (enable_price_mismatch): Se True, valida preço do site vs Google
     """
     try:
-        # Ler e parsear o JSON
+        # Converter strings para booleanos (FormData envia strings)
+        execute_immersive_bool = execute_immersive.lower() in ('true', '1', 'yes')
+        validar_preco_site_bool = validar_preco_site.lower() in ('true', '1', 'yes')
+
+        logger.info(f"Debug SerpAPI - execute_immersive: {execute_immersive} -> {execute_immersive_bool}")
+        logger.info(f"Debug SerpAPI - validar_preco_site: {validar_preco_site} -> {validar_preco_site_bool}")
+
+        # Ler JSON
         content = await file.read()
         try:
             shopping_data = json.loads(content.decode('utf-8'))
         except json.JSONDecodeError as e:
-            raise HTTPException(status_code=400, detail=f"JSON invalido: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"JSON inválido: {str(e)}")
 
-        # Verificar se é o JSON da cotação (com raw_api_response) ou direto do SerpAPI
+        # Verificar se é JSON de cotação ou direto do SerpAPI
         if 'raw_api_response' in shopping_data:
-            # JSON baixado da cotação - usar o raw_api_response
-            raw_api_response = shopping_data.get('raw_api_response', {})
-            if raw_api_response:
-                shopping_data = raw_api_response
-            else:
-                raise HTTPException(status_code=400, detail="JSON da cotacao nao contem raw_api_response valido")
+            raw_api = shopping_data.get('raw_api_response', {})
+            if raw_api:
+                shopping_data = raw_api
 
-        # Extrair query da resposta
         query = shopping_data.get('search_parameters', {}).get('q', 'N/A')
+        var_max_decimal = variacao_maxima / 100.0
 
-        # Converter variacao para decimal
-        variacao_decimal = variacao_maxima / 100.0
+        # Parâmetros do sistema
+        parametros = ParametrosSistema(
+            NUM_COTACOES=num_cotacoes,
+            VAR_MAX_PERCENT=variacao_maxima,
+            MAX_VALID_PRODUCTS=150,
+            INCREMENTO_VAR=INCREMENTO_VAR * 100,
+            VALIDAR_PRECO_SITE=validar_preco_site_bool,
+            DOMINIOS_BLOQUEADOS_SAMPLE=list(BLOCKED_DOMAINS)[:10]
+        )
 
-        steps = []
-        all_products = []
+        fluxo_resumo = []
 
-        # ============================================
-        # STEP 1: Extrair produtos do JSON
-        # ============================================
+        # =====================================================================
+        # ETAPA 1: PROCESSAMENTO GOOGLE SHOPPING
+        # =====================================================================
+        fluxo_resumo.append("📥 ETAPA 1: Processamento Google Shopping iniciado")
+
+        # 1.1 Extração
         shopping_results = shopping_data.get('shopping_results', [])
         inline_results = shopping_data.get('inline_shopping_results', [])
 
-        raw_products = []
+        produtos_extraidos = []
         position = 0
 
-        for item in shopping_results:
+        for item in shopping_results + inline_results:
             position += 1
-            # Usar extracted_price diretamente do JSON (já é um número)
             extracted = item.get('extracted_price')
-            price_str = item.get('price', '')
-
-            raw_products.append({
-                'title': item.get('title', ''),
-                'price': str(price_str),
-                'extracted_price': float(extracted) if extracted is not None else None,
-                'source': item.get('source', ''),
+            produtos_extraidos.append({
                 'position': position,
+                'title': item.get('title', ''),
+                'source': item.get('source', ''),
+                'extracted_price': float(extracted) if extracted is not None else None,
                 'serpapi_immersive_url': item.get('serpapi_product_api_immersive') or item.get('serpapi_immersive_product_api'),
-                'product_link': item.get('product_link'),
-                'link': item.get('link'),
+                'status': ProductStatus.NAO_TESTADO,
+                'failure_code': None,
+                'failure_reason': None
             })
 
-        for item in inline_results:
-            position += 1
-            # Usar extracted_price diretamente do JSON (já é um número)
-            extracted = item.get('extracted_price')
-            price_str = item.get('price', '')
+        total_extraidos = len(produtos_extraidos)
+        fluxo_resumo.append(f"  └─ Extraídos: {total_extraidos} produtos")
 
-            raw_products.append({
-                'title': item.get('title', ''),
-                'price': str(price_str),
-                'extracted_price': float(extracted) if extracted is not None else None,
-                'source': item.get('source', ''),
-                'position': position,
-                'serpapi_immersive_url': item.get('serpapi_product_api_immersive') or item.get('serpapi_immersive_product_api'),
-                'product_link': item.get('product_link'),
-                'link': item.get('link'),
-            })
+        filtros_aplicados = []
 
-        steps.append(StepResult(
-            step_number=1,
-            step_name="Extracao de Produtos",
-            description="Extrair todos os produtos do JSON do Google Shopping",
-            input_count=len(shopping_results) + len(inline_results),
-            output_count=len(raw_products),
-            filtered_count=0,
-            details={
-                "shopping_results_count": len(shopping_results),
-                "inline_results_count": len(inline_results),
-                "total_raw": len(raw_products)
-            }
-        ))
+        # 1.2 Filtro: Fontes Bloqueadas
+        produtos_apos_fonte = []
+        bloqueados_fonte = []
+        motivos_bloqueio = {}
 
-        # ============================================
-        # STEP 2: Filtrar fontes bloqueadas
-        # ============================================
-        products_step2 = []
-        blocked_products = []
-        blocked_reasons = {}
-
-        for p in raw_products:
-            is_blocked, reason = is_blocked_source(p['source'])
-            p['is_blocked'] = is_blocked
-            p['block_reason'] = reason
-            p['domain'] = get_domain_from_source(p['source'])
-
+        for p in produtos_extraidos:
+            is_blocked, reason = _is_blocked_source(p['source'])
             if is_blocked:
-                blocked_products.append(p)
-                blocked_reasons[reason] = blocked_reasons.get(reason, 0) + 1
+                bloqueados_fonte.append(p)
+                motivos_bloqueio[reason] = motivos_bloqueio.get(reason, 0) + 1
             else:
-                products_step2.append(p)
+                produtos_apos_fonte.append(p)
 
-        steps.append(StepResult(
-            step_number=2,
-            step_name="Filtro de Fontes Bloqueadas",
-            description="Remover produtos de fontes bloqueadas (marketplaces, lojas com anti-bot)",
-            input_count=len(raw_products),
-            output_count=len(products_step2),
-            filtered_count=len(blocked_products),
-            details={
-                "blocked_reasons": blocked_reasons,
-                "blocked_domains_config": list(BLOCKED_DOMAINS)[:10],  # Primeiros 10
-                "blocked_products": [
-                    {"title": p['title'][:50], "source": p['source'], "reason": p['block_reason']}
-                    for p in blocked_products[:10]  # Primeiros 10
+        filtros_aplicados.append(FiltroAplicado(
+            nome="Fontes Bloqueadas",
+            descricao="Remove produtos de marketplaces e lojas com anti-bot",
+            entrada=len(produtos_extraidos),
+            saida=len(produtos_apos_fonte),
+            removidos=len(bloqueados_fonte),
+            detalhes={
+                "motivos": motivos_bloqueio,
+                "exemplos_removidos": [
+                    {"title": p['title'][:40], "source": p['source']}
+                    for p in bloqueados_fonte[:5]
                 ]
             }
         ))
 
-        # ============================================
-        # STEP 3: Filtrar precos invalidos
-        # ============================================
-        products_step3 = []
-        invalid_price_products = []
+        # 1.2 Filtro: Preços Inválidos
+        produtos_apos_preco = []
+        invalidos_preco = []
 
-        for p in products_step2:
-            p['has_valid_price'] = p['extracted_price'] is not None and p['extracted_price'] > 0
-            if p['has_valid_price']:
-                products_step3.append(p)
+        for p in produtos_apos_fonte:
+            if p['extracted_price'] is not None and p['extracted_price'] > 0:
+                produtos_apos_preco.append(p)
             else:
-                invalid_price_products.append(p)
+                invalidos_preco.append(p)
 
-        steps.append(StepResult(
-            step_number=3,
-            step_name="Filtro de Precos Validos",
-            description="Remover produtos sem preco ou com preco invalido",
-            input_count=len(products_step2),
-            output_count=len(products_step3),
-            filtered_count=len(invalid_price_products),
-            details={
-                "invalid_price_products": [
-                    {"title": p['title'][:50], "price": p['price']}
-                    for p in invalid_price_products[:10]
+        filtros_aplicados.append(FiltroAplicado(
+            nome="Preços Inválidos",
+            descricao="Remove produtos sem preço ou preço ≤ 0",
+            entrada=len(produtos_apos_fonte),
+            saida=len(produtos_apos_preco),
+            removidos=len(invalidos_preco),
+            detalhes={
+                "exemplos_removidos": [
+                    {"title": p['title'][:40], "price": p['extracted_price']}
+                    for p in invalidos_preco[:5]
                 ]
             }
         ))
 
-        # ============================================
-        # STEP 4: Ordenar por preco e limitar a 150
-        # ============================================
-        products_step3.sort(key=lambda x: x['extracted_price'])
+        # 1.3 Ordenação e Limite
+        produtos_apos_preco.sort(key=lambda x: x['extracted_price'])
+        produtos_limitados = produtos_apos_preco[:150]
 
-        MAX_PRODUCTS = 150
-        products_step4 = products_step3[:MAX_PRODUCTS]
-
-        steps.append(StepResult(
-            step_number=4,
-            step_name="Ordenacao e Limitacao",
-            description=f"Ordenar por preco e limitar a {MAX_PRODUCTS} produtos",
-            input_count=len(products_step3),
-            output_count=len(products_step4),
-            filtered_count=max(0, len(products_step3) - MAX_PRODUCTS),
-            details={
-                "max_products": MAX_PRODUCTS,
-                "price_range": {
-                    "min": products_step4[0]['extracted_price'] if products_step4 else None,
-                    "max": products_step4[-1]['extracted_price'] if products_step4 else None
-                },
-                "products": [
-                    {
-                        "position": i + 1,
-                        "title": p['title'][:60],
-                        "price": p['extracted_price'],
-                        "source": p['source'],
-                        "has_immersive_api": bool(p.get('serpapi_immersive_url'))
-                    }
-                    for i, p in enumerate(products_step4)
-                ]
+        filtros_aplicados.append(FiltroAplicado(
+            nome="Ordenação e Limite",
+            descricao="Ordena por preço crescente e limita a 150 produtos",
+            entrada=len(produtos_apos_preco),
+            saida=len(produtos_limitados),
+            removidos=max(0, len(produtos_apos_preco) - 150),
+            detalhes={
+                "preco_minimo": produtos_limitados[0]['extracted_price'] if produtos_limitados else None,
+                "preco_maximo": produtos_limitados[-1]['extracted_price'] if produtos_limitados else None
             }
         ))
 
-        # ============================================
-        # STEP 5: Criar blocos de variacao
-        # ============================================
-        blocks = []
-        valid_blocks = []
+        fluxo_resumo.append(f"  └─ Após filtros: {len(produtos_limitados)} produtos válidos")
 
-        for i, start_product in enumerate(products_step4):
-            min_price = start_product['extracted_price']
-            max_allowed = min_price * (1 + variacao_decimal)
+        # 1.4 Formação de Blocos
+        blocos = _form_blocks(produtos_limitados, var_max_decimal, num_cotacoes)
+        blocos_elegiveis = [b for b in blocos if b['elegivel']]
 
-            block_products = []
-            for p in products_step4[i:]:
-                if p['extracted_price'] <= max_allowed:
-                    block_products.append(p)
-                else:
-                    break
-
-            if len(block_products) > 0:
-                variation = ((block_products[-1]['extracted_price'] / block_products[0]['extracted_price']) - 1) * 100
-                block = BlockInfo(
-                    index=i,
-                    size=len(block_products),
-                    min_price=block_products[0]['extracted_price'],
-                    max_price=block_products[-1]['extracted_price'],
-                    variation_percent=round(variation, 2),
-                    products=[
-                        {
-                            "title": p['title'][:60],
-                            "price": p['extracted_price'],
-                            "source": p['source']
-                        }
-                        for p in block_products
-                    ],
-                    is_valid=len(block_products) >= limit
-                )
-                blocks.append(block)
-                if block.is_valid:
-                    valid_blocks.append(block)
-
-        # Ordenar blocos validos por tamanho (desc) e preco minimo (asc)
-        valid_blocks.sort(key=lambda b: (-b.size, b.min_price))
-
-        steps.append(StepResult(
-            step_number=5,
-            step_name="Criacao de Blocos de Variacao",
-            description=f"Criar blocos de produtos dentro de {variacao_maxima}% de variacao",
-            input_count=len(products_step4),
-            output_count=len(valid_blocks),
-            filtered_count=len(blocks) - len(valid_blocks),
-            details={
-                "total_blocks_created": len(blocks),
-                "valid_blocks": len(valid_blocks),
-                "invalid_blocks": len(blocks) - len(valid_blocks),
-                "min_products_per_block": limit,
-                "top_5_blocks": [
-                    {
-                        "index": b.index,
-                        "size": b.size,
-                        "price_range": f"R$ {b.min_price:.2f} - R$ {b.max_price:.2f}",
-                        "variation": f"{b.variation_percent:.1f}%"
-                    }
-                    for b in valid_blocks[:5]
+        # Converter para modelo
+        blocos_modelo = [
+            BlocoFormado(
+                indice=b['indice'],
+                tamanho=b['tamanho'],
+                preco_min=b['preco_min'],
+                preco_max=b['preco_max'],
+                variacao_percent=b['variacao_percent'],
+                elegivel=b['elegivel'],
+                potencial=b['tamanho'],  # Inicialmente, potencial = tamanho
+                produtos=[
+                    {"position": p['position'], "title": p['title'][:40], "price": p['extracted_price'], "source": p['source']}
+                    for p in b['produtos'][:10]  # Limitar para visualização
                 ]
-            }
-        ))
+            )
+            for b in blocos[:20]  # Mostrar até 20 blocos
+        ]
 
-        # ============================================
-        # STEP 6: Executar Google Immersive (opcional)
-        # Com validacoes detalhadas e recriacao de blocos
-        # ============================================
-        immersive_results = []
-        final_results = []
-        product_validations = []
-        block_iterations = []
+        melhor_bloco = None
+        if blocos_elegiveis:
+            # Ordenar por tamanho (desc) e preço mínimo (asc)
+            blocos_elegiveis.sort(key=lambda b: (-b['tamanho'], b['preco_min']))
+            best = blocos_elegiveis[0]
+            melhor_bloco = BlocoFormado(
+                indice=best['indice'],
+                tamanho=best['tamanho'],
+                preco_min=best['preco_min'],
+                preco_max=best['preco_max'],
+                variacao_percent=best['variacao_percent'],
+                elegivel=True,
+                potencial=best['tamanho'],
+                produtos=[
+                    {"position": p['position'], "title": p['title'][:40], "price": p['extracted_price'], "source": p['source']}
+                    for p in best['produtos']
+                ]
+            )
 
-        if execute_immersive and products_step4:
-            # Obter API key do SerpAPI - mesma logica do settings.py
+        fluxo_resumo.append(f"  └─ Blocos formados: {len(blocos)} (elegíveis: {len(blocos_elegiveis)})")
+
+        # Converter produtos para modelo
+        produtos_modelo = [
+            ProdutoExtraido(
+                position=p['position'],
+                title=p['title'],
+                source=p['source'],
+                extracted_price=p['extracted_price'],
+                has_immersive_url=bool(p.get('serpapi_immersive_url')),
+                status=ProductStatus.NAO_TESTADO
+            )
+            for p in produtos_limitados[:50]  # Limitar para visualização
+        ]
+
+        etapa1 = Etapa1Result(
+            total_extraidos=total_extraidos,
+            filtros_aplicados=filtros_aplicados,
+            produtos_apos_filtros=len(produtos_limitados),
+            blocos_formados=len(blocos),
+            blocos_elegiveis=len(blocos_elegiveis),
+            melhor_bloco=melhor_bloco,
+            produtos_ordenados=produtos_modelo
+        )
+
+        # =====================================================================
+        # ETAPA 2: VALIDAÇÃO DE BLOCO (se execute_immersive=True)
+        # =====================================================================
+        etapa2 = None
+        cotacoes_finais = []
+
+        logger.info(f"Debug SerpAPI - execute_immersive_bool: {execute_immersive_bool}, produtos_limitados: {len(produtos_limitados)}")
+
+        if execute_immersive_bool and produtos_limitados:
+            fluxo_resumo.append("🔍 ETAPA 2: Validação de Bloco iniciada")
+            logger.info("Debug SerpAPI - Iniciando ETAPA 2")
+
+            # Obter API key
             serpapi_setting = db.query(IntegrationSetting).filter(
-                IntegrationSetting.provider == "SERPAPI"  # UPPERCASE como no banco
+                IntegrationSetting.provider == "SERPAPI"
             ).first()
 
             serpapi_key = None
-
-            # Primeiro tenta do banco de dados
             if serpapi_setting and serpapi_setting.settings_json:
                 encrypted_key = serpapi_setting.settings_json.get('api_key')
                 if encrypted_key:
                     serpapi_key = decrypt_value(encrypted_key)
+                    logger.info("Debug SerpAPI - API key obtida do banco de dados")
 
-            # Fallback para variaveis de ambiente
             if not serpapi_key:
                 serpapi_key = settings.SERPAPI_API_KEY
+                if serpapi_key:
+                    logger.info("Debug SerpAPI - API key obtida das variáveis de ambiente")
 
             if not serpapi_key:
-                raise HTTPException(
-                    status_code=400,
-                    detail="API Key do SerpAPI nao encontrada. Configure em Configuracoes > Integracoes ou defina SERPAPI_API_KEY no .env"
-                )
+                logger.error("Debug SerpAPI - API Key do SerpAPI não configurada")
+                raise HTTPException(status_code=400, detail="API Key do SerpAPI não configurada")
+
+            logger.info(f"Debug SerpAPI - API key presente: {bool(serpapi_key)}, tamanho: {len(serpapi_key) if serpapi_key else 0}")
 
             import httpx
             from urllib.parse import urlparse
 
-            # Estado do processamento iterativo
-            failed_product_keys = set()
+            # Estado do processamento
+            validated_keys = set()
+            failed_keys = set()
+            urls_seen = set()
             results_by_key = {}
-            urls_seen = set()  # URLs únicas (não mais domínios) - permite produtos diferentes do mesmo domínio
+
+            iteracoes = []
             iteration = 0
+            tolerance_round = 0
+            current_var_max = var_max_decimal
             max_iterations = 50
-            validation_step = 0
 
             async with httpx.AsyncClient(timeout=30.0) as client:
-                while len(final_results) < limit and iteration < max_iterations:
-                    iteration += 1
+                # Loop externo: tolerância
+                while tolerance_round <= MAX_TOLERANCE_INCREASES:
+                    if tolerance_round > 0:
+                        current_var_max += INCREMENTO_VAR
+                        fluxo_resumo.append(f"  └─ ⚠️ Aumentando tolerância para {current_var_max*100:.0f}%")
 
-                    # Recriar blocos excluindo produtos que falharam
-                    products_for_blocks = [
-                        p for p in products_step4
-                        if f"{p['title']}_{p['extracted_price']}" not in failed_product_keys
-                    ]
+                    # Loop interno: iterações de bloco
+                    while iteration < max_iterations and len(cotacoes_finais) < num_cotacoes:
+                        iteration += 1
 
-                    if not products_for_blocks:
-                        block_iterations.append(BlockIteration(
-                            iteration=iteration,
-                            block_size=0,
-                            block_min_price=0,
-                            block_max_price=0,
-                            products_processed=0,
-                            results_obtained=0,
-                            results_total=len(final_results),
-                            failures_in_iteration=0,
-                            total_failures=len(failed_product_keys),
-                            skipped_reasons={},
-                            status="FAILED",
-                            action="no_products_left"
-                        ))
-                        break
+                        # Produtos disponíveis
+                        available = [
+                            p for p in produtos_limitados
+                            if _make_product_key(p['title'], p['extracted_price']) not in failed_keys
+                        ]
 
-                    # Criar blocos com produtos restantes
-                    current_blocks = create_variation_blocks(products_for_blocks, variacao_decimal, limit)
-
-                    if not current_blocks:
-                        block_iterations.append(BlockIteration(
-                            iteration=iteration,
-                            block_size=0,
-                            block_min_price=0,
-                            block_max_price=0,
-                            products_processed=0,
-                            results_obtained=0,
-                            results_total=len(final_results),
-                            failures_in_iteration=0,
-                            total_failures=len(failed_product_keys),
-                            skipped_reasons={},
-                            status="FAILED",
-                            action="no_valid_blocks"
-                        ))
-                        break
-
-                    # Ordenar blocos: maior tamanho primeiro, depois menor preco
-                    current_blocks.sort(key=lambda b: (-len(b), b[0]['extracted_price']))
-
-                    # Usar o melhor bloco
-                    block = current_blocks[0]
-                    block_min_price = block[0]['extracted_price']
-                    block_max_price = block[-1]['extracted_price']
-
-                    block_results_count = 0
-                    block_skipped = {
-                        "blocked_domain": 0, "foreign_domain": 0, "duplicate_url": 0,
-                        "listing_url": 0, "no_store_link": 0, "no_immersive_url": 0,
-                        "api_error": 0
-                    }
-                    new_failures = []
-                    failed_products_details = []  # Detalhes dos produtos que falharam nesta iteração
-
-                    for product in block:
-                        if len(final_results) >= limit:
+                        if not available:
+                            fluxo_resumo.append(f"  └─ ❌ Sem produtos disponíveis")
                             break
 
-                        product_key = f"{product['title']}_{product['extracted_price']}"
-                        validation_step += 1
+                        # Formar e rankear blocos
+                        current_blocks = _form_blocks(available, current_var_max, num_cotacoes)
+                        if not current_blocks:
+                            fluxo_resumo.append(f"  └─ ❌ Nenhum bloco pode ser formado")
+                            break
 
-                        # Pular produtos ja falhados
-                        if product_key in failed_product_keys:
-                            continue
+                        ranked = _rank_blocks(current_blocks, validated_keys, failed_keys, num_cotacoes)
+                        if not ranked:
+                            fluxo_resumo.append(f"  └─ ⚠️ Nenhum bloco elegível (potencial < {num_cotacoes})")
+                            break  # Ir para próxima tolerância
 
-                        # Verificar se ja temos resultado valido para este produto
-                        if product_key in results_by_key:
-                            stored = results_by_key[product_key]
-                            if stored['store_link'] not in urls_seen:
-                                urls_seen.add(stored['store_link'])
-                                final_results.append(stored)
-                                block_results_count += 1
-                                product_validations.append(ProductValidation(
-                                    product_title=product['title'][:60],
-                                    product_price=product['extracted_price'],
-                                    product_source=product['source'],
-                                    iteration=iteration,
-                                    block_index=0,
-                                    step=validation_step,
-                                    immersive_called=False,
-                                    stores_returned=0,
-                                    validations=[{"check": "reused_valid", "passed": True}],
-                                    final_status="SUCCESS",
-                                    failure_reason=None,
-                                    selected_store=stored
-                                ))
-                            continue
+                        # Selecionar melhor bloco
+                        best_block = ranked[0]
+                        block_products = best_block['produtos']
 
-                        # Verificar se tem URL do Immersive
-                        if not product.get('serpapi_immersive_url'):
-                            new_failures.append(product_key)
-                            block_skipped["no_immersive_url"] += 1
-                            failed_products_details.append({
-                                "product_title": product['title'][:60],
-                                "product_price": product['extracted_price'],
-                                "product_source": product['source'],
-                                "failure_reason": "no_immersive_url",
-                                "failure_description": "Produto não possui URL da Immersive API"
-                            })
-                            product_validations.append(ProductValidation(
-                                product_title=product['title'][:60],
-                                product_price=product['extracted_price'],
-                                product_source=product['source'],
-                                iteration=iteration,
-                                block_index=0,
-                                step=validation_step,
-                                immersive_called=False,
-                                stores_returned=0,
-                                validations=[{"check": "has_immersive_url", "passed": False, "reason": "URL nao disponivel"}],
-                                final_status="FAILED",
-                                failure_reason="no_immersive_url",
-                                selected_store=None
-                            ))
-                            continue
+                        # Produtos a testar nesta iteração
+                        untried = [
+                            p for p in block_products
+                            if _make_product_key(p['title'], p['extracted_price']) not in validated_keys
+                            and _make_product_key(p['title'], p['extracted_price']) not in failed_keys
+                        ]
 
-                        # Chamar Immersive API
-                        immersive_url = product['serpapi_immersive_url']
-                        if '?' in immersive_url:
-                            immersive_url += f"&api_key={serpapi_key}"
-                        else:
-                            immersive_url += f"?api_key={serpapi_key}"
+                        logger.info(f"Debug SerpAPI - Iteração {iteration}: {len(untried)} produtos a testar no bloco")
 
-                        validations_list = []
-                        stores_list = []
-                        selected_store = None
-                        api_error = None
+                        # Verificar quantos têm URL Immersive
+                        with_immersive = [p for p in untried if p.get('serpapi_immersive_url')]
+                        logger.info(f"Debug SerpAPI - Produtos com URL Immersive: {len(with_immersive)}/{len(untried)}")
 
-                        try:
-                            response = await client.get(immersive_url)
-                            response.raise_for_status()
-                            data = response.json()
+                        iteracao_info = IteracaoBloco(
+                            numero_iteracao=iteration,
+                            tolerancia_atual=current_var_max * 100,
+                            tolerancia_round=tolerance_round,
+                            bloco_tamanho=best_block['tamanho'],
+                            bloco_preco_min=best_block['preco_min'],
+                            bloco_preco_max=best_block['preco_max'],
+                            bloco_variacao=best_block['variacao_percent'],
+                            produtos_no_bloco=len(block_products),
+                            produtos_validados_inicio=best_block['validados_no_bloco'],
+                            produtos_nao_testados=len(untried),
+                            potencial_bloco=best_block['potencial'],
+                            validacoes_realizadas=[],
+                            novos_validados=0,
+                            novos_descartados=0,
+                            total_validados_apos=len(validated_keys),
+                            status="CONTINUAR",
+                            acao_tomada=""
+                        )
 
-                            stores = data.get('product_results', {}).get('sellers', [])
-                            if not stores:
-                                stores = data.get('sellers_results', {}).get('online_sellers', [])
-                            if not stores:
-                                stores = data.get('product_results', [])
+                        # Validar produtos do bloco
+                        ordem = 0
+                        for product in untried:
+                            if len(cotacoes_finais) >= num_cotacoes:
+                                break
 
-                            validations_list.append({"check": "immersive_api_call", "passed": True, "stores_found": len(stores)})
+                            ordem += 1
+                            product_key = _make_product_key(product['title'], product['extracted_price'])
 
-                            if not stores:
-                                new_failures.append(product_key)
-                                block_skipped["no_store_link"] += 1
-                                validations_list.append({"check": "has_stores", "passed": False, "reason": "Nenhuma loja retornada"})
+                            validacao = ValidacaoProduto(
+                                produto_titulo=product['title'][:60],
+                                produto_preco=product['extracted_price'],
+                                produto_source=product['source'],
+                                ordem_validacao=ordem,
+                                sucesso=False
+                            )
+
+                            # Verificar URL Immersive
+                            if not product.get('serpapi_immersive_url'):
+                                failed_keys.add(product_key)
+                                validacao.failure_code = FailureCode.NO_IMMERSIVE_URL
+                                validacao.failure_reason = "Produto não possui URL da Immersive API"
+                                iteracao_info.validacoes_realizadas.append(validacao)
+                                iteracao_info.novos_descartados += 1
+                                continue
+
+                            # Chamar Immersive API
+                            immersive_url = product['serpapi_immersive_url']
+                            logger.info(f"Debug SerpAPI - Chamando Immersive API: {immersive_url[:100]}...")
+
+                            if '?' in immersive_url:
+                                immersive_url += f"&api_key={serpapi_key}"
                             else:
-                                # Processar cada loja
-                                for s in stores:
-                                    store_name = s.get('name', s.get('source', 'N/A'))
-                                    store_link = s.get('link', s.get('url', ''))
-                                    store_price = s.get('price', s.get('base_price', 'N/A'))
+                                immersive_url += f"?api_key={serpapi_key}"
 
+                            try:
+                                response = await client.get(immersive_url)
+                                logger.info(f"Debug SerpAPI - Resposta Immersive: status={response.status_code}")
+                                response.raise_for_status()
+                                data = response.json()
+
+                                # Tentar vários caminhos para encontrar stores/sellers
+                                stores = data.get('product_results', {}).get('stores', [])
+                                if not stores:
+                                    stores = data.get('product_results', {}).get('sellers', [])
+                                if not stores:
+                                    stores = data.get('sellers_results', {}).get('online_sellers', [])
+                                if not stores:
+                                    stores = data.get('sellers_results', {}).get('sellers', [])
+                                if not stores:
+                                    # Logar chaves disponíveis para debug
+                                    available_keys = list(data.keys())
+                                    logger.info(f"Debug SerpAPI - Chaves na resposta: {available_keys}")
+                                    if 'sellers_results' in data:
+                                        seller_keys = list(data['sellers_results'].keys())
+                                        logger.info(f"Debug SerpAPI - Chaves em sellers_results: {seller_keys}")
+                                    if 'product_results' in data:
+                                        product_keys = list(data['product_results'].keys())
+                                        logger.info(f"Debug SerpAPI - Chaves em product_results: {product_keys}")
+                                logger.info(f"Debug SerpAPI - Lojas encontradas: {len(stores)}")
+
+                                validacao.lojas_encontradas = len(stores)
+
+                                if not stores:
+                                    failed_keys.add(product_key)
+                                    validacao.failure_code = FailureCode.NO_STORE_LINK
+                                    validacao.failure_reason = "API não retornou lojas"
+                                    iteracao_info.validacoes_realizadas.append(validacao)
+                                    iteracao_info.novos_descartados += 1
+                                    continue
+
+                                # Validar cada loja
+                                selected_store = None
+                                for store in stores:
+                                    store_link = store.get('link', store.get('url', ''))
                                     store_domain = ""
                                     if store_link:
                                         try:
@@ -791,287 +823,138 @@ async def analyze_shopping_json(
                                             pass
 
                                     store_info = {
-                                        "name": store_name,
-                                        "price": store_price,
+                                        "name": store.get('name', store.get('source', '')),
                                         "link": store_link,
-                                        "domain": store_domain
+                                        "domain": store_domain,
+                                        "price": store.get('price', store.get('base_price', ''))
                                     }
 
-                                    # Validacao 1: Dominio bloqueado
-                                    is_blk, blk_reason = is_blocked_domain(store_domain)
+                                    # Validações
+                                    is_blk, blk_reason = _is_blocked_domain(store_domain)
                                     if is_blk:
-                                        store_info["status"] = "blocked_domain"
-                                        store_info["reason"] = blk_reason
-                                        stores_list.append(store_info)
+                                        store_info['rejection'] = f"BLOCKED_DOMAIN: {blk_reason}"
+                                        validacao.lojas_rejeitadas.append(store_info)
                                         continue
 
-                                    # Validacao 2: Dominio estrangeiro
-                                    is_fgn, fgn_reason = is_foreign_domain(store_domain)
+                                    is_fgn, fgn_reason = _is_foreign_domain(store_domain)
                                     if is_fgn:
-                                        store_info["status"] = "foreign_domain"
-                                        store_info["reason"] = fgn_reason
-                                        stores_list.append(store_info)
+                                        store_info['rejection'] = f"FOREIGN_DOMAIN: {fgn_reason}"
+                                        validacao.lojas_rejeitadas.append(store_info)
                                         continue
 
-                                    # Validacao 3: URL duplicada (permite produtos diferentes do mesmo domínio)
                                     if store_link in urls_seen:
-                                        store_info["status"] = "duplicate_url"
-                                        store_info["reason"] = "URL ja usada em outra cotacao"
-                                        stores_list.append(store_info)
+                                        store_info['rejection'] = "DUPLICATE_URL"
+                                        validacao.lojas_rejeitadas.append(store_info)
                                         continue
 
-                                    # Validacao 4: URL de listagem
-                                    is_lst, lst_reason = is_listing_url(store_link)
+                                    is_lst, lst_reason = _is_listing_url(store_link)
                                     if is_lst:
-                                        store_info["status"] = "listing_url"
-                                        store_info["reason"] = lst_reason
-                                        stores_list.append(store_info)
+                                        store_info['rejection'] = f"LISTING_URL: {lst_reason}"
+                                        validacao.lojas_rejeitadas.append(store_info)
                                         continue
 
-                                    # Passou em todas as validacoes!
-                                    store_info["status"] = "valid"
-                                    stores_list.append(store_info)
-                                    if selected_store is None:
-                                        selected_store = store_info
+                                    # Passou em todas as validações!
+                                    selected_store = store_info
+                                    break
 
-                                # Registrar resultado das validacoes
-                                blocked_count = sum(1 for s in stores_list if s.get("status") == "blocked_domain")
-                                foreign_count = sum(1 for s in stores_list if s.get("status") == "foreign_domain")
-                                duplicate_url_count = sum(1 for s in stores_list if s.get("status") == "duplicate_url")
-                                listing_count = sum(1 for s in stores_list if s.get("status") == "listing_url")
-                                valid_count = sum(1 for s in stores_list if s.get("status") == "valid")
+                                if selected_store:
+                                    urls_seen.add(selected_store['link'])
+                                    validated_keys.add(product_key)
 
-                                validations_list.append({"check": "blocked_domain", "blocked": blocked_count})
-                                validations_list.append({"check": "foreign_domain", "blocked": foreign_count})
-                                validations_list.append({"check": "duplicate_url", "blocked": duplicate_url_count})
-                                validations_list.append({"check": "listing_url", "blocked": listing_count})
-                                validations_list.append({"check": "valid_stores", "count": valid_count})
+                                    cotacao = {
+                                        "titulo": product['title'],
+                                        "preco_google": product['extracted_price'],
+                                        "loja": selected_store['name'],
+                                        "url": selected_store['link'],
+                                        "dominio": selected_store['domain']
+                                    }
+                                    cotacoes_finais.append(cotacao)
+                                    results_by_key[product_key] = cotacao
 
-                        except Exception as e:
-                            api_error = str(e)[:100]
-                            validations_list.append({"check": "immersive_api_call", "passed": False, "error": api_error})
-                            new_failures.append(product_key)
-                            block_skipped["api_error"] += 1
-
-                        # Registrar resultado do produto
-                        if selected_store:
-                            urls_seen.add(selected_store['link'])  # URL única, não domínio
-                            result_entry = {
-                                "title": product['title'],
-                                "google_price": product['extracted_price'],
-                                "store": selected_store['name'],
-                                "store_price": selected_store['price'],
-                                "store_link": selected_store['link'],
-                                "store_domain": selected_store['domain']
-                            }
-                            final_results.append(result_entry)
-                            results_by_key[product_key] = result_entry
-                            block_results_count += 1
-
-                            product_validations.append(ProductValidation(
-                                product_title=product['title'][:60],
-                                product_price=product['extracted_price'],
-                                product_source=product['source'],
-                                iteration=iteration,
-                                block_index=0,
-                                step=validation_step,
-                                immersive_called=True,
-                                stores_returned=len(stores_list),
-                                validations=validations_list,
-                                final_status="SUCCESS",
-                                failure_reason=None,
-                                selected_store=selected_store
-                            ))
-
-                            immersive_results.append(ImmersiveResult(
-                                product_title=product['title'][:60],
-                                source=product['source'],
-                                google_price=product['extracted_price'],
-                                immersive_url=immersive_url.split('api_key=')[0] + "api_key=***",
-                                stores_found=len(stores_list),
-                                stores=stores_list[:10],
-                                selected_store=selected_store,
-                                success=True,
-                                error=None
-                            ))
-                        else:
-                            # Falha - nenhuma loja valida
-                            if not api_error:
-                                new_failures.append(product_key)
-                                # Usar variaveis locais se definidas, senao usar 0
-                                _blocked = locals().get('blocked_count', 0)
-                                _foreign = locals().get('foreign_count', 0)
-                                _duplicate_url = locals().get('duplicate_url_count', 0)
-                                _listing = locals().get('listing_count', 0)
-
-                                # Determinar motivo específico da falha
-                                if _blocked > 0:
-                                    block_skipped["blocked_domain"] += 1
-                                    fail_reason = "blocked_domain"
-                                    fail_desc = f"Todas as {len(stores_list)} lojas estão em domínios bloqueados"
-                                elif _foreign > 0:
-                                    block_skipped["foreign_domain"] += 1
-                                    fail_reason = "foreign_domain"
-                                    fail_desc = f"Todas as {len(stores_list)} lojas são de domínios estrangeiros"
-                                elif _duplicate_url > 0:
-                                    block_skipped["duplicate_url"] += 1
-                                    fail_reason = "duplicate_url"
-                                    fail_desc = f"Todas as {len(stores_list)} URLs já foram usadas em outras cotações"
-                                elif _listing > 0:
-                                    block_skipped["listing_url"] += 1
-                                    fail_reason = "listing_url"
-                                    fail_desc = f"Todas as {len(stores_list)} URLs são páginas de listagem"
+                                    validacao.sucesso = True
+                                    validacao.loja_selecionada = selected_store
+                                    iteracao_info.novos_validados += 1
                                 else:
-                                    block_skipped["no_store_link"] += 1
-                                    fail_reason = "no_store_link"
-                                    fail_desc = "Nenhuma loja válida encontrada na Immersive API"
+                                    failed_keys.add(product_key)
+                                    validacao.failure_code = FailureCode.BLOCKED_DOMAIN
+                                    validacao.failure_reason = "Todas as lojas foram rejeitadas"
+                                    iteracao_info.novos_descartados += 1
 
-                                failed_products_details.append({
-                                    "product_title": product['title'][:60],
-                                    "product_price": product['extracted_price'],
-                                    "product_source": product['source'],
-                                    "failure_reason": fail_reason,
-                                    "failure_description": fail_desc,
-                                    "stores_checked": len(stores_list),
-                                    "stores_details": [
-                                        {"name": s.get("name"), "domain": s.get("domain"), "status": s.get("status"), "reason": s.get("reason")}
-                                        for s in stores_list[:5]  # Primeiras 5 lojas
-                                    ]
-                                })
-                            else:
-                                # Erro de API
-                                failed_products_details.append({
-                                    "product_title": product['title'][:60],
-                                    "product_price": product['extracted_price'],
-                                    "product_source": product['source'],
-                                    "failure_reason": "api_error",
-                                    "failure_description": f"Erro ao chamar Immersive API: {api_error}"
-                                })
+                            except Exception as e:
+                                failed_keys.add(product_key)
+                                validacao.failure_code = FailureCode.API_ERROR
+                                validacao.failure_reason = str(e)[:100]
+                                iteracao_info.novos_descartados += 1
 
-                            failure_reason = api_error or "no_valid_store"
-                            product_validations.append(ProductValidation(
-                                product_title=product['title'][:60],
-                                product_price=product['extracted_price'],
-                                product_source=product['source'],
-                                iteration=iteration,
-                                block_index=0,
-                                step=validation_step,
-                                immersive_called=True,
-                                stores_returned=len(stores_list),
-                                validations=validations_list,
-                                final_status="FAILED",
-                                failure_reason=failure_reason,
-                                selected_store=None
-                            ))
+                            iteracao_info.validacoes_realizadas.append(validacao)
 
-                            immersive_results.append(ImmersiveResult(
-                                product_title=product['title'][:60],
-                                source=product['source'],
-                                google_price=product['extracted_price'],
-                                immersive_url=immersive_url.split('api_key=')[0] + "api_key=***",
-                                stores_found=len(stores_list),
-                                stores=stores_list[:10],
-                                selected_store=None,
-                                success=False,
-                                error=failure_reason
-                            ))
+                        # Atualizar status da iteração
+                        iteracao_info.total_validados_apos = len(validated_keys)
 
-                    # Atualizar falhas
-                    failed_product_keys.update(new_failures)
-
-                    # Determinar status e acao
-                    if len(final_results) >= limit:
-                        status = "SUCCESS"
-                        action = "completed"
-                        block_failure_reason = None
-                    elif new_failures:
-                        status = "CONTINUING"
-                        action = "recreating_blocks"
-                        # Determinar motivo da falha do bloco
-                        failure_counts = {k: v for k, v in block_skipped.items() if v > 0}
-                        if failure_counts:
-                            main_reason = max(failure_counts, key=failure_counts.get)
-                            block_failure_reason = f"Bloco falhou parcialmente: {len(new_failures)} produtos falharam. Principal motivo: {main_reason} ({failure_counts[main_reason]}x)"
+                        if len(cotacoes_finais) >= num_cotacoes:
+                            iteracao_info.status = "SUCESSO"
+                            iteracao_info.acao_tomada = f"✅ Meta atingida: {len(cotacoes_finais)}/{num_cotacoes} cotações"
+                            iteracoes.append(iteracao_info)
+                            break
+                        elif iteracao_info.novos_descartados > 0 and iteracao_info.novos_validados == 0:
+                            iteracao_info.status = "BLOCO_FALHOU"
+                            iteracao_info.acao_tomada = "Recalcular blocos sem produtos descartados"
                         else:
-                            block_failure_reason = f"Bloco falhou parcialmente: {len(new_failures)} produtos falharam"
-                    else:
-                        status = "FAILED"
-                        action = "no_progress"
-                        already_processed = len([p for p in block if f"{p['title']}_{p['extracted_price']}" in failed_product_keys])
-                        block_failure_reason = f"Bloco travou: nenhum produto processável restante. Produtos no bloco: {len(block)}, já processados: {already_processed}"
+                            iteracao_info.status = "CONTINUAR"
+                            iteracao_info.acao_tomada = "Continuar validando próximo bloco"
 
-                    block_iterations.append(BlockIteration(
-                        iteration=iteration,
-                        block_size=len(block),
-                        block_min_price=block_min_price,
-                        block_max_price=block_max_price,
-                        products_processed=len([p for p in block if f"{p['title']}_{p['extracted_price']}" not in failed_product_keys or f"{p['title']}_{p['extracted_price']}" in new_failures]),
-                        results_obtained=block_results_count,
-                        results_total=len(final_results),
-                        failures_in_iteration=len(new_failures),
-                        total_failures=len(failed_product_keys),
-                        skipped_reasons=block_skipped,
-                        status=status,
-                        action=action,
-                        block_failure_reason=block_failure_reason,
-                        failed_products_details=failed_products_details
-                    ))
+                        iteracoes.append(iteracao_info)
 
-                    if status == "SUCCESS" or action == "no_progress":
+                        if iteracao_info.status == "SUCESSO":
+                            break
+
+                    # Verificar se atingiu meta ou precisa aumentar tolerância
+                    if len(cotacoes_finais) >= num_cotacoes:
                         break
 
-            # Adicionar step 6 com resumo
-            steps.append(StepResult(
-                step_number=6,
-                step_name="Processamento Iterativo com Immersive API",
-                description="Validacoes detalhadas e recriacao de blocos em caso de falha (URL unica)",
-                input_count=len(products_step4),
-                output_count=len(final_results),
-                filtered_count=len(failed_product_keys),
-                details={
-                    "total_iterations": len(block_iterations),
-                    "total_validations": len(product_validations),
-                    "api_calls_made": len(immersive_results),
-                    "successful_quotes": len(final_results),
-                    "failed_products": len(failed_product_keys),
-                    "urls_used": list(urls_seen),
-                    "final_status": "SUCCESS" if len(final_results) >= limit else "PARTIAL"
-                }
-            ))
+                    tolerance_round += 1
 
-        # ============================================
-        # Montar resposta final
-        # ============================================
-        summary = {
-            "total_raw_products": len(raw_products),
-            "after_source_filter": len(products_step2),
-            "after_price_filter": len(products_step3),
-            "after_limit": len(products_step4),
-            "total_blocks": len(blocks),
-            "valid_blocks": len(valid_blocks),
-            "quotes_target": limit,
-            "quotes_obtained": len(final_results),
-            "variacao_maxima": f"{variacao_maxima}%",
-            "immersive_executed": execute_immersive,
-            "total_iterations": len(block_iterations) if execute_immersive else 0,
-            "total_product_validations": len(product_validations) if execute_immersive else 0
-        }
+            etapa2 = Etapa2Result(
+                iteracoes=iteracoes,
+                total_iteracoes=len(iteracoes),
+                aumentos_tolerancia=tolerance_round,
+                tolerancia_inicial=variacao_maxima,
+                tolerancia_final=current_var_max * 100,
+                produtos_validados_final=len(validated_keys),
+                produtos_descartados_final=len(failed_keys),
+                sucesso=len(cotacoes_finais) >= num_cotacoes,
+                cotacoes_obtidas=cotacoes_finais
+            )
+
+            if len(cotacoes_finais) >= num_cotacoes:
+                fluxo_resumo.append(f"  └─ ✅ SUCESSO: {len(cotacoes_finais)}/{num_cotacoes} cotações obtidas")
+            else:
+                fluxo_resumo.append(f"  └─ ⚠️ PARCIAL: {len(cotacoes_finais)}/{num_cotacoes} cotações obtidas")
+
+        # =====================================================================
+        # MONTAR RESPOSTA FINAL
+        # =====================================================================
+        sucesso_geral = len(cotacoes_finais) >= num_cotacoes if execute_immersive_bool else len(blocos_elegiveis) > 0
+
+        status_geral = "SUCESSO" if sucesso_geral else ("PARCIAL" if cotacoes_finais else "AGUARDANDO")
+        if not execute_immersive_bool:
+            status_geral = "SIMULAÇÃO"
+
+        fluxo_visual = FluxoVisual(
+            etapa_atual="CONCLUÍDO" if sucesso_geral else "ETAPA 2",
+            status_geral=status_geral,
+            progresso=f"{len(cotacoes_finais)}/{num_cotacoes} cotações" if execute_immersive_bool else f"{len(blocos_elegiveis)} blocos elegíveis",
+            resumo_fluxo=fluxo_resumo
+        )
 
         return DebugResponse(
-            success=True,
+            sucesso=sucesso_geral,
             query=query,
-            parameters={
-                "limit": limit,
-                "variacao_maxima": variacao_maxima,
-                "execute_immersive": execute_immersive
-            },
-            steps=steps,
-            blocks=valid_blocks[:10],  # Top 10 blocos
-            immersive_results=immersive_results,
-            product_validations=product_validations,
-            block_iterations=block_iterations,
-            final_results=final_results,
-            summary=summary
+            parametros=parametros,
+            etapa1=etapa1,
+            etapa2=etapa2,
+            fluxo_visual=fluxo_visual,
+            cotacoes_finais=cotacoes_finais
         )
 
     except HTTPException:
@@ -1080,16 +963,31 @@ async def analyze_shopping_json(
         logger.error(f"Erro no debug SerpAPI: {e}")
         import traceback
         traceback.print_exc()
+
         return DebugResponse(
-            success=False,
+            sucesso=False,
             query="",
-            parameters={},
-            steps=[],
-            blocks=[],
-            immersive_results=[],
-            product_validations=[],
-            block_iterations=[],
-            final_results=[],
-            summary={},
-            error=str(e)
+            parametros=ParametrosSistema(
+                NUM_COTACOES=num_cotacoes,
+                VAR_MAX_PERCENT=variacao_maxima,
+                VALIDAR_PRECO_SITE=validar_preco_site.lower() in ('true', '1', 'yes'),
+                DOMINIOS_BLOQUEADOS_SAMPLE=[]
+            ),
+            etapa1=Etapa1Result(
+                total_extraidos=0,
+                filtros_aplicados=[],
+                produtos_apos_filtros=0,
+                blocos_formados=0,
+                blocos_elegiveis=0,
+                melhor_bloco=None,
+                produtos_ordenados=[]
+            ),
+            fluxo_visual=FluxoVisual(
+                etapa_atual="ERRO",
+                status_geral="ERRO",
+                progresso="0/0",
+                resumo_fluxo=["❌ Erro no processamento"]
+            ),
+            cotacoes_finais=[],
+            erro=str(e)
         )

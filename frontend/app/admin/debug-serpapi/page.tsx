@@ -4,106 +4,141 @@ import { useState } from 'react'
 import { api } from '@/lib/api'
 import AdminRoute from '@/components/AdminRoute'
 
-interface ProductInfo {
-  title: string
-  price: string
-  extracted_price: number | null
-  source: string
-  domain: string | null
+// =============================================================================
+// INTERFACES - Nova estrutura do backend
+// =============================================================================
+
+interface FiltroAplicado {
+  nome: string
+  descricao: string
+  entrada: number
+  saida: number
+  removidos: number
+  detalhes?: Record<string, any>
+}
+
+interface ProdutoExtraido {
   position: number
-  is_blocked: boolean
-  block_reason: string | null
-  has_valid_price: boolean
-}
-
-interface BlockInfo {
-  index: number
-  size: number
-  min_price: number
-  max_price: number
-  variation_percent: number
-  products: Array<{ title: string; price: number; source: string }>
-  is_valid: boolean
-}
-
-interface StepResult {
-  step_number: number
-  step_name: string
-  description: string
-  input_count: number
-  output_count: number
-  filtered_count: number
-  details: Record<string, any> | null
-}
-
-interface ImmersiveResult {
-  product_title: string
+  title: string
   source: string
-  google_price: number
-  immersive_url: string
-  stores_found: number
-  stores: Array<{ name: string; price: string; link: string; domain?: string; status?: string; reason?: string }>
-  selected_store: { name: string; price: string; link: string; domain?: string } | null
-  success: boolean
-  error: string | null
-}
-
-interface ProductValidation {
-  product_title: string
-  product_price: number
-  product_source: string
-  iteration: number
-  block_index: number
-  step: number
-  immersive_called: boolean
-  stores_returned: number
-  validations: Array<Record<string, any>>
-  final_status: string
-  failure_reason: string | null
-  selected_store: Record<string, any> | null
-}
-
-interface BlockIteration {
-  iteration: number
-  block_size: number
-  block_min_price: number
-  block_max_price: number
-  products_processed: number
-  results_obtained: number
-  results_total: number
-  failures_in_iteration: number
-  total_failures: number
-  skipped_reasons: Record<string, number>
+  extracted_price: number | null
+  has_immersive_url: boolean
   status: string
-  action: string
+  failure_code?: string
+  failure_reason?: string
+}
+
+interface BlocoFormado {
+  indice: number
+  tamanho: number
+  preco_min: number
+  preco_max: number
+  variacao_percent: number
+  elegivel: boolean
+  potencial: number
+  produtos: Array<{ position: number; title: string; price: number; source: string }>
+}
+
+interface ValidacaoProduto {
+  produto_titulo: string
+  produto_preco: number
+  produto_source: string
+  ordem_validacao: number
+  sucesso: boolean
+  failure_code?: string
+  failure_reason?: string
+  loja_selecionada?: Record<string, any>
+  lojas_encontradas: number
+  lojas_rejeitadas: Array<Record<string, any>>
+}
+
+interface IteracaoBloco {
+  numero_iteracao: number
+  tolerancia_atual: number
+  tolerancia_round: number
+  bloco_tamanho: number
+  bloco_preco_min: number
+  bloco_preco_max: number
+  bloco_variacao: number
+  produtos_no_bloco: number
+  produtos_validados_inicio: number
+  produtos_nao_testados: number
+  potencial_bloco: number
+  validacoes_realizadas: ValidacaoProduto[]
+  novos_validados: number
+  novos_descartados: number
+  total_validados_apos: number
+  status: string
+  acao_tomada: string
+  motivo?: string
+}
+
+interface ParametrosSistema {
+  NUM_COTACOES: number
+  VAR_MAX_PERCENT: number
+  MAX_VALID_PRODUCTS: number
+  INCREMENTO_VAR: number
+  VALIDAR_PRECO_SITE: boolean
+  DOMINIOS_BLOQUEADOS_SAMPLE: string[]
+}
+
+interface Etapa1Result {
+  total_extraidos: number
+  filtros_aplicados: FiltroAplicado[]
+  produtos_apos_filtros: number
+  blocos_formados: number
+  blocos_elegiveis: number
+  melhor_bloco?: BlocoFormado
+  produtos_ordenados: ProdutoExtraido[]
+}
+
+interface Etapa2Result {
+  iteracoes: IteracaoBloco[]
+  total_iteracoes: number
+  aumentos_tolerancia: number
+  tolerancia_inicial: number
+  tolerancia_final: number
+  produtos_validados_final: number
+  produtos_descartados_final: number
+  sucesso: boolean
+  cotacoes_obtidas: Array<Record<string, any>>
+}
+
+interface FluxoVisual {
+  etapa_atual: string
+  status_geral: string
+  progresso: string
+  resumo_fluxo: string[]
 }
 
 interface DebugResponse {
-  success: boolean
+  sucesso: boolean
   query: string
-  parameters: Record<string, any>
-  steps: StepResult[]
-  blocks: BlockInfo[]
-  immersive_results: ImmersiveResult[]
-  product_validations: ProductValidation[]
-  block_iterations: BlockIteration[]
-  final_results: Array<Record<string, any>>
-  summary: Record<string, any>
-  error: string | null
+  parametros: ParametrosSistema
+  etapa1: Etapa1Result
+  etapa2?: Etapa2Result
+  fluxo_visual: FluxoVisual
+  cotacoes_finais: Array<Record<string, any>>
+  erro?: string
 }
+
+// =============================================================================
+// COMPONENTE PRINCIPAL
+// =============================================================================
 
 export default function DebugSerpApiPage() {
   const [file, setFile] = useState<File | null>(null)
   const [limit, setLimit] = useState(3)
   const [variacaoMaxima, setVariacaoMaxima] = useState(25)
   const [executeImmersive, setExecuteImmersive] = useState(false)
+  const [validarPrecoSite, setValidarPrecoSite] = useState(true)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<DebugResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set())
-  const [expandedBlocks, setExpandedBlocks] = useState<Set<number>>(new Set())
-  const [expandedIterations, setExpandedIterations] = useState<Set<number>>(new Set())
-  const [expandedValidations, setExpandedValidations] = useState<Set<number>>(new Set())
+  const [expandedFiltros, setExpandedFiltros] = useState<Set<number>>(new Set())
+  const [expandedIteracoes, setExpandedIteracoes] = useState<Set<number>>(new Set())
+  const [expandedValidacoes, setExpandedValidacoes] = useState<Set<string>>(new Set())
+  const [showProdutos, setShowProdutos] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -130,6 +165,7 @@ export default function DebugSerpApiPage() {
       formData.append('limit', limit.toString())
       formData.append('variacao_maxima', variacaoMaxima.toString())
       formData.append('execute_immersive', executeImmersive.toString())
+      formData.append('enable_price_mismatch', validarPrecoSite.toString())
 
       const response = await api.post('/api/admin/debug-serpapi/analyze', formData, {
         headers: {
@@ -138,8 +174,6 @@ export default function DebugSerpApiPage() {
       })
 
       setResult(response.data)
-      // Expandir todas as steps por padrao
-      setExpandedSteps(new Set(response.data.steps.map((_: any, i: number) => i)))
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao processar arquivo')
     } finally {
@@ -147,75 +181,54 @@ export default function DebugSerpApiPage() {
     }
   }
 
-  const toggleStep = (index: number) => {
-    const newExpanded = new Set(expandedSteps)
+  const toggleFiltro = (index: number) => {
+    const newExpanded = new Set(expandedFiltros)
     if (newExpanded.has(index)) {
       newExpanded.delete(index)
     } else {
       newExpanded.add(index)
     }
-    setExpandedSteps(newExpanded)
+    setExpandedFiltros(newExpanded)
   }
 
-  const toggleBlock = (index: number) => {
-    const newExpanded = new Set(expandedBlocks)
+  const toggleIteracao = (index: number) => {
+    const newExpanded = new Set(expandedIteracoes)
     if (newExpanded.has(index)) {
       newExpanded.delete(index)
     } else {
       newExpanded.add(index)
     }
-    setExpandedBlocks(newExpanded)
+    setExpandedIteracoes(newExpanded)
   }
 
-  const toggleIteration = (index: number) => {
-    const newExpanded = new Set(expandedIterations)
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index)
+  const toggleValidacao = (key: string) => {
+    const newExpanded = new Set(expandedValidacoes)
+    if (newExpanded.has(key)) {
+      newExpanded.delete(key)
     } else {
-      newExpanded.add(index)
+      newExpanded.add(key)
     }
-    setExpandedIterations(newExpanded)
-  }
-
-  const toggleValidation = (index: number) => {
-    const newExpanded = new Set(expandedValidations)
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index)
-    } else {
-      newExpanded.add(index)
-    }
-    setExpandedValidations(newExpanded)
+    setExpandedValidacoes(newExpanded)
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status.toUpperCase()) {
+      case 'SUCESSO':
       case 'SUCCESS':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+      case 'BLOCO_FALHOU':
       case 'FAILED':
+      case 'FALHA':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+      case 'CONTINUAR':
       case 'CONTINUING':
+      case 'PARCIAL':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      case 'SKIPPED':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+      case 'SIMULAÇÃO':
+      case 'AGUARDANDO':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-    }
-  }
-
-  const getActionLabel = (action: string) => {
-    switch (action) {
-      case 'completed':
-        return 'Concluido'
-      case 'recreating_blocks':
-        return 'Recriando Blocos'
-      case 'no_progress':
-        return 'Sem Progresso'
-      case 'no_products_left':
-        return 'Produtos Esgotados'
-      case 'no_valid_blocks':
-        return 'Sem Blocos Validos'
-      default:
-        return action
     }
   }
 
@@ -258,10 +271,10 @@ export default function DebugSerpApiPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Número de Cotações (limit)
+                Número de Cotações
               </label>
               <input
                 type="number"
@@ -296,7 +309,21 @@ export default function DebugSerpApiPage() {
                   className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Executar Google Immersive API (chamadas reais)
+                  Executar Immersive API
+                </span>
+              </label>
+            </div>
+
+            <div className="flex items-end">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={validarPrecoSite}
+                  onChange={(e) => setValidarPrecoSite(e.target.checked)}
+                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Validação de Preços
                 </span>
               </label>
             </div>
@@ -324,259 +351,138 @@ export default function DebugSerpApiPage() {
       {/* Resultados */}
       {result && (
         <div className="space-y-6">
-          {/* Resumo */}
+
+          {/* Fluxo Visual - Status Geral */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Resumo</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {result.summary.total_raw_products}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Status Geral
+              </h2>
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(result.fluxo_visual.status_geral)}`}>
+                {result.fluxo_visual.status_geral}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-primary-600 dark:text-primary-400">
+                  {result.fluxo_visual.progresso}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Produtos Raw</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Progresso</p>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {result.summary.after_source_filter}
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {result.etapa1.total_extraidos}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Apos Filtro Fonte</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Produtos Extraídos</p>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {result.summary.after_price_filter}
+              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg text-center">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {result.etapa1.blocos_elegiveis}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Apos Filtro Preco</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {result.summary.valid_blocks}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Blocos Validos</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                  {result.summary.quotes_obtained}/{result.summary.quotes_target}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Cotacoes Obtidas</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {result.summary.variacao_maxima}
-                </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Variacao Max</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Blocos Elegíveis</p>
               </div>
             </div>
-            {result.query && (
-              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+
+            {result.query && result.query !== 'N/A' && (
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   <strong>Query:</strong> {result.query}
                 </p>
               </div>
             )}
+
+            {/* Resumo do Fluxo */}
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fluxo Executado:</p>
+              <div className="space-y-1">
+                {result.fluxo_visual.resumo_fluxo.map((passo, index) => (
+                  <p key={index} className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                    {passo}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Steps */}
+          {/* Parâmetros Utilizados */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Etapas do Processamento
+              Parâmetros
             </h2>
-            <div className="space-y-3">
-              {result.steps.map((step, index) => (
-                <div
-                  key={index}
-                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
-                >
-                  <button
-                    onClick={() => toggleStep(index)}
-                    className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary-600 text-white font-bold text-sm">
-                        {step.step_number}
-                      </span>
-                      <div className="text-left">
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {step.step_name}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {step.input_count} → {step.output_count}
-                        </span>
-                        {step.filtered_count > 0 && (
-                          <span className="ml-2 text-sm text-red-600 dark:text-red-400">
-                            (-{step.filtered_count})
-                          </span>
-                        )}
-                      </div>
-                      <svg
-                        className={`w-5 h-5 transform transition-transform ${
-                          expandedSteps.has(index) ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </button>
-
-                  {expandedSteps.has(index) && step.details && (
-                    <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                      <pre className="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">
-                        {JSON.stringify(step.details, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Cotações Alvo</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {result.parametros.NUM_COTACOES}
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Variação Máxima</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {result.parametros.VAR_MAX_PERCENT}%
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Incremento Tolerância</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {result.parametros.INCREMENTO_VAR}%
+                </p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Validar Preço Site</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  {result.parametros.VALIDAR_PRECO_SITE ? 'Sim' : 'Não'}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Blocos de Variacao */}
-          {result.blocks.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Blocos de Variacao (Top 10)
-              </h2>
-              <div className="space-y-3">
-                {result.blocks.map((block, index) => (
+          {/* ETAPA 1 - Processamento Google Shopping */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+              ETAPA 1: Processamento Google Shopping
+            </h2>
+
+            {/* Filtros Aplicados */}
+            <div className="mb-6">
+              <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Filtros Aplicados
+              </h3>
+              <div className="space-y-2">
+                {result.etapa1.filtros_aplicados.map((filtro, index) => (
                   <div
                     key={index}
-                    className={`border rounded-lg overflow-hidden ${
-                      block.is_valid
-                        ? 'border-green-200 dark:border-green-800'
-                        : 'border-gray-200 dark:border-gray-700'
-                    }`}
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                   >
                     <button
-                      onClick={() => toggleBlock(index)}
-                      className={`w-full flex items-center justify-between p-4 transition-colors ${
-                        block.is_valid
-                          ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
-                          : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
-                      }`}
+                      onClick={() => toggleFiltro(index)}
+                      className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          block.is_valid
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-200'
-                        }`}>
-                          Bloco #{block.index}
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold">
+                          {index + 1}
                         </span>
                         <div className="text-left">
                           <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {block.size} produtos | R$ {block.min_price.toFixed(2)} - R$ {block.max_price.toFixed(2)}
+                            {filtro.nome}
                           </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Variacao: {block.variation_percent.toFixed(1)}%
-                          </p>
-                        </div>
-                      </div>
-                      <svg
-                        className={`w-5 h-5 transform transition-transform ${
-                          expandedBlocks.has(index) ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {expandedBlocks.has(index) && (
-                      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="text-left text-gray-500 dark:text-gray-400">
-                              <th className="pb-2">Produto</th>
-                              <th className="pb-2">Preco</th>
-                              <th className="pb-2">Fonte</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {block.products.map((product, pIndex) => (
-                              <tr key={pIndex}>
-                                <td className="py-2 text-gray-900 dark:text-gray-100">
-                                  {product.title}
-                                </td>
-                                <td className="py-2 font-medium text-gray-900 dark:text-gray-100">
-                                  R$ {product.price.toFixed(2)}
-                                </td>
-                                <td className="py-2 text-gray-600 dark:text-gray-400">
-                                  {product.source}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Iteracoes de Blocos */}
-          {result.block_iterations && result.block_iterations.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Iteracoes de Processamento (Recriacao de Blocos)
-              </h2>
-              <div className="space-y-3">
-                {result.block_iterations.map((iteration, index) => (
-                  <div
-                    key={index}
-                    className={`border rounded-lg overflow-hidden ${
-                      iteration.status === 'SUCCESS'
-                        ? 'border-green-200 dark:border-green-800'
-                        : iteration.status === 'CONTINUING'
-                        ? 'border-yellow-200 dark:border-yellow-800'
-                        : 'border-red-200 dark:border-red-800'
-                    }`}
-                  >
-                    <button
-                      onClick={() => toggleIteration(index)}
-                      className={`w-full flex items-center justify-between p-4 transition-colors ${
-                        iteration.status === 'SUCCESS'
-                          ? 'bg-green-50 dark:bg-green-900/20'
-                          : iteration.status === 'CONTINUING'
-                          ? 'bg-yellow-50 dark:bg-yellow-900/20'
-                          : 'bg-red-50 dark:bg-red-900/20'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white font-bold text-sm">
-                          {iteration.iteration}
-                        </span>
-                        <div className="text-left">
-                          <p className="font-medium text-gray-900 dark:text-gray-100">
-                            Bloco: {iteration.block_size} produtos | R$ {iteration.block_min_price.toFixed(2)} - R$ {iteration.block_max_price.toFixed(2)}
-                          </p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Resultados: {iteration.results_obtained} obtidos | {iteration.failures_in_iteration} falhas | Total: {iteration.results_total}
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {filtro.descricao}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(iteration.status)}`}>
-                          {iteration.status}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {getActionLabel(iteration.action)}
-                        </span>
+                        <div className="text-right text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">{filtro.entrada}</span>
+                          <span className="mx-1">→</span>
+                          <span className="text-gray-900 dark:text-gray-100 font-medium">{filtro.saida}</span>
+                          {filtro.removidos > 0 && (
+                            <span className="ml-2 text-red-600 dark:text-red-400">(-{filtro.removidos})</span>
+                          )}
+                        </div>
                         <svg
-                          className={`w-5 h-5 transform transition-transform ${
-                            expandedIterations.has(index) ? 'rotate-180' : ''
-                          }`}
+                          className={`w-4 h-4 transform transition-transform ${expandedFiltros.has(index) ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -585,98 +491,242 @@ export default function DebugSerpApiPage() {
                         </svg>
                       </div>
                     </button>
-
-                    {expandedIterations.has(index) && (
-                      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                          <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded text-center">
-                            <p className="text-lg font-bold">{iteration.block_size}</p>
-                            <p className="text-xs text-gray-500">Tamanho Bloco</p>
-                          </div>
-                          <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded text-center">
-                            <p className="text-lg font-bold text-green-600">{iteration.results_obtained}</p>
-                            <p className="text-xs text-gray-500">Sucesso</p>
-                          </div>
-                          <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded text-center">
-                            <p className="text-lg font-bold text-red-600">{iteration.failures_in_iteration}</p>
-                            <p className="text-xs text-gray-500">Falhas</p>
-                          </div>
-                          <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded text-center">
-                            <p className="text-lg font-bold">{iteration.total_failures}</p>
-                            <p className="text-xs text-gray-500">Total Falhas</p>
-                          </div>
-                        </div>
-                        {Object.keys(iteration.skipped_reasons).length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Motivos dos Skips:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {Object.entries(iteration.skipped_reasons).map(([reason, count]) => (
-                                count > 0 && (
-                                  <span key={reason} className="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">
-                                    {reason}: {count}
-                                  </span>
-                                )
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                    {expandedFiltros.has(index) && filtro.detalhes && (
+                      <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <pre className="text-xs text-gray-700 dark:text-gray-300 overflow-x-auto whitespace-pre-wrap">
+                          {JSON.stringify(filtro.detalhes, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Validacoes Detalhadas de Produtos */}
-          {result.product_validations && result.product_validations.length > 0 && (
+            {/* Resumo dos Blocos */}
+            <div className="mb-6">
+              <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Blocos Formados
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {result.etapa1.produtos_apos_filtros}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Produtos Válidos</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {result.etapa1.blocos_formados}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Total Blocos</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {result.etapa1.blocos_elegiveis}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Blocos Elegíveis</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                    {result.etapa1.melhor_bloco?.tamanho || 0}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Melhor Bloco (tam)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Melhor Bloco */}
+            {result.etapa1.melhor_bloco && (
+              <div className="mb-6">
+                <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                  Melhor Bloco Selecionado
+                </h3>
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-green-800 dark:text-green-200 font-medium">
+                      Bloco #{result.etapa1.melhor_bloco.indice}
+                    </span>
+                    <span className="text-green-700 dark:text-green-300 text-sm">
+                      {result.etapa1.melhor_bloco.tamanho} produtos | Variação: {result.etapa1.melhor_bloco.variacao_percent.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="text-sm text-green-700 dark:text-green-300 mb-3">
+                    Faixa de preço: R$ {result.etapa1.melhor_bloco.preco_min.toFixed(2)} - R$ {result.etapa1.melhor_bloco.preco_max.toFixed(2)}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-left text-green-600 dark:text-green-400">
+                          <th className="pb-2">#</th>
+                          <th className="pb-2">Produto</th>
+                          <th className="pb-2">Preço</th>
+                          <th className="pb-2">Fonte</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-green-100 dark:divide-green-800">
+                        {result.etapa1.melhor_bloco.produtos.slice(0, 10).map((p, index) => (
+                          <tr key={index}>
+                            <td className="py-1 text-green-700 dark:text-green-300">{p.position}</td>
+                            <td className="py-1 text-green-800 dark:text-green-200 max-w-xs truncate">{p.title}</td>
+                            <td className="py-1 font-medium text-green-800 dark:text-green-200">R$ {p.price.toFixed(2)}</td>
+                            <td className="py-1 text-green-600 dark:text-green-400">{p.source}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {result.etapa1.melhor_bloco.produtos.length > 10 && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                        ... e mais {result.etapa1.melhor_bloco.produtos.length - 10} produtos
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lista de Produtos */}
+            <div>
+              <button
+                onClick={() => setShowProdutos(!showProdutos)}
+                className="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 hover:underline"
+              >
+                <svg
+                  className={`w-4 h-4 transform transition-transform ${showProdutos ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                {showProdutos ? 'Ocultar' : 'Ver'} lista de produtos ({result.etapa1.produtos_ordenados.length})
+              </button>
+              {showProdutos && (
+                <div className="mt-3 overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-white dark:bg-gray-800">
+                      <tr className="text-left text-gray-500 dark:text-gray-400 border-b">
+                        <th className="pb-2 px-2">#</th>
+                        <th className="pb-2 px-2">Produto</th>
+                        <th className="pb-2 px-2">Preço</th>
+                        <th className="pb-2 px-2">Fonte</th>
+                        <th className="pb-2 px-2">Immersive</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {result.etapa1.produtos_ordenados.map((p, index) => (
+                        <tr key={index}>
+                          <td className="py-1 px-2 text-gray-600">{p.position}</td>
+                          <td className="py-1 px-2 text-gray-900 dark:text-gray-100 max-w-xs truncate">{p.title}</td>
+                          <td className="py-1 px-2 font-medium">R$ {p.extracted_price?.toFixed(2) || '-'}</td>
+                          <td className="py-1 px-2 text-gray-600 dark:text-gray-400">{p.source}</td>
+                          <td className="py-1 px-2">
+                            {p.has_immersive_url ? (
+                              <span className="text-green-600">✓</span>
+                            ) : (
+                              <span className="text-red-600">✗</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ETAPA 2 - Validação de Bloco */}
+          {result.etapa2 && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Validacoes Detalhadas de Produtos ({result.product_validations.length} validacoes)
+                ETAPA 2: Validação de Bloco (Immersive API)
               </h2>
-              <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                {result.product_validations.map((validation, index) => (
+
+              {/* Resumo da Etapa 2 */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {result.etapa2.total_iteracoes}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Iterações</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {result.etapa2.produtos_validados_final}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Validados</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    {result.etapa2.produtos_descartados_final}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Descartados</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {result.etapa2.aumentos_tolerancia}
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Aumentos Tolerância</p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg text-center">
+                  <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    {result.etapa2.tolerancia_inicial}% → {result.etapa2.tolerancia_final.toFixed(0)}%
+                  </p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Tolerância (ini → fin)</p>
+                </div>
+              </div>
+
+              {/* Iterações */}
+              <h3 className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Iterações de Validação
+              </h3>
+              <div className="space-y-2">
+                {result.etapa2.iteracoes.map((iteracao, index) => (
                   <div
                     key={index}
                     className={`border rounded-lg overflow-hidden ${
-                      validation.final_status === 'SUCCESS'
+                      iteracao.status === 'SUCESSO'
                         ? 'border-green-200 dark:border-green-800'
-                        : 'border-red-200 dark:border-red-800'
+                        : iteracao.status === 'BLOCO_FALHOU'
+                        ? 'border-red-200 dark:border-red-800'
+                        : 'border-yellow-200 dark:border-yellow-800'
                     }`}
                   >
                     <button
-                      onClick={() => toggleValidation(index)}
-                      className={`w-full flex items-center justify-between p-3 transition-colors text-sm ${
-                        validation.final_status === 'SUCCESS'
+                      onClick={() => toggleIteracao(index)}
+                      className={`w-full flex items-center justify-between p-3 transition-colors ${
+                        iteracao.status === 'SUCESSO'
                           ? 'bg-green-50 dark:bg-green-900/20'
-                          : 'bg-red-50 dark:bg-red-900/20'
+                          : iteracao.status === 'BLOCO_FALHOU'
+                          ? 'bg-red-50 dark:bg-red-900/20'
+                          : 'bg-yellow-50 dark:bg-yellow-900/20'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 font-mono">#{validation.step}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(validation.final_status)}`}>
-                          {validation.final_status === 'SUCCESS' ? '✓' : '✗'}
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-600 text-white text-sm font-bold">
+                          {iteracao.numero_iteracao}
                         </span>
-                        <span className="text-gray-900 dark:text-gray-100 truncate max-w-md">
-                          {validation.product_title}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          R$ {validation.product_price.toFixed(2)}
-                        </span>
+                        <div className="text-left">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
+                            Bloco: {iteracao.bloco_tamanho} prod | R$ {iteracao.bloco_preco_min.toFixed(2)} - R$ {iteracao.bloco_preco_max.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            Potencial: {iteracao.potencial_bloco} | Tolerância: {iteracao.tolerancia_atual.toFixed(0)}%
+                          </p>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">
-                          Iter {validation.iteration}
+                        <div className="text-right text-xs">
+                          <span className="text-green-600">+{iteracao.novos_validados}</span>
+                          <span className="mx-1">/</span>
+                          <span className="text-red-600">-{iteracao.novos_descartados}</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(iteracao.status)}`}>
+                          {iteracao.status}
                         </span>
-                        {validation.immersive_called && (
-                          <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-1.5 py-0.5 rounded">
-                            API
-                          </span>
-                        )}
                         <svg
-                          className={`w-4 h-4 transform transition-transform ${
-                            expandedValidations.has(index) ? 'rotate-180' : ''
-                          }`}
+                          className={`w-4 h-4 transform transition-transform ${expandedIteracoes.has(index) ? 'rotate-180' : ''}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -686,66 +736,83 @@ export default function DebugSerpApiPage() {
                       </div>
                     </button>
 
-                    {expandedValidations.has(index) && (
-                      <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 text-sm">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-                          <div className="text-xs">
-                            <span className="text-gray-500">Fonte:</span>{' '}
-                            <span className="text-gray-900 dark:text-gray-100">{validation.product_source}</span>
-                          </div>
-                          <div className="text-xs">
-                            <span className="text-gray-500">Lojas:</span>{' '}
-                            <span className="text-gray-900 dark:text-gray-100">{validation.stores_returned}</span>
-                          </div>
-                          <div className="text-xs">
-                            <span className="text-gray-500">Immersive:</span>{' '}
-                            <span className="text-gray-900 dark:text-gray-100">{validation.immersive_called ? 'Sim' : 'Nao'}</span>
-                          </div>
-                          {validation.failure_reason && (
-                            <div className="text-xs">
-                              <span className="text-gray-500">Motivo:</span>{' '}
-                              <span className="text-red-600">{validation.failure_reason}</span>
-                            </div>
-                          )}
-                        </div>
+                    {expandedIteracoes.has(index) && (
+                      <div className="p-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                          <strong>Ação:</strong> {iteracao.acao_tomada}
+                        </p>
+
+                        {/* Validações da iteração */}
                         <div className="space-y-1">
-                          <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Validacoes:</p>
-                          {validation.validations.map((v, vIndex) => (
-                            <div key={vIndex} className="text-xs bg-gray-50 dark:bg-gray-700 p-1.5 rounded flex items-center gap-2">
-                              <span className="font-mono text-gray-600 dark:text-gray-400">{v.check}</span>
-                              {v.passed !== undefined && (
-                                <span className={v.passed ? 'text-green-600' : 'text-red-600'}>
-                                  {v.passed ? '✓' : '✗'}
-                                </span>
-                              )}
-                              {v.blocked !== undefined && (
-                                <span className="text-red-600">bloqueados: {v.blocked}</span>
-                              )}
-                              {v.count !== undefined && (
-                                <span className="text-green-600">validos: {v.count}</span>
-                              )}
-                              {v.stores_found !== undefined && (
-                                <span className="text-blue-600">lojas: {v.stores_found}</span>
-                              )}
-                              {v.reason && (
-                                <span className="text-gray-500">{v.reason}</span>
-                              )}
-                              {v.error && (
-                                <span className="text-red-600">{v.error}</span>
-                              )}
-                            </div>
-                          ))}
+                          {iteracao.validacoes_realizadas.map((val, vIndex) => {
+                            const valKey = `${index}-${vIndex}`
+                            return (
+                              <div
+                                key={vIndex}
+                                className={`border rounded overflow-hidden ${
+                                  val.sucesso ? 'border-green-200' : 'border-red-200'
+                                }`}
+                              >
+                                <button
+                                  onClick={() => toggleValidacao(valKey)}
+                                  className={`w-full flex items-center justify-between p-2 text-xs ${
+                                    val.sucesso ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-medium ${val.sucesso ? 'text-green-600' : 'text-red-600'}`}>
+                                      {val.sucesso ? '✓' : '✗'}
+                                    </span>
+                                    <span className="text-gray-900 dark:text-gray-100 max-w-md truncate">
+                                      {val.produto_titulo}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-500">R$ {val.produto_preco.toFixed(2)}</span>
+                                    {val.failure_code && (
+                                      <span className="text-red-600 text-xs">{val.failure_code}</span>
+                                    )}
+                                    <svg
+                                      className={`w-3 h-3 transform transition-transform ${expandedValidacoes.has(valKey) ? 'rotate-180' : ''}`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                  </div>
+                                </button>
+                                {expandedValidacoes.has(valKey) && (
+                                  <div className="p-2 text-xs bg-white dark:bg-gray-800 border-t">
+                                    <p><strong>Fonte:</strong> {val.produto_source}</p>
+                                    <p><strong>Lojas encontradas:</strong> {val.lojas_encontradas}</p>
+                                    {val.failure_reason && (
+                                      <p className="text-red-600"><strong>Motivo:</strong> {val.failure_reason}</p>
+                                    )}
+                                    {val.loja_selecionada && (
+                                      <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                                        <p className="font-medium text-green-800 dark:text-green-200">
+                                          Loja: {val.loja_selecionada.name}
+                                        </p>
+                                        <p className="text-green-600 text-xs truncate">{val.loja_selecionada.link}</p>
+                                      </div>
+                                    )}
+                                    {val.lojas_rejeitadas.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className="font-medium text-gray-700 dark:text-gray-300">Lojas rejeitadas:</p>
+                                        {val.lojas_rejeitadas.slice(0, 5).map((loja, lIndex) => (
+                                          <p key={lIndex} className="text-red-600 text-xs">
+                                            {loja.name}: {loja.rejection}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
                         </div>
-                        {validation.selected_store && (
-                          <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                            <p className="text-xs font-medium text-green-800 dark:text-green-200">
-                              Loja Selecionada: {validation.selected_store.name} - {validation.selected_store.price}
-                            </p>
-                            {validation.selected_store.domain && (
-                              <p className="text-xs text-green-600">{validation.selected_store.domain}</p>
-                            )}
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -754,68 +821,11 @@ export default function DebugSerpApiPage() {
             </div>
           )}
 
-          {/* Resultados Immersive (resumo) */}
-          {result.immersive_results.length > 0 && (
+          {/* Cotações Finais */}
+          {result.cotacoes_finais.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Resumo Chamadas Google Immersive API
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                      <th className="pb-3">Produto</th>
-                      <th className="pb-3">Preco Google</th>
-                      <th className="pb-3">Lojas</th>
-                      <th className="pb-3">Loja Selecionada</th>
-                      <th className="pb-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {result.immersive_results.map((ir, index) => (
-                      <tr key={index}>
-                        <td className="py-3 text-gray-900 dark:text-gray-100 max-w-xs truncate">
-                          {ir.product_title}
-                        </td>
-                        <td className="py-3 font-medium text-gray-900 dark:text-gray-100">
-                          R$ {ir.google_price.toFixed(2)}
-                        </td>
-                        <td className="py-3 text-gray-600 dark:text-gray-400">
-                          {ir.stores_found} encontradas
-                        </td>
-                        <td className="py-3 text-gray-900 dark:text-gray-100">
-                          {ir.selected_store ? (
-                            <span>
-                              {ir.selected_store.name} - {ir.selected_store.price}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="py-3">
-                          {ir.success ? (
-                            <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Sucesso
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" title={ir.error || ''}>
-                              Falhou
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Resultados Finais */}
-          {result.final_results.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Cotacoes Finais Obtidas
+                Cotações Finais Obtidas ({result.cotacoes_finais.length})
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -823,32 +833,32 @@ export default function DebugSerpApiPage() {
                     <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                       <th className="pb-3">#</th>
                       <th className="pb-3">Produto</th>
-                      <th className="pb-3">Preco Google</th>
+                      <th className="pb-3">Preço Google</th>
                       <th className="pb-3">Loja</th>
-                      <th className="pb-3">Preco Loja</th>
+                      <th className="pb-3">Domínio</th>
                       <th className="pb-3">Link</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {result.final_results.map((fr, index) => (
+                    {result.cotacoes_finais.map((cotacao, index) => (
                       <tr key={index}>
                         <td className="py-3 text-gray-600 dark:text-gray-400">{index + 1}</td>
                         <td className="py-3 text-gray-900 dark:text-gray-100 max-w-xs truncate">
-                          {fr.title}
+                          {cotacao.titulo}
                         </td>
                         <td className="py-3 font-medium text-gray-900 dark:text-gray-100">
-                          R$ {fr.google_price?.toFixed(2)}
+                          R$ {cotacao.preco_google?.toFixed(2)}
                         </td>
                         <td className="py-3 text-gray-900 dark:text-gray-100">
-                          {fr.store}
+                          {cotacao.loja}
                         </td>
-                        <td className="py-3 font-medium text-green-600 dark:text-green-400">
-                          {fr.store_price}
+                        <td className="py-3 text-gray-600 dark:text-gray-400 text-xs">
+                          {cotacao.dominio}
                         </td>
                         <td className="py-3">
-                          {fr.store_link && (
+                          {cotacao.url && (
                             <a
-                              href={fr.store_link}
+                              href={cotacao.url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-primary-600 hover:text-primary-800"
@@ -862,6 +872,13 @@ export default function DebugSerpApiPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* Erro */}
+          {result.erro && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+              <strong>Erro:</strong> {result.erro}
             </div>
           )}
         </div>

@@ -58,7 +58,10 @@ function CotacaoContent() {
   }, [searchParams])
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setImages((prev) => [...prev, ...acceptedFiles])
+    // Cotação individual: aceita apenas 1 imagem
+    if (acceptedFiles.length > 0) {
+      setImages([acceptedFiles[0]])
+    }
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -66,7 +69,8 @@ function CotacaoContent() {
     accept: {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif']
     },
-    multiple: true
+    multiple: false,  // Cotação individual: apenas 1 imagem
+    maxFiles: 1
   })
 
   const removeImage = (index: number) => {
@@ -261,7 +265,7 @@ function CotacaoContent() {
                     : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
                 } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <input {...getInputProps()} disabled={loading} capture="environment" />
+                <input {...getInputProps()} disabled={loading} accept="image/*" />
                 <svg
                   className="mx-auto h-12 w-12 text-gray-400"
                   stroke="currentColor"
@@ -277,11 +281,11 @@ function CotacaoContent() {
                 </svg>
                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                   {isDragActive
-                    ? 'Solte as imagens aqui...'
-                    : 'Arraste imagens ou clique para selecionar'}
+                    ? 'Solte a imagem aqui...'
+                    : 'Arraste uma imagem ou clique para selecionar'}
                 </p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
-                  No celular, voce pode usar a camera para tirar fotos
+                  Apenas 1 imagem permitida. No celular, escolha entre camera ou galeria.
                 </p>
               </div>
 

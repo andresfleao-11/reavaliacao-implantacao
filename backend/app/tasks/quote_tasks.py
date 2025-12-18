@@ -636,48 +636,49 @@ def process_quote_request(self, quote_request_id: int):
                                     product_link=store_result.url
                                 )
 
-                                # PASSO 2: Verificar URL duplicada
+                                # PASSO 2: Validações de domínio/URL
+                                if search_provider._is_blocked_domain(store_result.domain):
+                                    raise ValueError(f"BLOCKED_DOMAIN: {store_result.domain}")
+
+                                if search_provider._is_foreign_domain(store_result.domain):
+                                    raise ValueError(f"FOREIGN_DOMAIN: {store_result.domain}")
+
+                                if search_provider._is_listing_url(store_result.url):
+                                    raise ValueError(f"LISTING_URL: {store_result.url[:50]}")
+
+                                # PASSO 3: Verificar URL duplicada
                                 if store_result.url in urls_seen:
                                     raise ValueError(f"URL_DUPLICADA: {store_result.url}")
                                 urls_seen.add(store_result.url)
 
-                                # PASSO 3: Verificar domínio duplicado no bloco
-                                if store_result.domain in domains_in_block:
-                                    raise ValueError(f"DOMINIO_DUPLICADO: {store_result.domain}")
-                                domains_in_block.add(store_result.domain)
+                                # PASSO 4: Capturar screenshot (OBRIGATÓRIO)
+                                from app.services.price_extractor import PriceExtractor
+                                extractor = PriceExtractor()
+                                screenshot_bytes = await extractor.capture_screenshot_only(store_result.url)
 
-                                # PASSO 4: Capturar screenshot (OPCIONAL - se falhar, continua)
-                                screenshot_file = None
-                                screenshot_path = None
-                                try:
-                                    from app.services.price_extractor import PriceExtractor
-                                    extractor = PriceExtractor()
-                                    screenshot_bytes = await extractor.capture_screenshot_only(store_result.url)
+                                if not screenshot_bytes:
+                                    raise ValueError(f"SCREENSHOT_ERROR: Falha ao capturar screenshot de {store_result.url[:50]}")
 
-                                    if screenshot_bytes:
-                                        file_hash = hashlib.sha256(screenshot_bytes).hexdigest()
-                                        screenshot_path = f"storage/screenshots/{file_hash}_screenshot.png"
+                                file_hash = hashlib.sha256(screenshot_bytes).hexdigest()
+                                screenshot_path = f"storage/screenshots/{file_hash}_screenshot.png"
 
-                                        # Salvar arquivo no disco primeiro
-                                        os.makedirs("storage/screenshots", exist_ok=True)
-                                        with open(screenshot_path, "wb") as f:
-                                            f.write(screenshot_bytes)
+                                # Salvar arquivo no disco
+                                os.makedirs("storage/screenshots", exist_ok=True)
+                                with open(screenshot_path, "wb") as f:
+                                    f.write(screenshot_bytes)
 
-                                        # Criar registro no banco com campos corretos
-                                        screenshot_file = File(
-                                            type=FileType.SCREENSHOT,
-                                            mime_type="image/png",
-                                            storage_path=screenshot_path,
-                                            sha256=file_hash,
-                                            quote_request_id=quote_request_id
-                                        )
-                                        db.add(screenshot_file)
-                                        db.flush()
+                                # Criar registro no banco
+                                screenshot_file = File(
+                                    type=FileType.SCREENSHOT,
+                                    mime_type="image/png",
+                                    storage_path=screenshot_path,
+                                    sha256=file_hash,
+                                    quote_request_id=quote_request_id
+                                )
+                                db.add(screenshot_file)
+                                db.flush()
 
-                                        logger.info(f"    Screenshot capturado: {screenshot_path}")
-                                except Exception as screenshot_error:
-                                    logger.warning(f"    Screenshot falhou (continuando sem): {str(screenshot_error)[:50]}")
-                                    # Continua sem screenshot - não é motivo de falha
+                                logger.info(f"    Screenshot capturado: {screenshot_path}")
 
                                 # ✅ SUCESSO - Criar QuoteSource com preço do Google
                                 source = QuoteSource(
@@ -731,15 +732,21 @@ def process_quote_request(self, quote_request_id: int):
                                 if "NO_STORE_LINK" in error_msg:
                                     failure_step = "IMMERSIVE_API"
                                     failure_reason = CaptureFailureReason.NO_STORE_LINK
+                                elif "BLOCKED_DOMAIN" in error_msg:
+                                    failure_step = "DOMAIN_VALIDATION"
+                                    failure_reason = CaptureFailureReason.BLOCKED_DOMAIN
+                                elif "FOREIGN_DOMAIN" in error_msg:
+                                    failure_step = "DOMAIN_VALIDATION"
+                                    failure_reason = CaptureFailureReason.FOREIGN_DOMAIN
+                                elif "LISTING_URL" in error_msg:
+                                    failure_step = "URL_VALIDATION"
+                                    failure_reason = CaptureFailureReason.LISTING_URL
                                 elif "URL_DUPLICADA" in error_msg:
                                     failure_step = "URL_VALIDATION"
-                                    failure_reason = CaptureFailureReason.OTHER
-                                elif "DOMINIO_DUPLICADO" in error_msg:
-                                    failure_step = "DOMAIN_VALIDATION"
-                                    failure_reason = CaptureFailureReason.OTHER
-                                elif "DOMINIO_BLOQUEADO" in error_msg:
-                                    failure_step = "DOMAIN_BLOCKED"
-                                    failure_reason = CaptureFailureReason.BLOCKED_DOMAIN
+                                    failure_reason = CaptureFailureReason.DUPLICATE_URL
+                                elif "SCREENSHOT_ERROR" in error_msg:
+                                    failure_step = "SCREENSHOT"
+                                    failure_reason = CaptureFailureReason.SCREENSHOT_ERROR
 
                                 test_record["result"] = "failed"
                                 test_record["failure_step"] = failure_step
@@ -1068,10 +1075,6 @@ def process_quote_request(self, quote_request_id: int):
                                 if search_provider._is_listing_url(store_result.url):
                                     raise ValueError(f"LISTING_URL: {store_result.url[:50]}")
 
-                                # DUPLICATE_DOMAIN: verificar apenas domínios já validados nesta cotação
-                                if store_result.domain in domains_in_block:
-                                    raise ValueError(f"DUPLICATE_DOMAIN: {store_result.domain}")
-
                                 if store_result.url in urls_seen:
                                     raise ValueError(f"DUPLICATE_URL: {store_result.url[:50]}")
 
@@ -1100,7 +1103,6 @@ def process_quote_request(self, quote_request_id: int):
 
                                 # ✅ SUCESSO - Produto validado!
                                 urls_seen.add(store_result.url)
-                                domains_in_block.add(store_result.domain)
 
                                 screenshot_file = File(
                                     type=FileType.SCREENSHOT,
@@ -1191,7 +1193,17 @@ def process_quote_request(self, quote_request_id: int):
                                 # Registrar falha no banco
                                 try:
                                     failure_reason = CaptureFailureReason.OTHER
-                                    if "PRICE_MISMATCH" in error_msg:
+                                    if "NO_STORE_LINK" in error_msg:
+                                        failure_reason = CaptureFailureReason.NO_STORE_LINK
+                                    elif "BLOCKED_DOMAIN" in error_msg:
+                                        failure_reason = CaptureFailureReason.BLOCKED_DOMAIN
+                                    elif "FOREIGN_DOMAIN" in error_msg:
+                                        failure_reason = CaptureFailureReason.FOREIGN_DOMAIN
+                                    elif "LISTING_URL" in error_msg:
+                                        failure_reason = CaptureFailureReason.LISTING_URL
+                                    elif "URL_DUPLICADA" in error_msg or "DUPLICATE" in error_msg:
+                                        failure_reason = CaptureFailureReason.DUPLICATE_URL
+                                    elif "PRICE_MISMATCH" in error_msg:
                                         failure_reason = CaptureFailureReason.PRICE_MISMATCH
                                     elif "EXTRACTION" in error_msg or "INVALID_PRICE" in error_msg:
                                         failure_reason = CaptureFailureReason.INVALID_PRICE
@@ -1300,24 +1312,34 @@ def process_quote_request(self, quote_request_id: int):
                             logger.info(f"  Fonte {source.domain} marcada como não aceita (fora do melhor bloco)")
 
         # Executar a lógica apropriada baseado na configuração de validação de preço
-        if enable_price_mismatch:
-            # Fluxo COM validação de preço (extrai preço do site e compara com Google)
-            logger.info("Usando fluxo COM validação de preço (extract_prices_with_blocks)")
-            asyncio.run(extract_prices_with_blocks())
-        else:
-            # Fluxo SEM validação de preço (usa apenas preço do Google Shopping)
-            logger.info("Usando fluxo SEM validação de preço (extract_prices_google_only)")
-            asyncio.run(extract_prices_google_only())
+        # Usar try/finally para garantir que search_stats sejam salvos mesmo em caso de erro
+        extraction_error = None
+        try:
+            if enable_price_mismatch:
+                # Fluxo COM validação de preço (extrai preço do site e compara com Google)
+                logger.info("Usando fluxo COM validação de preço (extract_prices_with_blocks)")
+                asyncio.run(extract_prices_with_blocks())
+            else:
+                # Fluxo SEM validação de preço (usa apenas preço do Google Shopping)
+                logger.info("Usando fluxo SEM validação de preço (extract_prices_google_only)")
+                asyncio.run(extract_prices_google_only())
+        except Exception as e:
+            extraction_error = e
+            logger.error(f"Erro durante extração de preços: {str(e)}")
+        finally:
+            # Salvar estatísticas detalhadas de busca no JSON da cotação (sempre, mesmo com erro)
+            if quote_request.google_shopping_response_json:
+                quote_request.google_shopping_response_json["search_stats"] = search_stats
+                quote_request.google_shopping_response_json["search_stats"]["final_valid_sources"] = len(valid_sources)
+                quote_request.google_shopping_response_json["search_stats"]["final_failed_products"] = len(failed_product_keys)
+                quote_request.google_shopping_response_json["search_stats"]["extraction_error"] = str(extraction_error) if extraction_error else None
+                from sqlalchemy.orm.attributes import flag_modified
+                flag_modified(quote_request, "google_shopping_response_json")
+                db.commit()
 
-        # Salvar estatísticas detalhadas de busca no JSON da cotação
-        if quote_request.google_shopping_response_json:
-            quote_request.google_shopping_response_json["search_stats"] = search_stats
-            quote_request.google_shopping_response_json["search_stats"]["final_valid_sources"] = len(valid_sources)
-            quote_request.google_shopping_response_json["search_stats"]["final_failed_products"] = len(failed_product_keys)
-            from sqlalchemy.orm.attributes import flag_modified
-            flag_modified(quote_request, "google_shopping_response_json")
-
-        db.commit()
+        # Re-lançar a exceção se houve erro
+        if extraction_error:
+            raise extraction_error
 
         logger.info(f"Extracted {len(valid_sources)} valid prices")
         logger.info(f"Search stats: products_tested={search_stats['products_tested']}, blocks_recalculated={search_stats['blocks_recalculated']}, immersive_api_calls={search_stats['immersive_api_calls']}")

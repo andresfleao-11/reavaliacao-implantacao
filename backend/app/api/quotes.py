@@ -166,7 +166,9 @@ def get_quote(
         raise HTTPException(status_code=404, detail="Quote request not found")
 
     sources_response = []
-    for source in quote_request.sources:
+    # Filtrar apenas sources aceitos (is_accepted=True)
+    accepted_sources = [s for s in quote_request.sources if s.is_accepted]
+    for source in accepted_sources:
         screenshot_url = None
         if source.screenshot_file_id:
             screenshot_url = f"/api/quotes/{quote_id}/screenshots/{source.screenshot_file_id}"

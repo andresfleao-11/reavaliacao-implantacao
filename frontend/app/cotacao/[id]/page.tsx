@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { quotesApi, QuoteDetail, materialsApi, SuggestedMaterial, IntegrationLog, API_URL } from '@/lib/api'
+import SearchLogDetail from '@/components/SearchLogDetail'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -1498,7 +1499,17 @@ export default function QuoteDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          {searchStatsExpanded && (() => {
+          {searchStatsExpanded && (
+            <SearchLogDetail
+              searchStats={quote.google_shopping_response_json.search_stats}
+              shoppingLog={quote.google_shopping_response_json.shopping_log || {}}
+            />
+          )}
+        </div>
+      )}
+
+      {/* LEGACY: Log de Busca Detalhado Antigo (mantido para referência, removido do render) */}
+      {false && quote?.google_shopping_response_json?.search_stats && (() => {
             const searchStats = quote.google_shopping_response_json.search_stats
             const shoppingLog = quote.google_shopping_response_json.shopping_log || {}
             return (

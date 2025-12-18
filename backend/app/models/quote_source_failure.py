@@ -15,6 +15,11 @@ class CaptureFailureReason(str, enum.Enum):
     SCREENSHOT_ERROR = "SCREENSHOT_ERROR"  # Erro ao capturar screenshot
     BLOCKED_BY_SITE = "BLOCKED_BY_SITE"  # Site bloqueou acesso (403, captcha, etc)
     NETWORK_ERROR = "NETWORK_ERROR"  # Erro de rede
+    NO_STORE_LINK = "NO_STORE_LINK"  # Nao conseguiu obter link da loja via API
+    BLOCKED_DOMAIN = "BLOCKED_DOMAIN"  # Dominio bloqueado (ex: leroymerlin.com.br)
+    FOREIGN_DOMAIN = "FOREIGN_DOMAIN"  # Dominio estrangeiro (nao .br)
+    LISTING_URL = "LISTING_URL"  # URL de listagem/busca em vez de produto
+    DUPLICATE_URL = "DUPLICATE_URL"  # URL ja usada nesta cotacao
     OTHER = "OTHER"  # Outro erro
 
 
