@@ -355,6 +355,34 @@ def update_integration_setting(
     )
 
 
+@router.post("/integrations/bcb/test")
+async def test_bcb_integration():
+    """Testa a conexão com a API do Banco Central (BCB PTAX)"""
+    from app.services.bcb_client import fetch_current_exchange_rate
+
+    try:
+        result = await fetch_current_exchange_rate()
+
+        if result and result.get("rate"):
+            return {
+                "success": True,
+                "message": f"Conexão com BCB OK. Cotação atual: USD 1 = BRL {result['rate']}",
+                "rate": result["rate"],
+                "bcb_date": result.get("date")
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Não foi possível obter cotação do BCB (pode ser fim de semana ou feriado)"
+            }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Erro ao conectar com BCB: {str(e)}"
+        }
+
+
 @router.post("/integrations/{provider}/test", response_model=IntegrationTestResponse)
 async def test_integration(provider: str, db: Session = Depends(get_db)):
     from app.core.config import settings as app_settings
@@ -485,7 +513,7 @@ def update_cost_config(
     config: dict,
     db: Session = Depends(get_db)
 ):
-    """Atualiza configurações de custo"""
+    """Atualiza configurações de custo (apenas SerpAPI - taxa de câmbio é automática)"""
     from datetime import datetime
 
     setting = db.query(Setting).filter(Setting.key == "cost_config").first()
@@ -496,13 +524,11 @@ def update_cost_config(
 
     current = dict(setting.value_json) if setting.value_json else {}
 
+    # Apenas SerpAPI pode ser atualizado manualmente
+    # Taxa de câmbio é atualizada automaticamente via BCB
     if "serpapi_cost_per_call" in config:
         current["serpapi_cost_per_call"] = config["serpapi_cost_per_call"]
         current["serpapi_updated_at"] = datetime.now().isoformat()
-
-    if "usd_to_brl_rate" in config:
-        current["usd_to_brl_rate"] = config["usd_to_brl_rate"]
-        current["exchange_updated_at"] = datetime.now().isoformat()
 
     setting.value_json = current
     flag_modified(setting, "value_json")
@@ -510,3 +536,91 @@ def update_cost_config(
     db.refresh(setting)
 
     return setting.value_json
+
+
+@router.get("/exchange-rate")
+def get_exchange_rate(db: Session = Depends(get_db)):
+    """
+    Retorna a taxa de câmbio USD -> BRL atual.
+    A taxa é atualizada automaticamente diariamente às 23:00 via BCB PTAX.
+    """
+    setting = db.query(Setting).filter(Setting.key == "cost_config").first()
+
+    defaults = {
+        "rate": 6.0,
+        "source": "default",
+        "updated_at": None,
+        "bcb_date": None
+    }
+
+    if setting and setting.value_json:
+        return {
+            "rate": setting.value_json.get("usd_to_brl_rate", defaults["rate"]),
+            "source": setting.value_json.get("exchange_source", "manual"),
+            "updated_at": setting.value_json.get("exchange_updated_at"),
+            "bcb_date": setting.value_json.get("exchange_bcb_date")
+        }
+
+    return defaults
+
+
+@router.post("/exchange-rate/update")
+async def update_exchange_rate_now(
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Força a atualização da taxa de câmbio USD -> BRL agora.
+    Busca a cotação mais recente do Banco Central (PTAX).
+    """
+    from app.services.bcb_client import fetch_current_exchange_rate
+    from datetime import datetime
+
+    try:
+        result = await fetch_current_exchange_rate()
+
+        if not result or not result.get("rate"):
+            raise HTTPException(
+                status_code=503,
+                detail="Não foi possível obter a cotação do Banco Central. Tente novamente mais tarde."
+            )
+
+        rate = result["rate"]
+        bcb_date = result.get("date", "")
+
+        # Atualizar no banco de dados
+        setting = db.query(Setting).filter(Setting.key == "cost_config").first()
+
+        if not setting:
+            setting = Setting(key="cost_config", value_json={})
+            db.add(setting)
+
+        current = dict(setting.value_json) if setting.value_json else {}
+
+        current["usd_to_brl_rate"] = rate
+        current["exchange_updated_at"] = datetime.now().isoformat()
+        current["exchange_source"] = "BCB_PTAX"
+        current["exchange_bcb_date"] = bcb_date
+
+        setting.value_json = current
+        flag_modified(setting, "value_json")
+        db.commit()
+
+        return {
+            "success": True,
+            "rate": rate,
+            "source": "BCB_PTAX",
+            "updated_at": current["exchange_updated_at"],
+            "bcb_date": bcb_date,
+            "message": f"Taxa de câmbio atualizada: USD 1 = BRL {rate}"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao atualizar taxa de câmbio: {str(e)}"
+        )
+
+

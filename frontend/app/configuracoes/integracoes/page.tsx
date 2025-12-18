@@ -34,9 +34,15 @@ export default function IntegracoesPage() {
   const [serpApiCostPerCall, setSerpApiCostPerCall] = useState('')
   const [serpApiCostConfig, setSerpApiCostConfig] = useState<{ cost_per_call: number | null; updated_at: string | null } | null>(null)
 
-  // USD to BRL exchange rate
-  const [usdToBrl, setUsdToBrl] = useState('')
-  const [exchangeRateConfig, setExchangeRateConfig] = useState<{ rate: number | null; updated_at: string | null } | null>(null)
+  // USD to BRL exchange rate (read-only, auto-updated from BCB)
+  const [exchangeRateConfig, setExchangeRateConfig] = useState<{
+    rate: number | null;
+    source: string | null;
+    updated_at: string | null;
+    bcb_date: string | null;
+  } | null>(null)
+  const [updatingExchangeRate, setUpdatingExchangeRate] = useState(false)
+  const [testingBCB, setTestingBCB] = useState(false)
 
   useEffect(() => {
     const loadAll = async () => {
@@ -58,15 +64,60 @@ export default function IntegracoesPage() {
           updated_at: data.serpapi_updated_at
         })
       }
-      if (data.usd_to_brl_rate) {
-        setUsdToBrl(data.usd_to_brl_rate.toString())
-        setExchangeRateConfig({
-          rate: data.usd_to_brl_rate,
-          updated_at: data.exchange_updated_at
-        })
-      }
+      // Load exchange rate from dedicated endpoint
+      const exchangeRes = await fetch(`${API_URL}/api/settings/exchange-rate`)
+      const exchangeData = await exchangeRes.json()
+      setExchangeRateConfig({
+        rate: exchangeData.rate,
+        source: exchangeData.source,
+        updated_at: exchangeData.updated_at,
+        bcb_date: exchangeData.bcb_date
+      })
     } catch (err) {
       console.error('Error loading cost config:', err)
+    }
+  }
+
+  const handleUpdateExchangeRate = async () => {
+    setUpdatingExchangeRate(true)
+    setIntegrationMessages(prev => { const n = {...prev}; delete n['EXCHANGE']; return n })
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch(`${API_URL}/api/settings/exchange-rate/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setIntegrationMessage('EXCHANGE', 'success', `Taxa atualizada: USD 1 = R$ ${data.rate.toFixed(4)}`)
+        await loadCostConfig()
+      } else {
+        setIntegrationMessage('EXCHANGE', 'error', data.detail || 'Erro ao atualizar taxa de câmbio')
+      }
+    } catch (err) {
+      setIntegrationMessage('EXCHANGE', 'error', 'Erro ao conectar com o servidor')
+    } finally {
+      setUpdatingExchangeRate(false)
+    }
+  }
+
+  const handleTestBCB = async () => {
+    setTestingBCB(true)
+    setIntegrationMessages(prev => { const n = {...prev}; delete n['BCB']; return n })
+    try {
+      const res = await fetch(`${API_URL}/api/settings/integrations/bcb/test`, {
+        method: 'POST'
+      })
+      const data = await res.json()
+      setIntegrationMessage('BCB', data.success ? 'success' : 'error',
+        data.success ? `✓ ${data.message}` : `✗ ${data.message}`)
+    } catch (err) {
+      setIntegrationMessage('BCB', 'error', 'Erro ao testar conexão com BCB')
+    } finally {
+      setTestingBCB(false)
     }
   }
 
@@ -164,29 +215,6 @@ export default function IntegracoesPage() {
       await loadCostConfig()
     } catch (err) {
       setIntegrationMessage('SERPAPI', 'error', 'Erro ao salvar custo SerpAPI')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const handleSaveExchangeRate = async () => {
-    setSaving(true)
-    setIntegrationMessages(prev => { const n = {...prev}; delete n['EXCHANGE']; return n })
-    try {
-      const rateValue = parseFloat(usdToBrl)
-      if (isNaN(rateValue) || rateValue <= 0) {
-        setMessage('Informe um valor válido para a taxa de câmbio')
-        return
-      }
-      await fetch(`${API_URL}/api/settings/cost-config`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usd_to_brl_rate: rateValue })
-      })
-      setMessage(`Taxa de câmbio atualizada: 1 USD = R$ ${rateValue.toFixed(2)}`)
-      await loadCostConfig()
-    } catch (err) {
-      setMessage('Erro ao salvar taxa de câmbio')
     } finally {
       setSaving(false)
     }
@@ -446,46 +474,89 @@ export default function IntegracoesPage() {
           </div>
         </div>
 
-        {/* Taxa de Câmbio USD/BRL */}
+        {/* Taxa de Câmbio USD/BRL - Banco Central (BCB PTAX) */}
         <div className="card bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800">
+          {renderIntegrationMessage('EXCHANGE')}
+          {renderIntegrationMessage('BCB')}
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-xl font-semibold text-green-900 dark:text-green-100">Taxa de Câmbio USD → BRL</h2>
               <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                Usado para converter custos das APIs (Claude/OpenAI) de dólar para real
+                Cotação PTAX do Banco Central do Brasil - Atualização automática diária às 23h
               </p>
             </div>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+              {exchangeRateConfig?.source === 'BCB_PTAX' ? 'BCB PTAX' : exchangeRateConfig?.source || 'Não configurado'}
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">1 USD =</span>
-            <input
-              type="number"
-              step="0.01"
-              value={usdToBrl}
-              onChange={(e) => setUsdToBrl(e.target.value)}
-              className="input-field w-32"
-              placeholder="6.00"
-            />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">BRL</span>
+
+          {/* Taxa atual (somente leitura) */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Cotação atual</p>
+                <p className="text-3xl font-bold text-green-700 dark:text-green-300">
+                  {exchangeRateConfig?.rate ? `R$ ${exchangeRateConfig.rate.toFixed(4)}` : 'R$ 6.00'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  1 USD = {exchangeRateConfig?.rate?.toFixed(4) || '6.00'} BRL
+                </p>
+              </div>
+              <div className="text-right">
+                {exchangeRateConfig?.updated_at && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Atualizado em: {new Date(exchangeRateConfig.updated_at).toLocaleString('pt-BR')}
+                  </p>
+                )}
+                {exchangeRateConfig?.bcb_date && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Data BCB: {exchangeRateConfig.bcb_date}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
             <button
-              onClick={handleSaveExchangeRate}
-              className="btn-primary bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={saving || !usdToBrl || !isAdmin}
-              title={!isAdmin ? 'Apenas administradores podem alterar esta configuração' : ''}
+              onClick={handleUpdateExchangeRate}
+              className="btn-primary bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              disabled={updatingExchangeRate || !isAdmin}
+              title={!isAdmin ? 'Apenas administradores podem atualizar' : 'Buscar cotação mais recente do BCB'}
             >
-              {saving ? 'Salvando...' : 'Salvar Taxa'}
+              {updatingExchangeRate ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Atualizando...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Atualizar Agora
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleTestBCB}
+              className="btn-secondary"
+              disabled={testingBCB}
+            >
+              {testingBCB ? 'Testando...' : 'Testar Conexão BCB'}
             </button>
           </div>
-          {exchangeRateConfig?.rate && (
-            <p className="text-xs text-green-600 dark:text-green-400 mt-2">
-              Taxa atual: 1 USD = R$ {exchangeRateConfig.rate.toFixed(2)}
-              {exchangeRateConfig.updated_at && (
-                <span className="ml-2">
-                  (atualizado em {new Date(exchangeRateConfig.updated_at).toLocaleDateString('pt-BR')})
-                </span>
-              )}
+
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
+            <p className="text-sm text-green-700 dark:text-green-300">
+              <strong>Fonte:</strong> Banco Central do Brasil - API PTAX<br/>
+              <strong>Atualização automática:</strong> Todos os dias às 23:00 (horário de Brasília)<br/>
+              <strong>Uso:</strong> Conversão de custos das APIs (Claude/OpenAI) de USD para BRL
             </p>
-          )}
+          </div>
         </div>
 
         {/* SerpAPI */}
