@@ -18,14 +18,17 @@ import logging
 
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from app.models import User, IntegrationSetting
+from app.models import User, IntegrationSetting, BlockedDomain
 from app.services.search_provider import (
-    BLOCKED_DOMAINS,
+    BLOCKED_DOMAINS as HARDCODED_BLOCKED_DOMAINS,
     FOREIGN_DOMAIN_PATTERNS,
     ALLOWED_FOREIGN_DOMAINS,
 )
 from app.core.config import settings
 from app.core.security import decrypt_value
+
+# Variável global para domínios bloqueados (será populada com DB + hardcoded)
+BLOCKED_DOMAINS = set()
 
 logger = logging.getLogger(__name__)
 
@@ -234,12 +237,14 @@ def _extract_price(price_str: str) -> Optional[float]:
         return None
 
 
-def _is_blocked_source(source: str) -> tuple:
+def _is_blocked_source(source: str, blocked_domains: set) -> tuple:
     """Verifica se uma fonte está bloqueada. Retorna (is_blocked, reason)"""
     if not source:
         return False, None
 
     source_lower = source.lower()
+    # Remover espaços para comparação (ex: "Leroy Merlin" -> "leroymerlin")
+    source_no_spaces = source_lower.replace(" ", "").replace("-", "")
 
     # Mapeamento de nomes de fonte para domínios
     source_to_domain_map = {
@@ -255,28 +260,33 @@ def _is_blocked_source(source: str) -> tuple:
         "magazine luiza": "magazineluiza.com.br",
         "magalu": "magalu.com.br",
         "americanas": "americanas.com.br",
+        "leroy merlin": "leroymerlin.com.br",
+        "leroymerlin": "leroymerlin.com.br",
     }
 
     for source_name, domain in source_to_domain_map.items():
         if source_name in source_lower:
-            if domain in BLOCKED_DOMAINS:
+            if domain in blocked_domains:
                 return True, f"Fonte '{source}' → domínio bloqueado: {domain}"
 
-    for blocked_domain in BLOCKED_DOMAINS:
-        base_name = blocked_domain.split('.')[0]
-        if base_name in source_lower:
-            return True, f"Fonte '{source}' contém domínio bloqueado: {base_name}"
+    # Verificar contra todos os domínios bloqueados
+    for blocked_domain in blocked_domains:
+        # Extrair nome base do domínio (ex: "leroymerlin.com.br" -> "leroymerlin")
+        base_name = blocked_domain.split('.')[0].lower()
+        # Comparar sem espaços (ex: "leroy merlin" vs "leroymerlin")
+        if base_name in source_no_spaces:
+            return True, f"Fonte '{source}' contém domínio bloqueado: {blocked_domain}"
 
     return False, None
 
 
-def _is_blocked_domain(domain: str) -> tuple:
+def _is_blocked_domain(domain: str, blocked_domains: set) -> tuple:
     """Verifica se um domínio está bloqueado"""
     if not domain:
         return False, None
 
     domain_lower = domain.lower()
-    for blocked in BLOCKED_DOMAINS:
+    for blocked in blocked_domains:
         if domain_lower == blocked or domain_lower.endswith("." + blocked):
             return True, f"Domínio bloqueado: {blocked}"
 
@@ -425,6 +435,13 @@ async def analyze_shopping_json(
         logger.info(f"Debug SerpAPI - execute_immersive: {execute_immersive} -> {execute_immersive_bool}")
         logger.info(f"Debug SerpAPI - validar_preco_site: {validar_preco_site} -> {validar_preco_site_bool}")
 
+        # Carregar domínios bloqueados (hardcoded + banco de dados)
+        blocked_domains = set(HARDCODED_BLOCKED_DOMAINS)
+        db_blocked = db.query(BlockedDomain.domain).all()
+        for (domain,) in db_blocked:
+            blocked_domains.add(domain.lower())
+        logger.info(f"Debug SerpAPI - Domínios bloqueados carregados: {len(blocked_domains)} (hardcoded: {len(HARDCODED_BLOCKED_DOMAINS)}, DB: {len(db_blocked)})")
+
         # Ler JSON
         content = await file.read()
         try:
@@ -433,10 +450,16 @@ async def analyze_shopping_json(
             raise HTTPException(status_code=400, detail=f"JSON inválido: {str(e)}")
 
         # Verificar se é JSON de cotação ou direto do SerpAPI
+        # Formato 1: raw_api_response na raiz
         if 'raw_api_response' in shopping_data:
             raw_api = shopping_data.get('raw_api_response', {})
             if raw_api:
                 shopping_data = raw_api
+        # Formato 2: search_log.raw_shopping_response (formato do sistema de cotação)
+        elif 'search_log' in shopping_data:
+            raw_shopping = shopping_data.get('search_log', {}).get('raw_shopping_response', {})
+            if raw_shopping:
+                shopping_data = raw_shopping
 
         query = shopping_data.get('search_parameters', {}).get('q', 'N/A')
         var_max_decimal = variacao_maxima / 100.0
@@ -448,7 +471,7 @@ async def analyze_shopping_json(
             MAX_VALID_PRODUCTS=150,
             INCREMENTO_VAR=INCREMENTO_VAR * 100,
             VALIDAR_PRECO_SITE=validar_preco_site_bool,
-            DOMINIOS_BLOQUEADOS_SAMPLE=list(BLOCKED_DOMAINS)[:10]
+            DOMINIOS_BLOQUEADOS_SAMPLE=sorted(list(blocked_domains))[:15]
         )
 
         fluxo_resumo = []
@@ -490,7 +513,7 @@ async def analyze_shopping_json(
         motivos_bloqueio = {}
 
         for p in produtos_extraidos:
-            is_blocked, reason = _is_blocked_source(p['source'])
+            is_blocked, reason = _is_blocked_source(p['source'], blocked_domains)
             if is_blocked:
                 bloqueados_fonte.append(p)
                 motivos_bloqueio[reason] = motivos_bloqueio.get(reason, 0) + 1
@@ -830,7 +853,7 @@ async def analyze_shopping_json(
                                     }
 
                                     # Validações
-                                    is_blk, blk_reason = _is_blocked_domain(store_domain)
+                                    is_blk, blk_reason = _is_blocked_domain(store_domain, blocked_domains)
                                     if is_blk:
                                         store_info['rejection'] = f"BLOCKED_DOMAIN: {blk_reason}"
                                         validacao.lojas_rejeitadas.append(store_info)

@@ -259,6 +259,15 @@ export default function SearchLogDetail({ searchStats, shoppingLog }: SearchLogD
                 <div className="space-y-2">
                   {searchStats.block_history.map((block: any, idx: number) => {
                     const isExpanded = expandedIterations.has(idx)
+                    // Extrair testes de sucesso e falha
+                    const tests = block.tests || []
+                    const successTests = tests.filter((t: any) => t.result === 'success')
+                    const failedTests = tests.filter((t: any) => t.result === 'failed')
+                    // Calcular variacao
+                    const minPrice = block.price_range?.min || 0
+                    const maxPrice = block.price_range?.max || 0
+                    const variation = minPrice > 0 ? ((maxPrice - minPrice) / minPrice) * 100 : 0
+
                     return (
                       <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                         <button
@@ -269,8 +278,8 @@ export default function SearchLogDetail({ searchStats, shoppingLog }: SearchLogD
                             setExpandedIterations(newSet)
                           }}
                           className={`w-full flex items-center justify-between p-3 text-left transition-colors ${
-                            block.result === 'SUCCESS' ? 'bg-green-50 dark:bg-green-900/20' :
-                            block.result === 'BLOCK_FAILED' ? 'bg-orange-50 dark:bg-orange-900/20' :
+                            block.result === 'success' || block.result === 'success_early' ? 'bg-green-50 dark:bg-green-900/20' :
+                            block.result === 'failed' ? 'bg-orange-50 dark:bg-orange-900/20' :
                             'bg-gray-50 dark:bg-gray-700'
                           }`}
                         >
@@ -283,19 +292,19 @@ export default function SearchLogDetail({ searchStats, shoppingLog }: SearchLogD
                                 Bloco [{block.products_indices?.join(', ')}]
                               </span>
                               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                                {block.block_info?.size || 0} produtos | Var: {block.block_info?.variation?.toFixed(1)}%
+                                {block.block_size || 0} produtos | Var: {variation.toFixed(1)}%
                               </span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            {block.products_validated_in_iteration && (
-                              <span className="text-xs text-green-600">+{block.products_validated_in_iteration.length} validados</span>
+                            {successTests.length > 0 && (
+                              <span className="text-xs text-green-600">+{successTests.length} validados</span>
                             )}
-                            {block.products_failed_in_iteration && (
-                              <span className="text-xs text-red-600">-{block.products_failed_in_iteration.length} falhas</span>
+                            {failedTests.length > 0 && (
+                              <span className="text-xs text-red-600">-{failedTests.length} falhas</span>
                             )}
                             <span className={`px-2 py-0.5 text-xs rounded ${getStatusColor(block.result)}`}>
-                              {block.result === 'SUCCESS' ? 'SUCESSO' : block.result === 'BLOCK_FAILED' ? 'BLOCO FALHOU' : block.result}
+                              {block.result === 'success' || block.result === 'success_early' ? 'SUCESSO' : block.result === 'failed' ? 'BLOCO FALHOU' : block.result}
                             </span>
                             <svg className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -309,54 +318,79 @@ export default function SearchLogDetail({ searchStats, shoppingLog }: SearchLogD
                             <div className="grid grid-cols-4 gap-2 mb-3 text-xs">
                               <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
                                 <span className="text-gray-500">Preco Min:</span>
-                                <span className="font-mono ml-1">R$ {block.block_info?.min_price?.toFixed(2)}</span>
+                                <span className="font-mono ml-1">R$ {minPrice.toFixed(2)}</span>
                               </div>
                               <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
                                 <span className="text-gray-500">Preco Max:</span>
-                                <span className="font-mono ml-1">R$ {block.block_info?.max_price?.toFixed(2)}</span>
+                                <span className="font-mono ml-1">R$ {maxPrice.toFixed(2)}</span>
                               </div>
                               <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
                                 <span className="text-gray-500">Variacao:</span>
-                                <span className="font-mono ml-1">{block.block_info?.variation?.toFixed(1)}%</span>
+                                <span className="font-mono ml-1">{variation.toFixed(1)}%</span>
                               </div>
                               <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                <span className="text-gray-500">Potencial:</span>
-                                <span className="font-mono ml-1">{block.block_info?.potential || '-'}</span>
+                                <span className="text-gray-500">Tolerancia:</span>
+                                <span className="font-mono ml-1">{block.var_max_percent?.toFixed(0) || 25}%</span>
                               </div>
                             </div>
 
-                            {/* Produtos Validados */}
-                            {block.products_validated_in_iteration?.length > 0 && (
+                            {/* Produtos do Bloco */}
+                            {block.products_in_block?.length > 0 && (
+                              <div className="mb-3">
+                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Produtos no Bloco:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {block.products_in_block.map((p: any, pIdx: number) => (
+                                    <span key={pIdx} className={`text-[10px] px-2 py-0.5 rounded ${
+                                      p.status === 'validated' ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200' :
+                                      p.status === 'failed' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200' :
+                                      'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                                    }`} title={p.title}>
+                                      #{p.index} {p.source} R$ {p.price?.toFixed(2)}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Testes Realizados */}
+                            {tests.length > 0 && (
                               <div className="mb-2">
-                                <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">Validados nesta iteracao:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {block.products_validated_in_iteration.map((p: any, pIdx: number) => (
-                                    <span key={pIdx} className="text-[10px] bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 px-2 py-0.5 rounded">
-                                      #{p.index} - R$ {p.price?.toFixed(2)}
-                                    </span>
+                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Testes Realizados ({tests.length}):</p>
+                                <div className="space-y-1 max-h-40 overflow-y-auto">
+                                  {tests.map((t: any, tIdx: number) => (
+                                    <div key={tIdx} className={`text-[10px] p-2 rounded ${
+                                      t.result === 'success' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+                                    }`}>
+                                      <div className="flex justify-between items-start">
+                                        <span className="font-medium">#{t.product_index} {t.source}</span>
+                                        <span className={`px-1.5 py-0.5 rounded ${
+                                          t.result === 'success' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+                                        }`}>
+                                          {t.result === 'success' ? 'OK' : 'FALHA'}
+                                        </span>
+                                      </div>
+                                      <div className="text-gray-600 dark:text-gray-400 truncate" title={t.title}>{t.title}</div>
+                                      {t.result === 'success' ? (
+                                        <div className="text-green-600">
+                                          R$ {t.google_price?.toFixed(2)} → R$ {t.final_price?.toFixed(2)} ({t.domain})
+                                        </div>
+                                      ) : (
+                                        <div className="text-red-600">
+                                          {t.failure_step}: {t.error_message}
+                                        </div>
+                                      )}
+                                    </div>
                                   ))}
                                 </div>
                               </div>
                             )}
 
-                            {/* Produtos Falhados */}
-                            {block.products_failed_in_iteration?.length > 0 && (
-                              <div>
-                                <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-1">Falharam nesta iteracao:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {block.products_failed_in_iteration.map((p: any, pIdx: number) => (
-                                    <span key={pIdx} className="text-[10px] bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2 py-0.5 rounded" title={p.reason}>
-                                      #{p.index} - {failureCodeLabels[p.failure_code] || p.failure_code}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Acao Tomada */}
-                            {block.action_taken && (
-                              <div className="mt-2 text-xs text-gray-600 dark:text-gray-400 italic">
-                                Acao: {block.action_taken}
+                            {/* Status Final do Bloco */}
+                            {block.status_after && (
+                              <div className="mt-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                <span className="font-medium">Resultado:</span> {block.status_after.valid_count || 0} validados |
+                                +{block.status_after.successes_this_block || 0} sucessos |
+                                -{block.status_after.failures_this_block || 0} falhas nesta iteracao
                               </div>
                             )}
                           </div>
