@@ -9,6 +9,7 @@ import logging
 from app.core.database import get_db
 from app.models import BlockedDomain
 from app.core.config import settings
+from app.services.prompts import PROMPT_DISPLAY_NAME_DOMINIO
 
 logger = logging.getLogger(__name__)
 
@@ -61,15 +62,8 @@ def generate_display_name_from_domain(domain: str) -> str:
     try:
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
 
-        prompt = f"""Dado o domínio "{domain}", gere um nome de exibição apropriado para este site.
-
-Exemplos:
-- mercadolivre.com.br → Mercado Livre
-- amazon.com.br → Amazon Brasil
-- casasbahia.com.br → Casas Bahia
-- magazineluiza.com.br → Magazine Luiza
-
-Retorne APENAS o nome de exibição, sem explicações adicionais."""
+        # Prompt importado de prompts.py com substituição de variáveis
+        prompt = PROMPT_DISPLAY_NAME_DOMINIO.format(domain=domain)
 
         response = client.messages.create(
             model=settings.ANTHROPIC_MODEL,

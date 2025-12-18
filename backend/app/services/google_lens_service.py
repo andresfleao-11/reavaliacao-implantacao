@@ -18,6 +18,8 @@ import os
 import base64
 from datetime import datetime
 
+from app.services.prompts import PROMPT_EXTRACAO_HTML
+
 logger = logging.getLogger(__name__)
 
 
@@ -421,30 +423,8 @@ class GoogleLensService:
         # Truncate HTML to avoid token limits
         html_truncated = html[:50000]
 
-        prompt = f"""Analise o HTML desta página de produto e extraia as especificações técnicas.
-
-URL: {url}
-
-HTML (truncado):
-{html_truncated}
-
-Retorne um JSON com:
-{{
-    "nome": "nome completo do produto",
-    "marca": "marca do produto",
-    "modelo": "código do modelo",
-    "tipo_produto": "notebook/ar_condicionado/impressora/etc",
-    "especificacoes": {{
-        "processador": "...",
-        "ram": "...",
-        "armazenamento": "...",
-        "tela": "...",
-        // outras specs relevantes
-    }},
-    "preco": 0.00
-}}
-
-Retorne APENAS o JSON, sem texto adicional."""
+        # Prompt importado de prompts.py com substituição de variáveis
+        prompt = PROMPT_EXTRACAO_HTML.format(url=url, html_truncado=html_truncated)
 
         try:
             response = claude_client.client.messages.create(
