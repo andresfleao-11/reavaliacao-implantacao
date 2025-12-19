@@ -226,7 +226,7 @@ fun ReadingScreen(
                 // RFID Tags List
                 if (uiState.readTags.isEmpty()) {
                     EmptyListPlaceholder(
-                        icon = Icons.Default.Nfc,
+                        icon = Icons.Default.Wifi,
                         message = "Nenhuma tag lida"
                     )
                 } else {
@@ -243,7 +243,7 @@ fun ReadingScreen(
                 // Barcode Results List
                 if (uiState.barcodeResults.isEmpty()) {
                     EmptyListPlaceholder(
-                        icon = Icons.Default.QrCodeScanner,
+                        icon = Icons.Default.CropFree,
                         message = "Nenhum codigo lido"
                     )
                 } else {
@@ -295,7 +295,7 @@ fun ReadModeToggle(
                         MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Icon(Icons.Default.Nfc, contentDescription = null)
+                Icon(Icons.Default.Wifi, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("RFID")
             }
@@ -316,7 +316,7 @@ fun ReadModeToggle(
                         MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                Icon(Icons.Default.CropFree, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Barcode")
             }
@@ -334,11 +334,11 @@ fun BatteryIndicator(deviceInfo: DeviceInfo) {
         else -> Success
     }
 
+    // Usar icones mais basicos que existem em todas versoes
     val batteryIcon = when {
-        batteryLevel < 0 -> Icons.Default.BatteryUnknown
-        batteryLevel <= 20 -> Icons.Default.Battery1Bar
-        batteryLevel <= 40 -> Icons.Default.Battery2Bar
-        batteryLevel <= 60 -> Icons.Default.Battery4Bar
+        batteryLevel < 0 -> Icons.Default.BatteryAlert
+        batteryLevel <= 20 -> Icons.Default.BatteryAlert
+        batteryLevel <= 50 -> Icons.Default.Battery3Bar
         batteryLevel <= 80 -> Icons.Default.Battery5Bar
         else -> Icons.Default.BatteryFull
     }

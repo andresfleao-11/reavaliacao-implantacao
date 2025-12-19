@@ -84,9 +84,9 @@ fun MainScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Nfc, contentDescription = null)
+                            Icon(Icons.Default.Wifi, contentDescription = null)
                             Text(" / ")
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                            Icon(Icons.Default.CropFree, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Iniciar Leitura")
                         }
@@ -250,11 +250,11 @@ fun BatteryIcon(batteryLevel: Int) {
         else -> Success
     }
 
+    // Usar icones mais basicos que existem em todas versoes
     val batteryIcon = when {
-        batteryLevel < 0 -> Icons.Default.BatteryUnknown
-        batteryLevel <= 20 -> Icons.Default.Battery1Bar
-        batteryLevel <= 40 -> Icons.Default.Battery2Bar
-        batteryLevel <= 60 -> Icons.Default.Battery4Bar
+        batteryLevel < 0 -> Icons.Default.BatteryAlert
+        batteryLevel <= 20 -> Icons.Default.BatteryAlert
+        batteryLevel <= 50 -> Icons.Default.Battery3Bar
         batteryLevel <= 80 -> Icons.Default.Battery5Bar
         else -> Icons.Default.BatteryFull
     }

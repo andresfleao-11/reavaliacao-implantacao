@@ -61,7 +61,8 @@ class RfidManager @Inject constructor(
         private const val TAG = "RfidManager"
     }
 
-    private val uhf: RFIDWithUHFBLE = RFIDWithUHFBLE.getInstance()
+    private var uhf: RFIDWithUHFBLE? = null
+    private var isInitialized = false
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
@@ -144,15 +145,22 @@ class RfidManager @Inject constructor(
     }
 
     fun initialize() {
+        if (isInitialized) {
+            Log.d(TAG, "SDK already initialized")
+            return
+        }
+
         try {
-            uhf.init(context)
-            Log.d(TAG, "SDK initialized")
+            uhf = RFIDWithUHFBLE.getInstance()
+            uhf?.init(context)
+            isInitialized = true
+            Log.d(TAG, "SDK initialized successfully")
 
             // Configura callback do botao fisico do coletor
-            uhf.setKeyEventCallback(object : KeyEventCallback {
+            uhf?.setKeyEventCallback(object : KeyEventCallback {
                 override fun onKeyDown(keyCode: Int) {
                     Log.d(TAG, "Key down: $keyCode")
-                    if (uhf.connectStatus == ConnectionStatus.CONNECTED) {
+                    if (uhf?.connectStatus == ConnectionStatus.CONNECTED) {
                         if (!_isReading.value) {
                             when (_readMode.value) {
                                 ReadMode.RFID -> startReading()
@@ -171,7 +179,9 @@ class RfidManager @Inject constructor(
                 }
             })
         } catch (e: Exception) {
-            Log.e(TAG, "Error initializing SDK", e)
+            Log.e(TAG, "Error initializing SDK: ${e.message}", e)
+            isInitialized = false
+            // Nao propagar excecao - app pode funcionar sem SDK em modo simulado
         }
     }
 
@@ -191,7 +201,10 @@ class RfidManager @Inject constructor(
         try {
             _scannedDevices.value = emptyList()
             _isScanning.value = true
-            uhf.startScanBTDevices(scanCallback)
+            uhf?.startScanBTDevices(scanCallback) ?: run {
+                Log.w(TAG, "SDK not initialized - cannot scan")
+                _isScanning.value = false
+            }
             Log.d(TAG, "Started scanning BLE devices")
         } catch (e: Exception) {
             Log.e(TAG, "Error starting scan", e)
@@ -201,7 +214,7 @@ class RfidManager @Inject constructor(
 
     fun stopScanDevices() {
         try {
-            uhf.stopScanBTDevices()
+            uhf?.stopScanBTDevices()
             _isScanning.value = false
             Log.d(TAG, "Stopped scanning BLE devices")
         } catch (e: Exception) {
@@ -212,7 +225,10 @@ class RfidManager @Inject constructor(
     fun connect(address: String) {
         try {
             _connectionState.value = ConnectionState.Connecting
-            uhf.connect(address, connectionCallback)
+            uhf?.connect(address, connectionCallback) ?: run {
+                Log.w(TAG, "SDK not initialized - cannot connect")
+                _connectionState.value = ConnectionState.Disconnected
+            }
             Log.d(TAG, "Connecting to: $address")
         } catch (e: Exception) {
             Log.e(TAG, "Error connecting", e)
@@ -225,7 +241,7 @@ class RfidManager @Inject constructor(
             stopReading()
             stopBarcodeReading()
             stopBatteryMonitor()
-            uhf.disconnect()
+            uhf?.disconnect()
             _connectionState.value = ConnectionState.Disconnected
             Log.d(TAG, "Disconnected")
         } catch (e: Exception) {
@@ -237,7 +253,7 @@ class RfidManager @Inject constructor(
 
     fun startReading() {
         if (_isReading.value) return
-        if (uhf.connectStatus != ConnectionStatus.CONNECTED) {
+        if (uhf?.connectStatus != ConnectionStatus.CONNECTED) {
             Log.w(TAG, "Cannot read: not connected")
             return
         }
@@ -245,16 +261,16 @@ class RfidManager @Inject constructor(
         _isReading.value = true
         readingThread = Thread {
             try {
-                if (uhf.startInventoryTag()) {
+                if (uhf?.startInventoryTag() == true) {
                     Log.d(TAG, "Started inventory")
                     while (_isReading.value) {
-                        val tags = uhf.readTagFromBufferList()
+                        val tags = uhf?.readTagFromBufferList()
                         if (tags != null && tags.isNotEmpty()) {
                             processTags(tags)
                         }
                         Thread.sleep(50)
                     }
-                    uhf.stopInventory()
+                    uhf?.stopInventory()
                     Log.d(TAG, "Stopped inventory")
                 } else {
                     Log.e(TAG, "Failed to start inventory")
@@ -273,7 +289,7 @@ class RfidManager @Inject constructor(
         readingThread?.interrupt()
         readingThread = null
         try {
-            uhf.stopInventory()
+            uhf?.stopInventory()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping inventory", e)
         }
@@ -304,7 +320,7 @@ class RfidManager @Inject constructor(
 
     fun startBarcodeReading() {
         if (_isReading.value) return
-        if (uhf.connectStatus != ConnectionStatus.CONNECTED) {
+        if (uhf?.connectStatus != ConnectionStatus.CONNECTED) {
             Log.w(TAG, "Cannot read barcode: not connected")
             return
         }
@@ -363,7 +379,7 @@ class RfidManager @Inject constructor(
     private fun updateDeviceInfo() {
         try {
             val batteryLevel = getBatteryLevel()
-            val currentPower = try { uhf.power } catch (e: Exception) { 20 }
+            val currentPower = try { uhf?.power ?: 20 } catch (e: Exception) { 20 }
             val firmware = "" // Firmware version nao disponivel neste SDK
 
             _deviceInfo.value = DeviceInfo(
@@ -379,12 +395,13 @@ class RfidManager @Inject constructor(
 
     private fun getBatteryLevel(): Int {
         return try {
+            val sdk = uhf ?: return -1
             // Tentar obter nivel de bateria via reflexao ou metodo alternativo
             // Se nao disponivel, retorna -1 (desconhecido)
-            val method = uhf.javaClass.methods.find {
+            val method = sdk.javaClass.methods.find {
                 it.name.lowercase().contains("battery") && it.parameterCount == 0
             }
-            method?.invoke(uhf) as? Int ?: -1
+            method?.invoke(sdk) as? Int ?: -1
         } catch (e: Exception) {
             Log.e(TAG, "Error getting battery level", e)
             -1
@@ -417,7 +434,7 @@ class RfidManager @Inject constructor(
     fun setPower(power: Int) {
         try {
             val clampedPower = power.coerceIn(5, 30)
-            if (uhf.setPower(clampedPower)) {
+            if (uhf?.setPower(clampedPower) == true) {
                 _deviceInfo.value = _deviceInfo.value.copy(currentPower = clampedPower)
                 Log.d(TAG, "Power set to: $clampedPower dBm")
             } else {
@@ -430,7 +447,7 @@ class RfidManager @Inject constructor(
 
     fun getPower(): Int {
         return try {
-            uhf.power
+            uhf?.power ?: 20
         } catch (e: Exception) {
             Log.e(TAG, "Error getting power", e)
             20 // Default
@@ -438,7 +455,7 @@ class RfidManager @Inject constructor(
     }
 
     fun getConnectionStatus(): ConnectionStatus {
-        return uhf.connectStatus
+        return uhf?.connectStatus ?: ConnectionStatus.DISCONNECTED
     }
 
     fun release() {
@@ -447,7 +464,8 @@ class RfidManager @Inject constructor(
             stopBarcodeReading()
             stopBatteryMonitor()
             disconnect()
-            uhf.free()
+            uhf?.free()
+            isInitialized = false
             Log.d(TAG, "SDK released")
         } catch (e: Exception) {
             Log.e(TAG, "Error releasing SDK", e)

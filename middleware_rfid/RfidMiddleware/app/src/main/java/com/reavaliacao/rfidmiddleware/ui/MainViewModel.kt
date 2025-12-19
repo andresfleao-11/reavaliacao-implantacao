@@ -41,13 +41,23 @@ class MainViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "MainViewModel"
+    }
+
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     private var currentBatchId: String = UUID.randomUUID().toString()
 
     init {
-        rfidManager.initialize()
+        android.util.Log.d(TAG, "MainViewModel init started")
+        try {
+            rfidManager.initialize()
+            android.util.Log.d(TAG, "RfidManager initialized")
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Error initializing RfidManager", e)
+        }
 
         // Collect connection state
         viewModelScope.launch {
@@ -122,6 +132,8 @@ class MainViewModel @Inject constructor(
                 _uiState.update { it.copy(unsyncedCount = count) }
             }
         }
+
+        android.util.Log.d(TAG, "MainViewModel init completed")
     }
 
     fun startScanDevices() {

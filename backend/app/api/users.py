@@ -419,3 +419,97 @@ def delete_user(
     db.commit()
 
     return {"message": "Usuário deletado com sucesso"}
+
+
+# ==================== MIDDLEWARE TOKEN ENDPOINTS ====================
+
+class MiddlewareTokenRequest(BaseModel):
+    """Request para gerar token de middleware"""
+    name: str = "RFID Middleware"  # Nome do dispositivo/app
+    expires_days: int = 365  # Validade em dias (padrão 1 ano)
+
+
+class MiddlewareTokenResponse(BaseModel):
+    """Response com token e configurações do middleware"""
+    token: str
+    expires_at: datetime
+    user_id: int
+    user_name: str
+    server_url: str
+    device_name: str
+
+
+class MiddlewareConfigResponse(BaseModel):
+    """Configurações do servidor para middleware"""
+    server_url: str
+    api_version: str = "1.0"
+    endpoints: dict
+
+
+@router.post("/middleware-token", response_model=MiddlewareTokenResponse)
+def generate_middleware_token(
+    request: MiddlewareTokenRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Gera um token de longa duração para uso em apps middleware (ex: RFID).
+    O token é vinculado ao usuário atual e pode ser revogado alterando a senha.
+    """
+    from datetime import timedelta
+    from app.core.config import settings
+
+    # Calcular data de expiração
+    expires_delta = timedelta(days=request.expires_days)
+    expires_at = datetime.utcnow() + expires_delta
+
+    # Criar token com expiração longa
+    token = create_access_token(
+        data={"sub": str(current_user.id), "device": request.name},
+        expires_delta=expires_delta
+    )
+
+    # Determinar URL do servidor
+    # Em produção usa a URL do Railway, em dev usa localhost
+    import os
+    server_url = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
+    if server_url:
+        server_url = f"https://{server_url}"
+    else:
+        server_url = os.getenv("API_URL", "http://localhost:8000")
+
+    return MiddlewareTokenResponse(
+        token=token,
+        expires_at=expires_at,
+        user_id=current_user.id,
+        user_name=current_user.nome,
+        server_url=server_url,
+        device_name=request.name
+    )
+
+
+@router.get("/middleware-config", response_model=MiddlewareConfigResponse)
+def get_middleware_config(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retorna as configurações necessárias para configurar um app middleware.
+    """
+    import os
+
+    # Determinar URL do servidor
+    server_url = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
+    if server_url:
+        server_url = f"https://{server_url}"
+    else:
+        server_url = os.getenv("API_URL", "http://localhost:8000")
+
+    return MiddlewareConfigResponse(
+        server_url=server_url,
+        api_version="1.0",
+        endpoints={
+            "inventory_tags": "/api/inventory/tags",
+            "inventory_sync": "/api/inventory/sync",
+            "health": "/health"
+        }
+    )

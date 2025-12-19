@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.RfidMiddleware" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.RfidMiddleware" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="android:navigationBarColor">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorAccent">@color/secondary</item>
     </style>
 </resources>
