@@ -3,6 +3,7 @@ API endpoints para cotacao em lote.
 Suporta 3 metodos de entrada: texto, imagens e arquivo CSV/XLSX.
 """
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, Form, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List, Optional
@@ -32,6 +33,7 @@ from datetime import datetime
 import os
 import hashlib
 import logging
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,47 @@ limiter = Limiter(key_func=get_remote_address)
 
 # Extensoes permitidas para upload de arquivo
 ALLOWED_FILE_EXTENSIONS = {'.csv', '.xlsx', '.xls'}
+
+
+@router.get("/template/download")
+def download_template():
+    """
+    Retorna um arquivo XLSX de template para cotacao em lote.
+    O template possui uma coluna 'Descricao do Produto' com exemplos.
+    """
+    import pandas as pd
+
+    # Criar DataFrame com exemplos
+    data = {
+        'Descricao do Produto': [
+            'Notebook Dell Inspiron 15 i7 16GB RAM 512GB SSD',
+            'Mouse Logitech MX Master 3 Wireless',
+            'Teclado Mecanico Redragon Kumara RGB',
+            'Monitor LG 27 4K UHD IPS',
+            'Cadeira Escritorio Ergonomica Giratoria',
+            '',  # Linha vazia para usuario comecar a preencher
+        ]
+    }
+    df = pd.DataFrame(data)
+
+    # Criar arquivo Excel em memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Produtos')
+
+        # Ajustar largura da coluna
+        worksheet = writer.sheets['Produtos']
+        worksheet.column_dimensions['A'].width = 60
+
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment; filename=template_cotacao_lote.xlsx"
+        }
+    )
 
 
 def _get_active_config_version(db: Session, project_id: Optional[int]) -> Optional[int]:
