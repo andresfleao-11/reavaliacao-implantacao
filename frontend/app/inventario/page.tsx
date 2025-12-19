@@ -116,7 +116,7 @@ export default function InventarioPage() {
     }
   }, [activeSession, showWaitingModal])
 
-  const getToken = () => localStorage.getItem('token')
+  const getToken = () => localStorage.getItem('access_token')
 
   const checkActiveSession = async () => {
     try {
