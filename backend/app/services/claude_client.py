@@ -294,14 +294,8 @@ class ClaudeClient:
     def _build_final_prompt(self, ocr_data: Dict, web_specs: Dict) -> str:
         """Constrói o prompt final combinando OCR + specs da web"""
 
-        specs_info = ""
-        if web_specs:
-            specs_info = f"""
-## ESPECIFICAÇÕES ENCONTRADAS NA WEB:
-{json.dumps(web_specs, indent=2, ensure_ascii=False)}
-
-Use estas especificações para criar a query de busca.
-"""
+        # Formata web_specs como JSON string ou mensagem de não encontrado
+        web_specs_str = json.dumps(web_specs, indent=2, ensure_ascii=False) if web_specs else "Nenhuma especificação adicional encontrada na web."
 
         # Prompt importado de prompts.py com substituição de variáveis
         return PROMPT_GERADOR_QUERIES.format(
@@ -310,7 +304,7 @@ Use estas especificações para criar a query de busca.
             marca=ocr_data.get('marca', 'N/A'),
             modelo=ocr_data.get('modelo', 'N/A'),
             specs_visiveis=json.dumps(ocr_data.get('specs_visiveis') or {}, ensure_ascii=False),
-            specs_info=specs_info
+            web_specs=web_specs_str
         )
 
     async def _analyze_text_only(self, input_text: str) -> ItemAnalysisResult:
