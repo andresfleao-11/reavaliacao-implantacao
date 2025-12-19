@@ -202,9 +202,15 @@ export default function InventarioPage() {
 
   const completeSession = async () => {
     if (!activeSession) return
+    if (sessionReadings.length === 0) {
+      setMessage({ type: 'error', text: 'Nenhuma leitura para finalizar' })
+      return
+    }
 
     try {
       const token = getToken()
+
+      // 1. Finalizar a sessao no backend
       const res = await fetch(`${API_URL}/api/reading-sessions/${activeSession.id}/complete`, {
         method: 'POST',
         headers: {
@@ -212,7 +218,41 @@ export default function InventarioPage() {
         }
       })
 
-      if (res.ok) {
+      if (!res.ok) {
+        throw new Error('Erro ao finalizar sessao')
+      }
+
+      // 2. Enviar as leituras automaticamente para o servidor
+      const batchId = `SESSION-${activeSession.id}-${Date.now()}`
+      const payload = {
+        device_id: 'MIDDLEWARE-APP',
+        batch_id: batchId,
+        location: activeSession.location || null,
+        project_id: activeSession.project_id || null,
+        tags: sessionReadings.map(reading => ({
+          epc: reading.code,
+          rssi: reading.rssi || '0',
+          timestamp: reading.created_at
+        }))
+      }
+
+      const syncRes = await fetch(`${API_URL}/api/rfid/tags`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (syncRes.ok) {
+        const syncData = await syncRes.json()
+        setMessage({
+          type: 'success',
+          text: `Sessao finalizada! ${syncData.received_count} leituras enviadas ao servidor.`
+        })
+      } else {
+        // Mesmo se falhar o sync, as leituras ficam na lista local
         const newItems: ReadItem[] = sessionReadings.map(reading => ({
           id: `session-${reading.id}`,
           code: reading.code,
@@ -227,14 +267,18 @@ export default function InventarioPage() {
           return [...uniqueNew, ...prev]
         })
 
-        setActiveSession(null)
-        setSessionReadings([])
-        setShowWaitingModal(false)
-        setMessage({ type: 'success', text: `Sessao finalizada! ${sessionReadings.length} leituras recebidas.` })
+        setMessage({
+          type: 'error',
+          text: `Sessao finalizada mas erro ao enviar. ${sessionReadings.length} leituras na lista local.`
+        })
+      }
 
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current)
-        }
+      setActiveSession(null)
+      setSessionReadings([])
+      setShowWaitingModal(false)
+
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Erro ao finalizar sessao' })
