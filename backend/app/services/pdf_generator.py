@@ -16,7 +16,8 @@ import os
 class PDFGenerator:
     # Caminho para os assets
     FONTS_DIR = os.path.join(os.path.dirname(__file__), "fonts")
-    LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "Union lk.png")
+    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+    LOGO_PATH = os.path.join(os.path.dirname(__file__), "assets", "Union lk.png")
 
     # Larguras das colunas (primeira coluna menor para o logo)
     FIRST_COL_WIDTH = 55 * mm
