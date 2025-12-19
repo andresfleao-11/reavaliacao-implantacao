@@ -50,10 +50,12 @@ export default function InventarioPage() {
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
   const [location, setLocation] = useState('')
 
-  // Estados para sessão
+  // Estados para sessao
   const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
   const [startingSession, setStartingSession] = useState<'RFID' | 'BARCODE' | null>(null)
   const [sessionReadings, setSessionReadings] = useState<SessionReading[]>([])
+  const [showWaitingModal, setShowWaitingModal] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState(0)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Carregar projetos
@@ -70,10 +72,9 @@ export default function InventarioPage() {
     fetchProjects()
   }, [])
 
-  // Verificar sessão ativa ao carregar
+  // Verificar sessao ativa ao carregar
   useEffect(() => {
     checkActiveSession()
-    // Cleanup interval on unmount
     return () => {
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current)
@@ -81,13 +82,12 @@ export default function InventarioPage() {
     }
   }, [])
 
-  // Polling para leituras quando há sessão ativa
+  // Polling para leituras quando ha sessao ativa
   useEffect(() => {
     if (activeSession && activeSession.status === 'ACTIVE') {
-      // Iniciar polling
       pollIntervalRef.current = setInterval(() => {
         fetchSessionReadings(activeSession.id)
-      }, 2000) // Poll a cada 2 segundos
+      }, 2000)
 
       return () => {
         if (pollIntervalRef.current) {
@@ -96,6 +96,25 @@ export default function InventarioPage() {
       }
     }
   }, [activeSession])
+
+  // Timer para atualizar tempo restante
+  useEffect(() => {
+    if (activeSession && showWaitingModal) {
+      const timer = setInterval(() => {
+        const created = new Date(activeSession.created_at)
+        const expiresAt = new Date(created.getTime() + activeSession.timeout_seconds * 1000)
+        const remaining = Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000))
+        setTimeRemaining(remaining)
+
+        if (remaining <= 0) {
+          setActiveSession(null)
+          setShowWaitingModal(false)
+          setMessage({ type: 'error', text: 'Sessao expirada' })
+        }
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [activeSession, showWaitingModal])
 
   const getToken = () => localStorage.getItem('token')
 
@@ -112,13 +131,15 @@ export default function InventarioPage() {
         const data = await res.json()
         if (data) {
           setActiveSession(data)
+          setShowWaitingModal(true)
           fetchSessionReadings(data.id)
         } else {
           setActiveSession(null)
+          setShowWaitingModal(false)
         }
       }
     } catch (err) {
-      console.error('Erro ao verificar sessão:', err)
+      console.error('Erro ao verificar sessao:', err)
     }
   }
 
@@ -150,7 +171,7 @@ export default function InventarioPage() {
         reading_type: readingType,
         project_id: selectedProject ? parseInt(selectedProject) : null,
         location: location || null,
-        timeout_seconds: 300 // 5 minutos
+        timeout_seconds: 300
       }
 
       const res = await fetch(`${API_URL}/api/reading-sessions`, {
@@ -166,13 +187,14 @@ export default function InventarioPage() {
         const data = await res.json()
         setActiveSession(data)
         setSessionReadings([])
-        setMessage({ type: 'success', text: `Sessão ${readingType} iniciada! Aguardando leituras do app...` })
+        setShowWaitingModal(true)
+        setTimeRemaining(data.timeout_seconds)
       } else {
         const error = await res.json()
-        setMessage({ type: 'error', text: error.detail || 'Erro ao iniciar sessão' })
+        setMessage({ type: 'error', text: error.detail || 'Erro ao iniciar sessao' })
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Erro de conexão com o servidor' })
+      setMessage({ type: 'error', text: 'Erro de conexao com o servidor' })
     } finally {
       setStartingSession(null)
     }
@@ -191,7 +213,6 @@ export default function InventarioPage() {
       })
 
       if (res.ok) {
-        // Converter leituras da sessão para readItems
         const newItems: ReadItem[] = sessionReadings.map(reading => ({
           id: `session-${reading.id}`,
           code: reading.code,
@@ -200,7 +221,6 @@ export default function InventarioPage() {
           rssi: reading.rssi
         }))
 
-        // Adicionar ao readItems (evitando duplicatas)
         setReadItems(prev => {
           const existingCodes = new Set(prev.map(i => i.code))
           const uniqueNew = newItems.filter(i => !existingCodes.has(i.code))
@@ -209,14 +229,15 @@ export default function InventarioPage() {
 
         setActiveSession(null)
         setSessionReadings([])
-        setMessage({ type: 'success', text: `Sessão finalizada! ${sessionReadings.length} leituras recebidas.` })
+        setShowWaitingModal(false)
+        setMessage({ type: 'success', text: `Sessao finalizada! ${sessionReadings.length} leituras recebidas.` })
 
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current)
         }
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Erro ao finalizar sessão' })
+      setMessage({ type: 'error', text: 'Erro ao finalizar sessao' })
     }
   }
 
@@ -234,20 +255,33 @@ export default function InventarioPage() {
 
       setActiveSession(null)
       setSessionReadings([])
-      setMessage({ type: 'success', text: 'Sessão cancelada' })
+      setShowWaitingModal(false)
+      setMessage({ type: 'success', text: 'Sessao cancelada' })
 
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current)
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Erro ao cancelar sessão' })
+      setMessage({ type: 'error', text: 'Erro ao cancelar sessao' })
     }
+  }
+
+  const openMiddlewareApp = () => {
+    if (!activeSession) return
+    const deepLink = `rfidmiddleware://reading?type=${activeSession.reading_type}&session_id=${activeSession.id}`
+    window.location.href = deepLink
+  }
+
+  const formatTimeRemaining = () => {
+    const minutes = Math.floor(timeRemaining / 60)
+    const secs = timeRemaining % 60
+    return `${minutes}:${secs.toString().padStart(2, '0')}`
   }
 
   // Adicionar item lido (manual)
   const addItem = (code: string, type: 'barcode' | 'rfid', rssi?: string) => {
     if (readItems.some(item => item.code === code)) {
-      setMessage({ type: 'error', text: `Código ${code} já foi lido` })
+      setMessage({ type: 'error', text: `Codigo ${code} ja foi lido` })
       setTimeout(() => setMessage(null), 3000)
       return
     }
@@ -331,32 +365,122 @@ export default function InventarioPage() {
         setMessage({ type: 'error', text: error.detail || 'Erro ao enviar dados' })
       }
     } catch (err) {
-      setMessage({ type: 'error', text: 'Erro de conexão com o servidor' })
+      setMessage({ type: 'error', text: 'Erro de conexao com o servidor' })
     } finally {
       setSyncing(false)
     }
   }
 
-  const getTimeRemaining = () => {
-    if (!activeSession) return 0
-    const created = new Date(activeSession.created_at)
-    const expiresAt = new Date(created.getTime() + activeSession.timeout_seconds * 1000)
-    const remaining = Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000))
-    return remaining
-  }
-
-  const formatTimeRemaining = () => {
-    const seconds = getTimeRemaining()
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${minutes}:${secs.toString().padStart(2, '0')}`
-  }
-
   return (
     <div className="max-w-4xl mx-auto">
+      {/* Modal de Espera */}
+      {showWaitingModal && activeSession && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Header com gradiente */}
+            <div className={`p-6 text-white ${
+              activeSession.reading_type === 'RFID'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600'
+                : 'bg-gradient-to-r from-blue-500 to-blue-600'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="animate-pulse">
+                    <div className="w-4 h-4 bg-white rounded-full"></div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Sessao {activeSession.reading_type}</h2>
+                    <p className="text-sm opacity-90">Aguardando leituras do app</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-mono font-bold">{formatTimeRemaining()}</div>
+                  <div className="text-xs opacity-75">restantes</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Conteudo */}
+            <div className="p-6">
+              {/* Contador de leituras */}
+              <div className="text-center mb-6">
+                <div className="text-5xl font-bold text-gray-900 dark:text-gray-100">
+                  {sessionReadings.length}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400">
+                  leitura{sessionReadings.length !== 1 ? 's' : ''} recebida{sessionReadings.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+
+              {/* Lista de leituras recentes */}
+              {sessionReadings.length > 0 && (
+                <div className="mb-6 max-h-32 overflow-y-auto">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Ultimas leituras:</div>
+                  <div className="space-y-1">
+                    {sessionReadings.slice(0, 5).map((reading) => (
+                      <div
+                        key={reading.id}
+                        className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-sm font-mono truncate"
+                      >
+                        {reading.code}
+                      </div>
+                    ))}
+                    {sessionReadings.length > 5 && (
+                      <div className="text-xs text-gray-400 text-center">
+                        +{sessionReadings.length - 5} mais...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Botao para abrir o app */}
+              <button
+                onClick={openMiddlewareApp}
+                className={`w-full py-4 rounded-xl text-white font-semibold flex items-center justify-center gap-3 mb-4 ${
+                  activeSession.reading_type === 'RFID'
+                    ? 'bg-orange-500 hover:bg-orange-600'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } transition-colors`}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Abrir App Middleware
+              </button>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-6">
+                Clique acima para abrir o app diretamente na tela de leitura {activeSession.reading_type}
+              </p>
+
+              {/* Botoes de acao */}
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelSession}
+                  className="flex-1 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={completeSession}
+                  disabled={sessionReadings.length === 0}
+                  className={`flex-1 py-3 rounded-xl font-medium transition-colors ${
+                    sessionReadings.length > 0
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  Finalizar ({sessionReadings.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Inventário - Nova Leitura
+          Inventario - Nova Leitura
         </h1>
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {readItems.length} item(s) lido(s)
@@ -374,62 +498,7 @@ export default function InventarioPage() {
         </div>
       )}
 
-      {/* Banner de Sessão Ativa */}
-      {activeSession && activeSession.status === 'ACTIVE' && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg text-white shadow-lg">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="animate-pulse">
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              </div>
-              <div>
-                <p className="font-semibold">
-                  Sessão {activeSession.reading_type} Ativa
-                </p>
-                <p className="text-sm text-primary-100">
-                  Aguardando leituras do app... ({sessionReadings.length} recebidas)
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-mono">
-                {formatTimeRemaining()}
-              </span>
-              <button
-                onClick={completeSession}
-                className="bg-white text-primary-600 px-4 py-2 rounded-lg font-medium hover:bg-primary-50 transition-colors"
-              >
-                Finalizar
-              </button>
-              <button
-                onClick={cancelSession}
-                className="bg-white/20 text-white px-4 py-2 rounded-lg font-medium hover:bg-white/30 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-
-          {/* Lista de leituras da sessão em tempo real */}
-          {sessionReadings.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-white/20">
-              <p className="text-sm font-medium mb-2">Leituras recebidas:</p>
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                {sessionReadings.map((reading) => (
-                  <span
-                    key={reading.id}
-                    className="bg-white/20 px-2 py-1 rounded text-xs font-mono"
-                  >
-                    {reading.code.length > 20 ? `${reading.code.substring(0, 20)}...` : reading.code}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Configurações */}
+      {/* Configuracoes */}
       <div className="card mb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -442,7 +511,7 @@ export default function InventarioPage() {
               className="input-field w-full"
               disabled={!!activeSession}
             >
-              <option value="">Sem vínculo com projeto</option>
+              <option value="">Sem vinculo com projeto</option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.nome} {p.client ? `(${p.client.nome_curto || p.client.nome})` : ''}
@@ -466,84 +535,80 @@ export default function InventarioPage() {
         </div>
       </div>
 
-      {/* Área de leitura */}
+      {/* Area de leitura */}
       <div className="card mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Iniciar Leitura via App Middleware
         </h2>
 
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Clique em um dos botões abaixo para iniciar uma sessão de leitura. O app só poderá enviar leituras enquanto a sessão estiver ativa.
+          Clique em um dos botoes abaixo para iniciar uma sessao de leitura. O app sera aberto automaticamente no modo correto.
         </p>
 
-        {/* Botões de sessão */}
+        {/* Botoes de sessao */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          {/* Botão RFID */}
+          {/* Botao RFID */}
           <button
             onClick={() => startSession('RFID')}
             disabled={!!activeSession || startingSession !== null}
-            className={`flex items-center justify-center gap-3 p-4 border-2 rounded-lg transition-all ${
-              activeSession?.reading_type === 'RFID'
-                ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-400 dark:border-orange-600'
-                : activeSession
+            className={`flex items-center justify-center gap-3 p-6 border-2 rounded-xl transition-all ${
+              activeSession
                 ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
-                : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/30 hover:border-orange-300 cursor-pointer'
+                : 'bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/30 border-orange-200 dark:border-orange-800 hover:border-orange-400 hover:shadow-lg cursor-pointer'
             }`}
           >
             {startingSession === 'RFID' ? (
-              <svg className="animate-spin w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-10 h-10 text-orange-600" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             ) : (
-              <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
             )}
             <div className="text-left">
-              <p className="font-medium text-orange-700 dark:text-orange-300">
-                {activeSession?.reading_type === 'RFID' ? 'Sessão RFID Ativa' : 'Iniciar Leitura RFID'}
+              <p className="text-lg font-semibold text-orange-700 dark:text-orange-300">
+                Leitura RFID
               </p>
               <p className="text-sm text-orange-600 dark:text-orange-400">
-                {activeSession?.reading_type === 'RFID' ? 'Aguardando leituras...' : 'App Middleware'}
+                Tags e etiquetas
               </p>
             </div>
           </button>
 
-          {/* Botão Barcode */}
+          {/* Botao Barcode */}
           <button
             onClick={() => startSession('BARCODE')}
             disabled={!!activeSession || startingSession !== null}
-            className={`flex items-center justify-center gap-3 p-4 border-2 rounded-lg transition-all ${
-              activeSession?.reading_type === 'BARCODE'
-                ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-600'
-                : activeSession
+            className={`flex items-center justify-center gap-3 p-6 border-2 rounded-xl transition-all ${
+              activeSession
                 ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
-                : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:border-blue-300 cursor-pointer'
+                : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 border-blue-200 dark:border-blue-800 hover:border-blue-400 hover:shadow-lg cursor-pointer'
             }`}
           >
             {startingSession === 'BARCODE' ? (
-              <svg className="animate-spin w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             ) : (
-              <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m2 0h.01M4 4h4M4 8h4m4 12h2M4 16h4m12-4h.01M12 20h.01" />
               </svg>
             )}
             <div className="text-left">
-              <p className="font-medium text-blue-700 dark:text-blue-300">
-                {activeSession?.reading_type === 'BARCODE' ? 'Sessão Barcode Ativa' : 'Iniciar Leitura Barcode'}
+              <p className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                Leitura Barcode
               </p>
               <p className="text-sm text-blue-600 dark:text-blue-400">
-                {activeSession?.reading_type === 'BARCODE' ? 'Aguardando leituras...' : 'App Middleware'}
+                Codigos de barras
               </p>
             </div>
           </button>
         </div>
 
-        {/* Scanner de código de barras - Câmera (Mobile) */}
+        {/* Scanner de codigo de barras - Camera (Mobile) */}
         <button
           onClick={() => setScannerOpen(true)}
           className="w-full flex items-center justify-center gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors sm:hidden mb-4"
@@ -553,8 +618,8 @@ export default function InventarioPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <div className="text-left">
-            <p className="font-medium text-purple-700 dark:text-purple-300">Usar Câmera</p>
-            <p className="text-sm text-purple-600 dark:text-purple-400">Escanear código de barras</p>
+            <p className="font-medium text-purple-700 dark:text-purple-300">Usar Camera</p>
+            <p className="text-sm text-purple-600 dark:text-purple-400">Escanear codigo de barras</p>
           </div>
         </button>
 
@@ -565,7 +630,7 @@ export default function InventarioPage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
-              Inserir código manualmente
+              Inserir codigo manualmente
             </span>
           </label>
           <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
@@ -576,7 +641,7 @@ export default function InventarioPage() {
                 onChange={(e) => setManualCode(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
                 className="input-field w-full text-base py-3 sm:py-2 pr-10"
-                placeholder="Digite o código do item..."
+                placeholder="Digite o codigo do item..."
               />
               {manualCode && (
                 <button
@@ -603,9 +668,6 @@ export default function InventarioPage() {
               </span>
             </button>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 sm:hidden">
-            Pressione Enter para adicionar rapidamente
-          </p>
         </div>
       </div>
 
@@ -657,7 +719,7 @@ export default function InventarioPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
             <p>Nenhum item lido ainda</p>
-            <p className="text-sm mt-1">Inicie uma sessão de leitura ou digite o código manualmente</p>
+            <p className="text-sm mt-1">Inicie uma sessao de leitura ou digite o codigo manualmente</p>
           </div>
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -697,7 +759,7 @@ export default function InventarioPage() {
         )}
       </div>
 
-      {/* Scanner de código de barras */}
+      {/* Scanner de codigo de barras */}
       <BarcodeScanner
         isOpen={scannerOpen}
         onClose={() => setScannerOpen(false)}

@@ -1,8 +1,10 @@
 package com.reavaliacao.rfidmiddleware
 
 import android.Manifest
+import android.content.Intent
 import androidx.activity.viewModels
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -22,14 +24,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.reavaliacao.rfidmiddleware.rfid.ReadMode
 import com.reavaliacao.rfidmiddleware.ui.MainViewModel
 import com.reavaliacao.rfidmiddleware.ui.MainUiState
 import com.reavaliacao.rfidmiddleware.ui.screens.MainScreen
@@ -47,6 +54,10 @@ class MainActivity : ComponentActivity() {
 
     // Criar ViewModel manualmente (bypass Hilt)
     private val viewModel: MainViewModel by viewModels()
+
+    // Deep link parameters
+    private var deepLinkReadingType: String? = null
+    private var deepLinkSessionId: Int? = null
 
     private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         arrayOf(
@@ -82,11 +93,13 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
         android.util.Log.d(TAG, "Permissions checked")
 
+        // Handle deep link
+        handleDeepLink(intent)
+
         try {
             android.util.Log.d(TAG, "Setting content...")
             setContent {
                 android.util.Log.d(TAG, "Inside setContent")
-                // TESTE 3: Com tema e app completo (com Hilt)
                 RfidMiddlewareTheme {
                     android.util.Log.d(TAG, "Inside Theme")
                     Surface(
@@ -94,13 +107,49 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         android.util.Log.d(TAG, "Inside Surface, calling AppContent")
-                        AppContent(viewModel)
+                        AppContent(
+                            viewModel = viewModel,
+                            deepLinkReadingType = deepLinkReadingType,
+                            deepLinkSessionId = deepLinkSessionId,
+                            onDeepLinkConsumed = {
+                                deepLinkReadingType = null
+                                deepLinkSessionId = null
+                            }
+                        )
                     }
                 }
             }
             android.util.Log.d(TAG, "setContent completed")
         } catch (e: Exception) {
             android.util.Log.e(TAG, "Error in setContent", e)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        android.util.Log.d(TAG, "onNewIntent called")
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        val uri = intent?.data
+        if (uri != null && uri.scheme == "rfidmiddleware" && uri.host == "reading") {
+            android.util.Log.d(TAG, "Deep link received: $uri")
+
+            // Parse parameters: rfidmiddleware://reading?type=RFID&session_id=123
+            deepLinkReadingType = uri.getQueryParameter("type")
+            deepLinkSessionId = uri.getQueryParameter("session_id")?.toIntOrNull()
+
+            android.util.Log.d(TAG, "Deep link params: type=$deepLinkReadingType, session_id=$deepLinkSessionId")
+
+            // Set the read mode in ViewModel
+            when (deepLinkReadingType?.uppercase()) {
+                "RFID" -> viewModel.setReadMode(ReadMode.RFID)
+                "BARCODE" -> viewModel.setReadMode(ReadMode.BARCODE)
+            }
+
+            // Force session check
+            viewModel.checkActiveSession()
         }
     }
 
@@ -123,13 +172,27 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppContent(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    deepLinkReadingType: String? = null,
+    deepLinkSessionId: Int? = null,
+    onDeepLinkConsumed: () -> Unit = {}
 ) {
-    android.util.Log.d("AppContent", "AppContent started")
+    android.util.Log.d("AppContent", "AppContent started, deepLinkType=$deepLinkReadingType")
     val navController = rememberNavController()
     android.util.Log.d("AppContent", "NavController created")
     val uiState by viewModel.uiState.collectAsState()
     android.util.Log.d("AppContent", "UiState collected")
+
+    // Handle deep link navigation
+    LaunchedEffect(deepLinkReadingType) {
+        if (deepLinkReadingType != null) {
+            android.util.Log.d("AppContent", "Navigating to Reading from deep link")
+            navController.navigate(Screen.Reading.route) {
+                popUpTo(Screen.Main.route) { inclusive = false }
+            }
+            onDeepLinkConsumed()
+        }
+    }
 
     NavHost(
         navController = navController,

@@ -11,7 +11,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models import User, ReadingSession, SessionReading, ReadingType, SessionStatus
 
-router = APIRouter(prefix="/reading-sessions", tags=["reading-sessions"])
+router = APIRouter(prefix="/api/reading-sessions", tags=["reading-sessions"])
 
 
 # === Schemas ===
