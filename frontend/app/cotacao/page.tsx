@@ -6,6 +6,7 @@ import { useDropzone } from 'react-dropzone'
 import Link from 'next/link'
 import { quotesApi, API_URL } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
+import BarcodeScanner from '@/components/BarcodeScanner'
 
 interface Project {
   id: number
@@ -29,6 +30,7 @@ function CotacaoContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<SearchTab>('descricao')
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   // Definir pesquisador como o nome do usuário autenticado
   useEffect(() => {
@@ -163,14 +165,28 @@ function CotacaoContent() {
               <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
                 Código do Item (opcional)
               </label>
-              <input
-                type="text"
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                className="input-field w-full text-sm"
-                placeholder="Ex: 100002346"
-                disabled={loading}
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
+                  className="input-field w-full text-sm pr-10 sm:pr-3"
+                  placeholder="Ex: 100002346"
+                  disabled={loading}
+                />
+                {/* Ícone de scanner de código de barras - apenas mobile */}
+                <button
+                  type="button"
+                  onClick={() => setScannerOpen(true)}
+                  className="sm:hidden absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-primary-500 transition-colors"
+                  disabled={loading}
+                  title="Escanear código de barras"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m2 0h.01M4 4h4M4 8h4m4 12h2M4 16h4m12-4h.01M12 20h.01" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -401,6 +417,13 @@ function CotacaoContent() {
           </button>
         </div>
       </form>
+
+      {/* Scanner de código de barras */}
+      <BarcodeScanner
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onScan={(code) => setCodigo(code)}
+      />
     </div>
   )
 }
