@@ -32,6 +32,7 @@ from .blocked_domain import BlockedDomain
 from .integration_log import IntegrationLog
 from .vehicle_price import VehiclePriceBank
 from .rfid_tag import RfidTag, RfidTagBatch
+from .reading_session import ReadingSession, SessionReading, ReadingType, SessionStatus
 
 __all__ = [
     "QuoteRequest",
@@ -71,4 +72,8 @@ __all__ = [
     "VehiclePriceBank",
     "RfidTag",
     "RfidTagBatch",
+    "ReadingSession",
+    "SessionReading",
+    "ReadingType",
+    "SessionStatus",
 ]

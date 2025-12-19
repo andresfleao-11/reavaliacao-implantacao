@@ -156,6 +156,8 @@ fun AppContent(
                 onSaveTags = viewModel::saveTagsLocally,
                 onSyncTags = viewModel::syncTags,
                 onSetReadMode = viewModel::setReadMode,
+                onSendToSession = viewModel::sendReadingsToSession,
+                onClearSessionSendStatus = viewModel::clearSessionSendStatus,
                 onBack = { navController.popBackStack() }
             )
         }

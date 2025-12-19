@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -19,7 +20,10 @@ import com.reavaliacao.rfidmiddleware.rfid.BarcodeResult
 import com.reavaliacao.rfidmiddleware.rfid.DeviceInfo
 import com.reavaliacao.rfidmiddleware.rfid.ReadMode
 import com.reavaliacao.rfidmiddleware.rfid.RfidTag
+import com.reavaliacao.rfidmiddleware.ui.ActiveSession
 import com.reavaliacao.rfidmiddleware.ui.MainUiState
+import com.reavaliacao.rfidmiddleware.ui.SessionCheckStatus
+import com.reavaliacao.rfidmiddleware.ui.SessionSendStatus
 import com.reavaliacao.rfidmiddleware.ui.SyncStatus
 import com.reavaliacao.rfidmiddleware.ui.theme.Success
 import java.text.SimpleDateFormat
@@ -35,6 +39,8 @@ fun ReadingScreen(
     onSaveTags: () -> Unit,
     onSyncTags: () -> Unit,
     onSetReadMode: (ReadMode) -> Unit,
+    onSendToSession: () -> Unit,
+    onClearSessionSendStatus: () -> Unit,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -71,11 +77,19 @@ fun ReadingScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            // Session Status Banner
+            SessionStatusBanner(
+                activeSession = uiState.activeSession,
+                sessionStatus = uiState.sessionStatus,
+                currentReadMode = uiState.readMode
+            )
+
             // Mode Toggle
             ReadModeToggle(
                 currentMode = uiState.readMode,
                 onModeChange = onSetReadMode,
-                enabled = !uiState.isReading
+                enabled = !uiState.isReading,
+                activeSession = uiState.activeSession
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -118,9 +132,15 @@ fun ReadingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Check if reading is allowed based on session
+                val canRead = uiState.activeSession != null &&
+                    ((uiState.activeSession.readingType == "RFID" && uiState.readMode == ReadMode.RFID) ||
+                     (uiState.activeSession.readingType == "BARCODE" && uiState.readMode == ReadMode.BARCODE))
+
                 Button(
                     onClick = { if (uiState.isReading) onStopReading() else onStartReading() },
                     modifier = Modifier.weight(1f),
+                    enabled = canRead || uiState.isReading, // Allow stopping even if session ended
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (uiState.isReading) MaterialTheme.colorScheme.error else Success
                     )
@@ -141,6 +161,35 @@ fun ReadingScreen(
                 }
             }
 
+            // No session warning
+            if (uiState.activeSession == null && !uiState.isReading) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFFF3E0) // Light orange
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = Color(0xFFE65100),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Inicie uma sessao de leitura na web primeiro",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFE65100)
+                        )
+                    }
+                }
+            }
+
             if (uiState.isReading) {
                 Spacer(modifier = Modifier.height(8.dp))
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -156,7 +205,106 @@ fun ReadingScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Action Buttons
+            // Action Buttons - Session Send Button (primary action when session active)
+            if (uiState.activeSession != null) {
+                val hasReadings = when (uiState.activeSession.readingType) {
+                    "RFID" -> uiState.readTags.isNotEmpty()
+                    "BARCODE" -> uiState.barcodeResults.isNotEmpty()
+                    else -> false
+                }
+
+                Button(
+                    onClick = onSendToSession,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = hasReadings && !uiState.isReading && uiState.sessionSendStatus !is SessionSendStatus.Sending,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    if (uiState.sessionSendStatus is SessionSendStatus.Sending) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.Send, contentDescription = null)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Enviar para Sessao Web")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Session Send Status
+            when (val status = uiState.sessionSendStatus) {
+                is SessionSendStatus.Success -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Success.copy(alpha = 0.15f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Success)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Success,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "${status.addedCount} enviados (total: ${status.totalCount})",
+                                color = Success,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                is SessionSendStatus.Error -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = status.message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                else -> {}
+            }
+
+            // Local Save/Sync Buttons (secondary actions)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -168,10 +316,10 @@ fun ReadingScreen(
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Salvar")
+                    Text("Salvar Local")
                 }
 
-                Button(
+                OutlinedButton(
                     onClick = onSyncTags,
                     modifier = Modifier.weight(1f),
                     enabled = uiState.unsyncedCount > 0 && uiState.syncStatus !is SyncStatus.Syncing
@@ -179,14 +327,13 @@ fun ReadingScreen(
                     if (uiState.syncStatus is SyncStatus.Syncing) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Icon(Icons.Default.CloudUpload, contentDescription = null)
                     }
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Enviar")
+                    Text("Enviar Local")
                 }
             }
 
@@ -335,10 +482,81 @@ fun ReadingScreen(
 }
 
 @Composable
+fun SessionStatusBanner(
+    activeSession: ActiveSession?,
+    sessionStatus: SessionCheckStatus,
+    currentReadMode: ReadMode
+) {
+    if (activeSession != null) {
+        val isMatchingMode = (activeSession.readingType == "RFID" && currentReadMode == ReadMode.RFID) ||
+                            (activeSession.readingType == "BARCODE" && currentReadMode == ReadMode.BARCODE)
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = if (isMatchingMode) Success.copy(alpha = 0.15f) else Color(0xFFFFF3E0)
+            ),
+            border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                if (isMatchingMode) Success else Color(0xFFE65100)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Animated dot
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            color = if (isMatchingMode) Success else Color(0xFFE65100),
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Sessao ${activeSession.readingType} Ativa",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isMatchingMode) Success else Color(0xFFE65100)
+                    )
+                    if (!isMatchingMode) {
+                        Text(
+                            text = "Mude para modo ${activeSession.readingType} para ler",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFE65100)
+                        )
+                    }
+                    if (activeSession.location != null) {
+                        Text(
+                            text = "Local: ${activeSession.location}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                Icon(
+                    if (isMatchingMode) Icons.Default.CheckCircle else Icons.Default.SwapHoriz,
+                    contentDescription = null,
+                    tint = if (isMatchingMode) Success else Color(0xFFE65100)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun ReadModeToggle(
     currentMode: ReadMode,
     onModeChange: (ReadMode) -> Unit,
-    enabled: Boolean
+    enabled: Boolean,
+    activeSession: ActiveSession? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -353,15 +571,17 @@ fun ReadModeToggle(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // RFID Button
+            val rfidHighlight = activeSession?.readingType == "RFID"
             Button(
                 onClick = { onModeChange(ReadMode.RFID) },
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (currentMode == ReadMode.RFID)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.surface,
+                    containerColor = when {
+                        currentMode == ReadMode.RFID && rfidHighlight -> Success
+                        currentMode == ReadMode.RFID -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.surface
+                    },
                     contentColor = if (currentMode == ReadMode.RFID)
                         MaterialTheme.colorScheme.onPrimary
                     else
@@ -374,15 +594,17 @@ fun ReadModeToggle(
             }
 
             // Barcode Button
+            val barcodeHighlight = activeSession?.readingType == "BARCODE"
             Button(
                 onClick = { onModeChange(ReadMode.BARCODE) },
                 modifier = Modifier.weight(1f),
                 enabled = enabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (currentMode == ReadMode.BARCODE)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.surface,
+                    containerColor = when {
+                        currentMode == ReadMode.BARCODE && barcodeHighlight -> Success
+                        currentMode == ReadMode.BARCODE -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.surface
+                    },
                     contentColor = if (currentMode == ReadMode.BARCODE)
                         MaterialTheme.colorScheme.onPrimary
                     else

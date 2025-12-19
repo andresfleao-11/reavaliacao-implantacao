@@ -3,7 +3,11 @@ package com.reavaliacao.rfidmiddleware.data.repository
 import android.util.Log
 import com.reavaliacao.rfidmiddleware.data.local.TagDao
 import com.reavaliacao.rfidmiddleware.data.local.TagEntity
+import com.reavaliacao.rfidmiddleware.data.remote.ActiveSessionResponse
 import com.reavaliacao.rfidmiddleware.data.remote.ApiService
+import com.reavaliacao.rfidmiddleware.data.remote.BulkReadingsRequest
+import com.reavaliacao.rfidmiddleware.data.remote.BulkReadingsResponse
+import com.reavaliacao.rfidmiddleware.data.remote.SessionReadingRequest
 import com.reavaliacao.rfidmiddleware.data.remote.TagBatchRequest
 import com.reavaliacao.rfidmiddleware.data.remote.TagDto
 import com.reavaliacao.rfidmiddleware.rfid.RfidTag
@@ -109,6 +113,62 @@ class TagRepository @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Connection test error", e)
+            Result.failure(e)
+        }
+    }
+
+    // ==================== Session Management ====================
+
+    suspend fun checkActiveSession(userId: Int): Result<ActiveSessionResponse> {
+        return try {
+            Log.d(TAG, "Checking active session for user $userId...")
+            val response = apiService.checkActiveSession(userId)
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    Log.d(TAG, "Session check response: has_active=${body.has_active_session}, type=${body.reading_type}")
+                    Result.success(body)
+                } else {
+                    Log.d(TAG, "Session check: empty body")
+                    Result.success(ActiveSessionResponse(has_active_session = false))
+                }
+            } else {
+                val error = "Erro HTTP ${response.code()}: ${response.message()}"
+                Log.e(TAG, "Session check failed: $error")
+                Result.failure(Exception(error))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Session check error", e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendSessionReadings(
+        sessionId: Int,
+        readings: List<SessionReadingRequest>
+    ): Result<BulkReadingsResponse> {
+        return try {
+            Log.d(TAG, "Sending ${readings.size} readings to session $sessionId...")
+            val request = BulkReadingsRequest(readings = readings)
+            val response = apiService.sendSessionReadings(sessionId, request)
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    Log.d(TAG, "Session readings sent: added=${body.added_count}, total=${body.total_count}")
+                    Result.success(body)
+                } else {
+                    Log.e(TAG, "Session readings: empty body")
+                    Result.failure(Exception("Empty response body"))
+                }
+            } else {
+                val error = response.errorBody()?.string() ?: "Erro HTTP ${response.code()}"
+                Log.e(TAG, "Session readings failed: $error")
+                Result.failure(Exception(error))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Session readings error", e)
             Result.failure(e)
         }
     }
