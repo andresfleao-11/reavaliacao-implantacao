@@ -455,49 +455,49 @@ export default function IntegracoesPage() {
 
   // Render Middleware Tab Content
   const renderMiddlewareTab = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Server Configuration */}
       <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800">
-        <div className="flex items-center mb-4">
-          <svg className="w-6 h-6 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center mb-3 sm:mb-4">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
           </svg>
-          <h2 className="text-xl font-semibold text-blue-900 dark:text-blue-100">Configuracoes do Servidor</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-blue-900 dark:text-blue-100">Configuracoes do Servidor</h2>
         </div>
-        <p className="text-sm text-blue-700 dark:text-blue-300 mb-4">
+        <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 mb-3 sm:mb-4">
           Use estas configuracoes no aplicativo RFID Middleware para conectar ao servidor.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Server URL */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               URL do Servidor
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={middlewareConfig?.server_url || API_URL}
                 readOnly
-                className="input-field flex-1 bg-gray-50 dark:bg-gray-700"
+                className="input-field flex-1 bg-gray-50 dark:bg-gray-700 text-xs sm:text-sm"
               />
               <button
                 onClick={() => copyToClipboard(middlewareConfig?.server_url || API_URL, 'server_url')}
-                className="btn-secondary flex items-center gap-1"
+                className="btn-secondary flex items-center justify-center gap-1 w-full sm:w-auto"
               >
                 {copiedField === 'server_url' ? (
                   <>
                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Copiado!
+                    <span className="text-sm">Copiado!</span>
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                     </svg>
-                    Copiar
+                    <span className="text-sm">Copiar</span>
                   </>
                 )}
               </button>
@@ -505,15 +505,15 @@ export default function IntegracoesPage() {
           </div>
 
           {/* API Version */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Versao da API
             </label>
             <input
               type="text"
               value={middlewareConfig?.api_version || '1.0'}
               readOnly
-              className="input-field w-32 bg-gray-50 dark:bg-gray-700"
+              className="input-field w-24 sm:w-32 bg-gray-50 dark:bg-gray-700 text-xs sm:text-sm"
             />
           </div>
         </div>
@@ -522,40 +522,40 @@ export default function IntegracoesPage() {
       {/* Token Generation */}
       <div className="card">
         {renderIntegrationMessage('MIDDLEWARE')}
-        <div className="flex items-center mb-4">
-          <svg className="w-6 h-6 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center mb-3 sm:mb-4">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-purple-600 dark:text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
           </svg>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Gerar Token de Acesso</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Gerar Token de Acesso</h2>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
           Gere um token de autenticacao para usar no aplicativo RFID Middleware. O token sera vinculado a sua conta.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Device Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nome do Dispositivo
             </label>
             <input
               type="text"
               value={deviceName}
               onChange={(e) => setDeviceName(e.target.value)}
-              className="input-field w-full"
+              className="input-field w-full text-sm"
               placeholder="Ex: RFID Middleware - Coletor 1"
             />
           </div>
 
           {/* Expiration */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Validade do Token (dias)
             </label>
             <select
               value={tokenExpiresDays}
               onChange={(e) => setTokenExpiresDays(Number(e.target.value))}
-              className="input-field w-48"
+              className="input-field w-full sm:w-48 text-sm"
             >
               <option value={30}>30 dias</option>
               <option value={90}>90 dias</option>
@@ -569,7 +569,7 @@ export default function IntegracoesPage() {
           <button
             onClick={generateMiddlewareToken}
             disabled={generatingToken || !deviceName}
-            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             {generatingToken ? (
               <>
@@ -577,14 +577,14 @@ export default function IntegracoesPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Gerando...
+                <span>Gerando...</span>
               </>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Gerar Token
+                <span>Gerar Token</span>
               </>
             )}
           </button>
@@ -592,9 +592,9 @@ export default function IntegracoesPage() {
 
         {/* Generated Token Display */}
         {generatedToken && (
-          <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-            <h3 className="font-semibold text-green-800 dark:text-green-200 mb-3 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+            <h3 className="font-semibold text-green-800 dark:text-green-200 mb-2 sm:mb-3 flex items-center text-sm sm:text-base">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Token Gerado com Sucesso!
@@ -604,30 +604,30 @@ export default function IntegracoesPage() {
               {/* Token */}
               <div>
                 <label className="block text-xs font-medium text-green-700 dark:text-green-300 mb-1">Token de Autenticacao</label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={generatedToken.token}
                     readOnly
-                    className="input-field flex-1 text-xs font-mono bg-white dark:bg-gray-800"
+                    className="input-field flex-1 text-xs font-mono bg-white dark:bg-gray-800 overflow-x-auto"
                   />
                   <button
                     onClick={() => copyToClipboard(generatedToken.token, 'token')}
-                    className="btn-secondary flex items-center gap-1 whitespace-nowrap"
+                    className="btn-secondary flex items-center justify-center gap-1 whitespace-nowrap w-full sm:w-auto"
                   >
                     {copiedField === 'token' ? (
                       <>
                         <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Copiado!
+                        <span className="text-sm">Copiado!</span>
                       </>
                     ) : (
                       <>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                         </svg>
-                        Copiar
+                        <span className="text-sm">Copiar</span>
                       </>
                     )}
                   </button>
@@ -635,29 +635,29 @@ export default function IntegracoesPage() {
               </div>
 
               {/* Info */}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex flex-wrap">
                   <span className="text-green-700 dark:text-green-300 font-medium">Usuario:</span>
-                  <span className="ml-2 text-green-900 dark:text-green-100">{generatedToken.user_name}</span>
+                  <span className="ml-2 text-green-900 dark:text-green-100 break-all">{generatedToken.user_name}</span>
                 </div>
-                <div>
+                <div className="flex flex-wrap">
                   <span className="text-green-700 dark:text-green-300 font-medium">Dispositivo:</span>
-                  <span className="ml-2 text-green-900 dark:text-green-100">{generatedToken.device_name}</span>
+                  <span className="ml-2 text-green-900 dark:text-green-100 break-all">{generatedToken.device_name}</span>
                 </div>
-                <div>
+                <div className="flex flex-wrap">
                   <span className="text-green-700 dark:text-green-300 font-medium">Expira em:</span>
                   <span className="ml-2 text-green-900 dark:text-green-100">
                     {new Date(generatedToken.expires_at).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
-                <div>
+                <div className="flex flex-wrap">
                   <span className="text-green-700 dark:text-green-300 font-medium">Servidor:</span>
-                  <span className="ml-2 text-green-900 dark:text-green-100">{generatedToken.server_url}</span>
+                  <span className="ml-2 text-green-900 dark:text-green-100 break-all">{generatedToken.server_url}</span>
                 </div>
               </div>
 
-              <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-700">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-700">
+                <p className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">
                   <strong>Importante:</strong> Copie o token agora. Por seguranca, ele nao sera exibido novamente.
                 </p>
               </div>
@@ -668,13 +668,13 @@ export default function IntegracoesPage() {
 
       {/* Instructions */}
       <div className="card bg-gray-50 dark:bg-gray-800">
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-3 flex items-center text-sm sm:text-base">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-gray-600 dark:text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Como Configurar o App RFID Middleware
         </h3>
-        <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
+        <ol className="list-decimal list-inside space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300">
           <li>Abra o aplicativo RFID Middleware no dispositivo</li>
           <li>Acesse <strong>Configuracoes</strong> no menu</li>
           <li>Cole a <strong>URL do Servidor</strong> no campo correspondente</li>
