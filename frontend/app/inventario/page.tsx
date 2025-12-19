@@ -208,9 +208,9 @@ export default function InventarioPage() {
           Método de Leitura
         </h2>
 
-        {/* Botões de leitura - Mobile */}
+        {/* Botões de leitura */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          {/* Scanner de código de barras */}
+          {/* Scanner de código de barras - Câmera (Mobile) */}
           <button
             onClick={() => setScannerOpen(true)}
             className="flex items-center justify-center gap-3 p-4 bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors sm:hidden"
@@ -224,7 +224,18 @@ export default function InventarioPage() {
             </div>
           </button>
 
-          {/* Info RFID */}
+          {/* Barcode via Middleware */}
+          <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+            <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m2 0h.01M4 4h4M4 8h4m4 12h2M4 16h4m12-4h.01M12 20h.01" />
+            </svg>
+            <div className="text-left">
+              <p className="font-medium text-blue-700 dark:text-blue-300">Código de Barras</p>
+              <p className="text-sm text-blue-600 dark:text-blue-400">Use o app Middleware</p>
+            </div>
+          </div>
+
+          {/* RFID via Middleware */}
           <div className="flex items-center justify-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-lg">
             <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />

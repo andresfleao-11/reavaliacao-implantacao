@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RFID Middleware</string>
+    <string name="scan_devices">Escanear Dispositivos</string>
+    <string name="connect">Conectar</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="start_reading">Iniciar Leitura</string>
+    <string name="stop_reading">Parar Leitura</string>
+    <string name="clear_tags">Limpar Tags</string>
+    <string name="send_to_server">Enviar para Servidor</string>
+    <string name="settings">Configuracoes</string>
+    <string name="connected">Conectado</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="scanning">Escaneando...</string>
+    <string name="no_devices_found">Nenhum dispositivo encontrado</string>
+    <string name="tags_read">Tags Lidas</string>
+    <string name="server_url">URL do Servidor</string>
+    <string name="auth_token">Token de Autenticacao</string>
+    <string name="reader_power">Potencia do Leitor</string>
+    <string name="auto_send">Envio Automatico</string>
+</resources>
