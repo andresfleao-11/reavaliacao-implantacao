@@ -250,30 +250,51 @@ export default function InventarioPage() {
         {/* Entrada manual */}
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Inserir código manualmente
+            <span className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Inserir código manualmente
+            </span>
           </label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="text"
-              value={manualCode}
-              onChange={(e) => setManualCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
-              className="input-field flex-1"
-              placeholder="Digite o código do item..."
-            />
+          <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
+                className="input-field w-full text-base py-3 sm:py-2 pr-10"
+                placeholder="Digite o código do item..."
+              />
+              {manualCode && (
+                <button
+                  type="button"
+                  onClick={() => setManualCode('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
             <button
               onClick={handleManualAdd}
               disabled={!manualCode.trim()}
-              className="btn-primary px-4 py-2 w-full sm:w-auto"
+              className="btn-primary px-6 py-3 sm:py-2 w-full sm:w-auto text-base sm:text-sm font-medium"
             >
               <span className="flex items-center justify-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Adicionar
               </span>
             </button>
           </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 sm:hidden">
+            Pressione Enter para adicionar rapidamente
+          </p>
         </div>
       </div>
 
