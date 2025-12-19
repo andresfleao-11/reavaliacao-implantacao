@@ -250,6 +250,79 @@ export default function SearchLogDetail({ searchStats, shoppingLog }: SearchLogD
               </div>
             </div>
 
+            {/* Aumentos de Tolerancia */}
+            {searchStats.tolerance_increases > 0 && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Aumentos de Tolerancia ({searchStats.tolerance_increases}x)
+                </h4>
+                <div className="space-y-3">
+                  {/* Mostrar progressão da tolerância */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 px-2 py-1 rounded text-xs font-medium">
+                      Inicial: {searchStats.initial_tolerance || 25}%
+                    </span>
+                    {Array.from({ length: searchStats.tolerance_increases || 0 }, (_, i) => (
+                      <span key={i} className="flex items-center gap-1">
+                        <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        <span className="bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded text-xs font-medium">
+                          {(searchStats.initial_tolerance || 25) + ((i + 1) * 5)}%
+                        </span>
+                      </span>
+                    ))}
+                    <span className="flex items-center gap-1">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                      <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-xs font-medium">
+                        Final: {searchStats.final_tolerance || ((searchStats.initial_tolerance || 25) + (searchStats.tolerance_increases || 0) * 5)}%
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* Mostrar blocos que falharam em cada tolerância (agrupados) */}
+                  {searchStats.block_history && searchStats.block_history.length > 0 && (
+                    <div className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                      <p className="font-medium mb-1">Blocos por nivel de tolerancia:</p>
+                      {(() => {
+                        // Agrupar blocos por tolerance_round
+                        const blocksByTolerance: { [key: number]: any[] } = {}
+                        searchStats.block_history.forEach((block: any) => {
+                          const round = block.tolerance_round || 0
+                          if (!blocksByTolerance[round]) blocksByTolerance[round] = []
+                          blocksByTolerance[round].push(block)
+                        })
+
+                        return Object.entries(blocksByTolerance).map(([round, blocks]) => {
+                          const tolerance = (searchStats.initial_tolerance || 25) + (parseInt(round) * 5)
+                          const failedBlocks = blocks.filter((b: any) => b.result === 'failed')
+                          const successBlocks = blocks.filter((b: any) => b.result === 'success' || b.result === 'success_early')
+
+                          return (
+                            <div key={round} className="ml-2 mb-1">
+                              <span className="font-medium">Tolerancia {tolerance}%:</span>{' '}
+                              {blocks.length} bloco(s) testado(s)
+                              {failedBlocks.length > 0 && (
+                                <span className="text-red-600 dark:text-red-400"> ({failedBlocks.length} falharam)</span>
+                              )}
+                              {successBlocks.length > 0 && (
+                                <span className="text-green-600 dark:text-green-400"> ({successBlocks.length} sucesso)</span>
+                              )}
+                            </div>
+                          )
+                        })
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Historico de Iteracoes */}
             {searchStats.block_history && searchStats.block_history.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-lg p-4">

@@ -171,11 +171,23 @@ class IteracaoBloco(BaseModel):
     motivo: Optional[str] = None
 
 
+class AumentoTolerancia(BaseModel):
+    """Registro de aumento de tolerância"""
+    tolerancia_anterior: float
+    tolerancia_nova: float
+    round_numero: int
+    motivo: str
+    blocos_que_falharam: List[Dict[str, Any]]  # Resumo dos blocos que falharam
+    total_validados_ate_agora: int
+    total_descartados_ate_agora: int
+
+
 class Etapa2Result(BaseModel):
     """Resultado da ETAPA 2: Validação de Bloco"""
     iteracoes: List[IteracaoBloco]
     total_iteracoes: int
     aumentos_tolerancia: int
+    aumentos_tolerancia_detalhados: List[AumentoTolerancia] = []
     tolerancia_inicial: float
     tolerancia_final: float
     produtos_validados_final: int
@@ -688,6 +700,8 @@ async def analyze_shopping_json(
             results_by_key = {}
 
             iteracoes = []
+            aumentos_tolerancia_lista = []
+            blocos_falhados_nesta_tolerancia = []
             iteration = 0
             tolerance_round = 0
             current_var_max = var_max_decimal
@@ -697,8 +711,36 @@ async def analyze_shopping_json(
                 # Loop externo: tolerância
                 while tolerance_round <= MAX_TOLERANCE_INCREASES:
                     if tolerance_round > 0:
+                        tolerancia_anterior = (current_var_max - INCREMENTO_VAR) * 100
                         current_var_max += INCREMENTO_VAR
-                        fluxo_resumo.append(f"  └─ ⚠️ Aumentando tolerância para {current_var_max*100:.0f}%")
+                        tolerancia_nova = current_var_max * 100
+
+                        # Registrar aumento de tolerância com detalhes
+                        aumento = AumentoTolerancia(
+                            tolerancia_anterior=tolerancia_anterior,
+                            tolerancia_nova=tolerancia_nova,
+                            round_numero=tolerance_round,
+                            motivo=f"Nenhum bloco elegível com potencial >= {num_cotacoes} na tolerância de {tolerancia_anterior:.0f}%",
+                            blocos_que_falharam=[
+                                {
+                                    "iteracao": b["iteracao"],
+                                    "tamanho": b["tamanho"],
+                                    "preco_min": b["preco_min"],
+                                    "preco_max": b["preco_max"],
+                                    "validados": b["validados"],
+                                    "descartados": b["descartados"],
+                                    "motivo_falha": b["motivo"]
+                                }
+                                for b in blocos_falhados_nesta_tolerancia
+                            ],
+                            total_validados_ate_agora=len(validated_keys),
+                            total_descartados_ate_agora=len(failed_keys)
+                        )
+                        aumentos_tolerancia_lista.append(aumento)
+                        blocos_falhados_nesta_tolerancia = []  # Reset para nova tolerância
+
+                        fluxo_resumo.append(f"  └─ ⚠️ AUMENTO DE TOLERÂNCIA: {tolerancia_anterior:.0f}% → {tolerancia_nova:.0f}%")
+                        fluxo_resumo.append(f"      Motivo: {len(aumento.blocos_que_falharam)} bloco(s) falharam na tolerância anterior")
 
                     # Loop interno: iterações de bloco
                     while iteration < max_iterations and len(cotacoes_finais) < num_cotacoes:
@@ -922,6 +964,16 @@ async def analyze_shopping_json(
                         elif iteracao_info.novos_descartados > 0 and iteracao_info.novos_validados == 0:
                             iteracao_info.status = "BLOCO_FALHOU"
                             iteracao_info.acao_tomada = "Recalcular blocos sem produtos descartados"
+                            # Registrar bloco que falhou para relatório de aumento de tolerância
+                            blocos_falhados_nesta_tolerancia.append({
+                                "iteracao": iteration,
+                                "tamanho": best_block['tamanho'],
+                                "preco_min": best_block['preco_min'],
+                                "preco_max": best_block['preco_max'],
+                                "validados": iteracao_info.novos_validados,
+                                "descartados": iteracao_info.novos_descartados,
+                                "motivo": "Todos os produtos testados falharam"
+                            })
                         else:
                             iteracao_info.status = "CONTINUAR"
                             iteracao_info.acao_tomada = "Continuar validando próximo bloco"
@@ -941,6 +993,7 @@ async def analyze_shopping_json(
                 iteracoes=iteracoes,
                 total_iteracoes=len(iteracoes),
                 aumentos_tolerancia=tolerance_round,
+                aumentos_tolerancia_detalhados=aumentos_tolerancia_lista,
                 tolerancia_inicial=variacao_maxima,
                 tolerancia_final=current_var_max * 100,
                 produtos_validados_final=len(validated_keys),
