@@ -31,6 +31,7 @@ from .financial import ApiCostConfig, FinancialTransaction
 from .blocked_domain import BlockedDomain
 from .integration_log import IntegrationLog
 from .vehicle_price import VehiclePriceBank
+from .rfid_tag import RfidTag, RfidTagBatch
 
 __all__ = [
     "QuoteRequest",
@@ -68,4 +69,6 @@ __all__ = [
     "BlockedDomain",
     "IntegrationLog",
     "VehiclePriceBank",
+    "RfidTag",
+    "RfidTagBatch",
 ]
