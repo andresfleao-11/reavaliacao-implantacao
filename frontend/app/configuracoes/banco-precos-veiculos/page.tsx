@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { vehiclePricesApi, VehiclePrice, VehiclePriceListResponse } from '@/lib/api'
+import { vehiclePricesApi, VehiclePrice, VehiclePriceListResponse, API_URL } from '@/lib/api'
 
 export default function BancoPrecoVeiculosPage() {
   // Data state
@@ -19,8 +19,13 @@ export default function BancoPrecoVeiculosPage() {
   const [selectedYear, setSelectedYear] = useState<string>('')
   const [selectedMonth, setSelectedMonth] = useState<string>('')
   const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [selectedScreenshot, setSelectedScreenshot] = useState<string>('')  // '', 'com', 'sem'
   const [searchFipe, setSearchFipe] = useState<string>('')
   const [searchModel, setSearchModel] = useState<string>('')
+
+  // Screenshot preview modal
+  const [previewVehicle, setPreviewVehicle] = useState<VehiclePrice | null>(null)
+  const [retryingScreenshotId, setRetryingScreenshotId] = useState<number | null>(null)
 
   // Pagination
   const [page, setPage] = useState(1)
@@ -63,6 +68,7 @@ export default function BancoPrecoVeiculosPage() {
         year_model: selectedYear ? parseInt(selectedYear) : undefined,
         reference_month: selectedMonth || undefined,
         status: selectedStatus ? selectedStatus as 'Vigente' | 'Expirada' : undefined,
+        has_screenshot: selectedScreenshot === 'com' ? true : selectedScreenshot === 'sem' ? false : undefined,
         codigo_fipe: searchFipe || undefined,
         model_name: searchModel || undefined,
         sort_by: 'updated_at',
@@ -78,7 +84,7 @@ export default function BancoPrecoVeiculosPage() {
 
   useEffect(() => {
     loadData()
-  }, [page, selectedBrand, selectedYear, selectedMonth, selectedStatus])
+  }, [page, selectedBrand, selectedYear, selectedMonth, selectedStatus, selectedScreenshot])
 
   // Handle search (with debounce)
   useEffect(() => {
@@ -98,9 +104,41 @@ export default function BancoPrecoVeiculosPage() {
     setSelectedYear('')
     setSelectedMonth('')
     setSelectedStatus('')
+    setSelectedScreenshot('')
     setSearchFipe('')
     setSearchModel('')
     setPage(1)
+  }
+
+  // Retry screenshot
+  const handleRetryScreenshot = async (vehicle: VehiclePrice) => {
+    setRetryingScreenshotId(vehicle.id)
+    setMessage(null)
+
+    try {
+      const result = await vehiclePricesApi.retryScreenshot(vehicle.id)
+
+      if (result.success) {
+        setMessage({
+          type: 'success',
+          text: `Screenshot capturado com sucesso para ${vehicle.vehicle_name}`,
+        })
+        loadData()
+      } else {
+        setMessage({
+          type: 'error',
+          text: result.message,
+        })
+      }
+    } catch (err: any) {
+      setMessage({
+        type: 'error',
+        text: err.message || 'Erro ao capturar screenshot',
+      })
+    } finally {
+      setRetryingScreenshotId(null)
+      setTimeout(() => setMessage(null), 5000)
+    }
   }
 
   // Export CSV
@@ -288,6 +326,22 @@ export default function BancoPrecoVeiculosPage() {
             </select>
           </div>
 
+          {/* Screenshot Filter */}
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Print
+            </label>
+            <select
+              value={selectedScreenshot}
+              onChange={(e) => { setSelectedScreenshot(e.target.value); setPage(1) }}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value="">Todos</option>
+              <option value="com">Com Print</option>
+              <option value="sem">Sem Print</option>
+            </select>
+          </div>
+
           {/* FIPE Code Search */}
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -439,39 +493,59 @@ export default function BancoPrecoVeiculosPage() {
                       </td>
                       <td className="px-4 py-4 text-center">
                         {vehicle.has_screenshot ? (
-                          <svg
-                            className="h-5 w-5 text-green-500 mx-auto"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <button
+                            onClick={() => setPreviewVehicle(vehicle)}
+                            className="hover:scale-110 transition-transform"
+                            title="Clique para visualizar"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
+                            <svg
+                              className="h-5 w-5 text-green-500 mx-auto cursor-pointer"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                            </svg>
+                          </button>
                         ) : (
-                          <svg
-                            className="h-5 w-5 text-yellow-500 mx-auto"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                          <button
+                            onClick={() => handleRetryScreenshot(vehicle)}
+                            disabled={retryingScreenshotId === vehicle.id}
+                            className="hover:scale-110 transition-transform disabled:opacity-50"
+                            title="Clique para capturar screenshot"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                          </svg>
+                            {retryingScreenshotId === vehicle.id ? (
+                              <svg className="animate-spin h-5 w-5 text-yellow-500 mx-auto" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                            ) : (
+                              <svg
+                                className="h-5 w-5 text-yellow-500 mx-auto cursor-pointer"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                />
+                              </svg>
+                            )}
+                          </button>
                         )}
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -550,14 +624,29 @@ export default function BancoPrecoVeiculosPage() {
                       {formatCurrency(vehicle.price_value)}
                     </span>
                     {vehicle.has_screenshot ? (
-                      <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                      <button onClick={() => setPreviewVehicle(vehicle)} className="hover:scale-110 transition-transform">
+                        <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </button>
                     ) : (
-                      <svg className="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
+                      <button
+                        onClick={() => handleRetryScreenshot(vehicle)}
+                        disabled={retryingScreenshotId === vehicle.id}
+                        className="hover:scale-110 transition-transform disabled:opacity-50"
+                      >
+                        {retryingScreenshotId === vehicle.id ? (
+                          <svg className="animate-spin h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                        ) : (
+                          <svg className="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        )}
+                      </button>
                     )}
                   </div>
                   <button
@@ -658,12 +747,99 @@ export default function BancoPrecoVeiculosPage() {
               <ul className="list-disc pl-4 sm:pl-5 space-y-0.5 sm:space-y-1">
                 <li>Este banco armazena todas as cotações FIPE realizadas pelo sistema</li>
                 <li>Use o botão "Atualizar" para obter o preço mais recente de um veículo</li>
-                <li>A referência indica o mês da tabela FIPE utilizado na cotação</li>
+                <li>Clique no icone de camera verde para visualizar o screenshot FIPE</li>
+                <li>Clique no icone amarelo para capturar o screenshot pendente</li>
               </ul>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Screenshot Preview Modal */}
+      {previewVehicle && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setPreviewVehicle(null)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  Screenshot FIPE
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {previewVehicle.brand_name} {previewVehicle.model_name} - {previewVehicle.year_model}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewVehicle(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Image */}
+            <div className="p-4">
+              <div className="bg-gray-100 dark:bg-gray-900 rounded-lg overflow-hidden">
+                <img
+                  src={vehiclePricesApi.getScreenshotUrl(previewVehicle.id)}
+                  alt={`Screenshot FIPE ${previewVehicle.codigo_fipe}`}
+                  className="w-full h-auto"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect fill="%23f3f4f6" width="400" height="300"/><text x="50%" y="50%" text-anchor="middle" fill="%239ca3af">Erro ao carregar imagem</text></svg>'
+                  }}
+                />
+              </div>
+
+              {/* Info */}
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Codigo FIPE</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">{previewVehicle.codigo_fipe}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Preco</p>
+                  <p className="font-semibold text-green-600 dark:text-green-400">{formatCurrency(previewVehicle.price_value)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Combustivel</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">{previewVehicle.fuel_type}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 dark:text-gray-400">Referencia</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">{previewVehicle.reference_month}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 flex justify-end gap-2">
+              <a
+                href={vehiclePricesApi.getScreenshotUrl(previewVehicle.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-md hover:bg-primary-700"
+              >
+                Abrir em nova aba
+              </a>
+              <button
+                onClick={() => setPreviewVehicle(null)}
+                className="px-4 py-2 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

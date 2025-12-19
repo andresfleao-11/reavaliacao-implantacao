@@ -751,6 +751,7 @@ export const vehiclePricesApi = {
     reference_month?: string
     vehicle_type?: string
     status?: 'Vigente' | 'Expirada' | 'Pendente'  // Filtro por status de vigência ou screenshot pendente
+    has_screenshot?: boolean  // Filtro por presença de screenshot
     sort_by?: string
     sort_order?: string
   }): Promise<VehiclePriceListResponse> => {
@@ -766,6 +767,15 @@ export const vehiclePricesApi = {
   refresh: async (id: number): Promise<RefreshPriceResponse> => {
     const response = await api.post(`/api/vehicle-prices/${id}/refresh`)
     return response.data
+  },
+
+  retryScreenshot: async (id: number): Promise<{ success: boolean; message: string; screenshot_url?: string }> => {
+    const response = await api.post(`/api/vehicle-prices/${id}/retry-screenshot`)
+    return response.data
+  },
+
+  getScreenshotUrl: (id: number): string => {
+    return `${API_URL}/api/vehicle-prices/${id}/screenshot`
   },
 
   refreshAll: async (params?: {

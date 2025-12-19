@@ -139,6 +139,7 @@ def list_vehicle_prices(
     reference_month: Optional[str] = None,
     vehicle_type: Optional[str] = None,
     status: Optional[str] = Query(None, regex="^(Vigente|Expirada|Pendente)$"),
+    has_screenshot: Optional[bool] = Query(None, description="Filtrar por presenca de screenshot"),
     sort_by: str = Query("updated_at", regex="^(updated_at|price_value|brand_name|year_model|codigo_fipe)$"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
     db: Session = Depends(get_db)
@@ -178,6 +179,19 @@ def list_vehicle_prices(
 
     if vehicle_type:
         query = query.filter(VehiclePriceBank.vehicle_type == vehicle_type)
+
+    # Filtro por presenca de screenshot
+    if has_screenshot is not None:
+        from sqlalchemy import or_
+        if has_screenshot:
+            query = query.filter(VehiclePriceBank.has_screenshot == True)
+        else:
+            query = query.filter(
+                or_(
+                    VehiclePriceBank.has_screenshot == False,
+                    VehiclePriceBank.has_screenshot.is_(None)
+                )
+            )
 
     # Filtro por status (calculado baseado em vigencia e has_screenshot)
     if status:
@@ -430,6 +444,119 @@ async def refresh_vehicle_price(
             success=False,
             message=f"Erro ao consultar API FIPE: {str(e)}"
         )
+
+
+class RetryScreenshotResponse(BaseModel):
+    success: bool
+    message: str
+    screenshot_url: Optional[str] = None
+
+
+@router.post("/{vehicle_id}/retry-screenshot", response_model=RetryScreenshotResponse)
+async def retry_vehicle_screenshot(
+    vehicle_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Tenta capturar novamente o screenshot da consulta FIPE para um veiculo.
+    Util quando o screenshot falhou na captura original.
+    """
+    vehicle = db.query(VehiclePriceBank).filter(VehiclePriceBank.id == vehicle_id).first()
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Veiculo nao encontrado no banco de precos")
+
+    try:
+        # Converter vehicle_type se necessário
+        vehicle_type_map = {"1": "cars", "2": "motorcycles", "3": "trucks"}
+        vehicle_type = vehicle.vehicle_type
+        if vehicle_type in vehicle_type_map:
+            vehicle_type = vehicle_type_map[vehicle_type]
+
+        logger.info(f"Retry screenshot FIPE para {vehicle.vehicle_name} (ID: {vehicle_id})...")
+
+        screenshot_path = await capture_fipe_screenshot(
+            codigo_fipe=vehicle.codigo_fipe,
+            ano_modelo=vehicle.year_model,
+            combustivel=vehicle.fuel_type,
+            vehicle_type=vehicle_type,
+            quote_id=vehicle_id
+        )
+
+        if screenshot_path:
+            logger.info(f"Screenshot FIPE capturado: {screenshot_path}")
+
+            # Calcular hash do arquivo
+            def _calculate_sha256(file_path: str) -> str:
+                sha256_hash = hashlib.sha256()
+                with open(file_path, "rb") as f:
+                    for byte_block in iter(lambda: f.read(4096), b""):
+                        sha256_hash.update(byte_block)
+                return sha256_hash.hexdigest()
+
+            # Criar registro de File para o screenshot
+            screenshot_file = File(
+                type=FileType.SCREENSHOT,
+                mime_type="image/png",
+                storage_path=screenshot_path,
+                sha256=_calculate_sha256(screenshot_path)
+            )
+            db.add(screenshot_file)
+            db.flush()
+
+            vehicle.screenshot_file_id = screenshot_file.id
+            vehicle.screenshot_path = screenshot_path
+            vehicle.has_screenshot = True
+            db.commit()
+
+            logger.info(f"Screenshot registrado: file_id={screenshot_file.id}")
+
+            # Gerar URL para o screenshot
+            screenshot_url = f"/api/files/{screenshot_file.id}"
+
+            return RetryScreenshotResponse(
+                success=True,
+                message="Screenshot capturado com sucesso",
+                screenshot_url=screenshot_url
+            )
+        else:
+            return RetryScreenshotResponse(
+                success=False,
+                message="Falha ao capturar screenshot - nenhum arquivo gerado"
+            )
+
+    except Exception as e:
+        logger.error(f"Erro ao capturar screenshot do veiculo {vehicle_id}: {e}")
+        return RetryScreenshotResponse(
+            success=False,
+            message=f"Erro ao capturar screenshot: {str(e)}"
+        )
+
+
+@router.get("/{vehicle_id}/screenshot")
+async def get_vehicle_screenshot(
+    vehicle_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Retorna o screenshot da consulta FIPE de um veiculo.
+    """
+    from fastapi.responses import FileResponse
+
+    vehicle = db.query(VehiclePriceBank).filter(VehiclePriceBank.id == vehicle_id).first()
+    if not vehicle:
+        raise HTTPException(status_code=404, detail="Veiculo nao encontrado")
+
+    if not vehicle.has_screenshot or not vehicle.screenshot_path:
+        raise HTTPException(status_code=404, detail="Veiculo nao possui screenshot")
+
+    if not os.path.exists(vehicle.screenshot_path):
+        raise HTTPException(status_code=404, detail="Arquivo de screenshot nao encontrado")
+
+    return FileResponse(
+        vehicle.screenshot_path,
+        media_type="image/png",
+        filename=f"fipe_{vehicle.codigo_fipe}_{vehicle.year_model}.png"
+    )
 
 
 @router.post("/refresh-all", response_model=BulkRefreshResponse)
