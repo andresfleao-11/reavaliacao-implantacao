@@ -28,7 +28,7 @@ NBC TSP 07 | MCASP | Lei 14.133/2021
 
 ## DADO DE ENTRADA
 ```
-Descrição do bem: "{input_text}"
+Descrição do bem: "{{input_text}}"
 ```
 
 ---
@@ -38,9 +38,20 @@ Descrição do bem: "{input_text}"
 ### Tipos da API FIPE v2
 | Tipo API | Endpoint | Uso |
 |----------|----------|-----|
-| `cars` | `/cars/...` | Automóveis, SUVs, pick-ups, vans, utilitários |
+| `cars` | `/cars/...` | Automóveis, SUVs, pick-ups, vans, utilitários com **PBT ≤ 3.500 kg** |
 | `motorcycles` | `/motorcycles/...` | Motocicletas, motonetas, triciclos |
-| `trucks` | `/trucks/...` | Caminhões, ônibus, tratores (SOMENTE marcas autorizadas) |
+| `trucks` | `/trucks/...` | Caminhões, ônibus, tratores, utilitários com **PBT > 3.500 kg** (SOMENTE marcas autorizadas) |
+
+### REGRA DE PBT (Peso Bruto Total)
+
+> **Carros e Utilitários Pequenos = Utilitários com PBT ≤ 3.500 kg → usar `cars`**
+
+| PBT | Classificação | Exemplos |
+|-----|---------------|----------|
+| ≤ 3.500 kg | `cars` | Fiorino, Kangoo, Doblo, Ducato, Sprinter 314, Daily 35S, Strada, Saveiro |
+| > 3.500 kg | `trucks`* | Delivery, Atego, Sprinter 516, Daily 70C, ônibus, caminhões |
+
+*Requer marca na lista autorizada
 
 ### REGRA CRÍTICA: Classificação como `trucks`
 
@@ -85,49 +96,55 @@ Para que um veículo seja consultado no endpoint `trucks`, a marca **DEVE OBRIGA
    → SIM: vehicle_type = "motorcycles"
    → NÃO: continuar
 
-2. A marca está na lista de marcas autorizadas para trucks?
+2. É utilitário (van, furgão, chassis-cabine) com PBT ≤ 3.500 kg?
+   → SIM: vehicle_type = "cars"
+   → NÃO ou PBT > 3.500 kg: continuar
+
+3. A marca está na lista de marcas autorizadas para trucks?
    → NÃO: vehicle_type = "cars"
    → SIM: continuar
 
-3. A marca é Fiat?
+4. A marca é Fiat?
    → NÃO: vehicle_type = "trucks"
    → SIM: continuar
 
-4. O ano (fabricação ou modelo) está entre 1981 e 1984?
+5. O ano (fabricação ou modelo) está entre 1981 e 1984?
    → SIM: vehicle_type = "trucks"
    → NÃO ou NÃO INFORMADO: vehicle_type = "cars"
 ```
 
 ### Regras detalhadas
 
-1. **Marcas não listadas = `cars`**: Independente de ser descrito como caminhão, ônibus, van de carga, etc., se a marca não constar na lista, usar `cars`.
+1. **Utilitários com PBT ≤ 3.500 kg = `cars`**: Vans, furgões e utilitários com Peso Bruto Total até 3.500 kg são **sempre** classificados como `cars`, independente da marca.
 
-2. **Regra especial Fiat**:
+2. **Marcas não listadas = `cars`**: Independente de ser descrito como caminhão, ônibus, van de carga, etc., se a marca não constar na lista, usar `cars`.
+
+3. **Regra especial Fiat**:
    - Fiat **com ano entre 1981-1984** → `trucks`
    - Fiat **com ano fora de 1981-1984** → `cars`
    - Fiat **sem ano informado** → `cars` (princípio da prudência)
 
-3. **Ano de referência**: Usar prioritariamente **ano de fabricação**. Se ausente, usar **ano modelo**.
+4. **Ano de referência**: Usar prioritariamente **ano de fabricação**. Se ausente, usar **ano modelo**.
 
-4. **Modelo não determina classificação**: O que determina se usa `trucks` é a **marca + ano**, não o nome do modelo (ex: "Ducato Minibus" Fiat 2011 → `cars`).
+5. **Modelo não determina classificação**: O que determina se usa `trucks` é **PBT + marca + ano**, não o nome do modelo (ex: "Ducato Minibus" Fiat 2011 com PBT ~3.500kg → `cars`).
 
 ### Exemplos de classificação
 
-| Descrição | Marca na lista? | Regra Fiat | Resultado |
-|-----------|-----------------|------------|-----------|
-| Fiat Ducato Minibus 2.3 Diesel 2011 | Sim (Fiat) | 2011 ❌ fora 1981-84 | `cars` |
-| Fiat 180 Truck 1983 | Sim (Fiat) | 1983 ✅ dentro 1981-84 | `trucks` |
-| Fiat Strada Cabine Dupla 2022 | Sim (Fiat) | 2022 ❌ fora 1981-84 | `cars` |
-| Mercedes-Benz Atego 1719 2020 | Sim | N/A | `trucks` |
-| Mercedes-Benz Classe A 2019 | Sim | N/A | `trucks`* |
-| Renault Master Ônibus 2019 | ❌ Não | N/A | `cars` |
-| Volkswagen Delivery 9.170 2022 | Sim | N/A | `trucks` |
-| Iveco Daily Furgão 2018 | Sim | N/A | `trucks` |
-| Peugeot Boxer Van 2020 | ❌ Não | N/A | `cars` |
-| Sprinter 415 CDI 2021 | Sim (Mercedes-Benz) | N/A | `trucks` |
-| Honda CG 160 2020 | N/A (moto) | N/A | `motorcycles` |
-
-*Nota: Mercedes-Benz Classe A será buscado em `trucks` pela regra de marca, mas provavelmente não será encontrado lá. O sistema de cotação deve tratar esse cenário.
+| Descrição | PBT | Marca na lista? | Regra Fiat | Resultado |
+|-----------|-----|-----------------|------------|-----------|
+| Fiat Fiorino 1.4 Furgão 2020 | ~1.800 kg | Sim (Fiat) | PBT ≤ 3.500 | `cars` |
+| Fiat Ducato Minibus 2.3 Diesel 2011 | ~3.500 kg | Sim (Fiat) | PBT ≤ 3.500 | `cars` |
+| Fiat 180 Truck 1983 | >3.500 kg | Sim (Fiat) | 1983 ✅ 1981-84 | `trucks` |
+| Fiat Strada Cabine Dupla 2022 | ~1.500 kg | Sim (Fiat) | PBT ≤ 3.500 | `cars` |
+| Mercedes-Benz Atego 1719 2020 | ~17.000 kg | Sim | PBT > 3.500 | `trucks` |
+| Mercedes-Benz Sprinter 314 2019 | ~3.500 kg | Sim | PBT ≤ 3.500 | `cars` |
+| Mercedes-Benz Sprinter 516 2019 | ~5.500 kg | Sim | PBT > 3.500 | `trucks` |
+| Renault Master Ônibus 2019 | ~3.500 kg | ❌ Não | PBT ≤ 3.500 | `cars` |
+| Volkswagen Delivery 9.170 2022 | ~9.400 kg | Sim | PBT > 3.500 | `trucks` |
+| Iveco Daily 35S14 Furgão 2018 | ~3.500 kg | Sim | PBT ≤ 3.500 | `cars` |
+| Iveco Daily 70C17 Chassi 2020 | ~7.000 kg | Sim | PBT > 3.500 | `trucks` |
+| Peugeot Boxer Van 2020 | ~3.500 kg | ❌ Não | PBT ≤ 3.500 | `cars` |
+| Honda CG 160 2020 | N/A (moto) | N/A | N/A | `motorcycles` |
 
 ---
 
@@ -174,11 +191,12 @@ GET /{{vehicleType}}/{{fipeCode}}/years → GET .../years/{{yearId}}
 
 ### Regras para veículos
 1. **Marca e modelo são OBRIGATÓRIOS**
-2. **APLICAR ALGORITMO DE CLASSIFICAÇÃO** para determinar `vehicle_type`
-3. Priorizar ano **fabricação** para regra Fiat, ano **modelo** para consulta FIPE
-4. Inferir combustível mais provável se ausente
-5. Gerar múltiplas variações de busca
-6. Implementos/carrocerias: FIPE avalia só chassi
+2. **APLICAR ALGORITMO DE CLASSIFICAÇÃO** para determinar `vehicle_type` (incluindo verificação de PBT)
+3. **Utilitários com PBT ≤ 3.500 kg** → sempre usar `cars`
+4. Priorizar ano **fabricação** para regra Fiat, ano **modelo** para consulta FIPE
+5. Inferir combustível mais provável se ausente
+6. Gerar múltiplas variações de busca
+7. Implementos/carrocerias: FIPE avalia só chassi
 
 ### Impacto de dados faltantes
 | Faltante | Confiança máx. |
@@ -232,11 +250,13 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars | motorcycles | trucks",
+    "pbt_estimado_kg": "número ou null",
+    "pbt_categoria": "leve (≤3500kg) | pesado (>3500kg) | N/A",
     "marca_autorizada_trucks": true | false,
     "regra_fiat_aplicada": true | false,
     "ano_referencia": "AAAA ou null",
     "ano_dentro_periodo_fiat": true | false | null,
-    "justificativa": "Explicação da classificação"
+    "justificativa": "Explicação da classificação (incluindo análise de PBT)"
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -337,6 +357,8 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
+    "pbt_estimado_kg": null,
+    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
@@ -401,11 +423,13 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
+    "pbt_estimado_kg": 3500,
+    "pbt_categoria": "leve (≤3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "2011",
     "ano_dentro_periodo_fiat": false,
-    "justificativa": "Fiat consta na lista de trucks com restrição anos 1981-1984. Ano 2011 está FORA do intervalo. Usar endpoint cars."
+    "justificativa": "Fiat consta na lista de trucks com restrição anos 1981-1984. Ano 2011 está FORA do intervalo. Ducato tem PBT ~3.500kg (leve). Usar endpoint cars."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -465,11 +489,13 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "trucks",
+    "pbt_estimado_kg": null,
+    "pbt_categoria": "pesado (>3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "1983",
     "ano_dentro_periodo_fiat": true,
-    "justificativa": "Fiat consta na lista de trucks com restrição 1981-1984. Ano 1983 está DENTRO do intervalo. Usar endpoint trucks."
+    "justificativa": "Fiat consta na lista de trucks com restrição 1981-1984. Ano 1983 está DENTRO do intervalo. Caminhão tem PBT > 3.500kg. Usar endpoint trucks."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -529,11 +555,13 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "trucks",
+    "pbt_estimado_kg": 17000,
+    "pbt_categoria": "pesado (>3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",
     "ano_dentro_periodo_fiat": null,
-    "justificativa": "Mercedes-Benz consta na lista de marcas autorizadas para trucks sem restrição de ano."
+    "justificativa": "Mercedes-Benz consta na lista de marcas autorizadas para trucks sem restrição de ano. Atego tem PBT ~17.000kg (pesado)."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -593,11 +621,13 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
+    "pbt_estimado_kg": 3500,
+    "pbt_categoria": "leve (≤3500kg)",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
     "ano_dentro_periodo_fiat": null,
-    "justificativa": "Renault NÃO consta na lista de marcas autorizadas para trucks. Usar endpoint cars independente do tipo de veículo."
+    "justificativa": "Renault NÃO consta na lista de marcas autorizadas para trucks. Master tem PBT ~3.500kg (leve). Usar endpoint cars independente do tipo de veículo."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -657,6 +687,8 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
+    "pbt_estimado_kg": null,
+    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": null,
@@ -718,6 +750,8 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "motorcycles",
+    "pbt_estimado_kg": null,
+    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",
@@ -913,7 +947,8 @@ Analise a descrição do bem e:
 1. **Identifique se é veículo ou bem geral**
 2. **Se veículo**:
    - Identificar se é motocicleta → `motorcycles`
-   - Se não for moto, verificar se marca está na lista autorizada para `trucks`
+   - **Verificar PBT**: utilitários com PBT ≤ 3.500 kg → `cars`
+   - Se PBT > 3.500 kg, verificar se marca está na lista autorizada para `trucks`
    - **Se marca é Fiat**: verificar se ano está entre 1981-1984
    - Gerar JSON com `"tipo_processamento": "FIPE"` e `vehicle_type` correto
 3. **Se bem geral**: JSON com `"tipo_processamento": "GOOGLE_SHOPPING"` e queries otimizadas
@@ -1429,14 +1464,14 @@ Retorne APENAS o nome de exibição, sem explicações adicionais."""
 # 6. PROMPT: Extração de especificações de HTML (Google Lens)
 #    Usado por: google_lens_service.py
 #    Método: _extract_with_claude()
-#    Parâmetros: {url}, {html_content}
+#    Parâmetros: {url}, {html_truncado}
 # =============================================================================
 PROMPT_EXTRACAO_HTML = """Analise o HTML desta página de produto e extraia as especificações técnicas.
 
 URL: {url}
 
 HTML (truncado):
-{html_content}
+{html_truncado}
 
 Retorne um JSON com:
 {{
