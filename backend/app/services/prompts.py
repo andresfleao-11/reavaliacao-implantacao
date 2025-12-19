@@ -217,6 +217,44 @@ GET /{{vehicleType}}/{{fipeCode}}/years → GET .../years/{{yearId}}
 **Equipamentos**: tipo, capacidade/potência, voltagem, tecnologia
 **Instrumentos**: tipo, faixa medição, precisão, categoria segurança
 
+### Regra especial para Eletrônicos e Bens de TI
+
+Quando a descrição do bem eletrônico/TI contiver **marca**, esta **DEVE** vir acompanhada do **modelo** correspondente:
+
+1. **Marca + Modelo identificados**: Gerar `query_com_marca` incluindo a combinação `[MARCA] [MODELO]` para buscar as **especificações técnicas oficiais** desse produto específico
+2. **Objetivo**: A query com marca + modelo visa encontrar o produto exato e suas specs técnicas (processador, RAM, armazenamento, etc.) para validar/complementar a descrição original
+3. **Formato**: `query_com_marca`: `"[tipo] [marca] [modelo] especificações"` ou `"[tipo] [marca] [modelo] ficha técnica"`
+4. **Se modelo ausente**: Registrar em `dados_faltantes` e reduzir `confianca` em 0.15
+
+| Situação | Exemplo | Ação |
+|----------|---------|------|
+| Marca + Modelo | Dell Inspiron 15 | Query busca specs do Inspiron 15 |
+| Só marca | Dell | Query genérica + flag `modelo_ausente` |
+| Sem marca | Notebook i5 8GB | Query por especificações funcionais |
+
+### Estratégia de busca para identificação de especificações (usar `web_search`)
+
+Quando **marca** e/ou **modelo** estiverem presentes, executar busca web para obter **especificações técnicas oficiais** antes de gerar queries de preço:
+
+| Prioridade | Estratégia | Query |
+|------------|------------|-------|
+| **1ª** | Marca + Modelo | `"{{marca}}" "{{modelo}}" ficha técnica especificações` |
+| **2ª** | Part Number + Marca | `"{{marca}}" "{{part_number}}" especificações` |
+| **3ª** | S/N + Marca (suporte) | `"{{marca}}" suporte "{{numero_serie}}"` |
+| **4ª** | Modelo genérico | `"{{modelo}}" specs datasheet` |
+
+> **Marca + Modelo** é a busca mais direta e comum.
+> **Part Number** refina para configuração exata quando o modelo tem variantes.
+> **Número de série** permite consulta ao suporte do fabricante.
+
+#### Fontes prioritárias:
+1. Site oficial do fabricante
+2. Lojas especializadas (Kabum, Pichau, Fast Shop)
+3. Reviews técnicos
+
+#### Evitar:
+- Mercado Livre, OLX, fóruns
+
 ### Construção de queries
 - Estrutura: `[TIPO] + [SPECS ESSENCIAIS] + [QUALIFICADORES]`
 - Limite: 4-8 termos
