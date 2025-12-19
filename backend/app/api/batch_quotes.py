@@ -50,19 +50,27 @@ ALLOWED_FILE_EXTENSIONS = {'.csv', '.xlsx', '.xls'}
 def download_template():
     """
     Retorna um arquivo XLSX de template para cotacao em lote.
-    O template possui uma coluna 'Descricao do Produto' com exemplos.
+    O template possui duas colunas: 'Codigo (Material)' e 'Descricao'.
     """
     import pandas as pd
 
     # Criar DataFrame com exemplos
     data = {
-        'Descricao do Produto': [
+        'Codigo (Material)': [
+            '100002346',
+            '100002347',
+            '100002348',
+            '100002349',
+            '100002350',
+            '',  # Linha vazia para usuario comecar a preencher
+        ],
+        'Descricao': [
             'Notebook Dell Inspiron 15 i7 16GB RAM 512GB SSD',
             'Mouse Logitech MX Master 3 Wireless',
             'Teclado Mecanico Redragon Kumara RGB',
             'Monitor LG 27 4K UHD IPS',
             'Cadeira Escritorio Ergonomica Giratoria',
-            '',  # Linha vazia para usuario comecar a preencher
+            '',
         ]
     }
     df = pd.DataFrame(data)
@@ -72,9 +80,10 @@ def download_template():
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Produtos')
 
-        # Ajustar largura da coluna
+        # Ajustar largura das colunas
         worksheet = writer.sheets['Produtos']
-        worksheet.column_dimensions['A'].width = 60
+        worksheet.column_dimensions['A'].width = 20
+        worksheet.column_dimensions['B'].width = 60
 
     output.seek(0)
 
@@ -312,9 +321,9 @@ async def create_file_batch(
     if len(content) > 10 * 1024 * 1024:  # 10MB max
         raise HTTPException(status_code=400, detail="Arquivo muito grande. Maximo 10MB.")
 
-    # Fazer parse do arquivo
+    # Fazer parse do arquivo (com suporte a codigo e descricao)
     try:
-        descriptions, col_name = BatchFileParser.parse_file(content, file.filename)
+        items, col_info = BatchFileParser.parse_file_with_codes(content, file.filename)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -347,18 +356,19 @@ async def create_file_batch(
         config_version_id=config_version_id,
         local=local,
         pesquisador=pesquisador or current_user.name,
-        total_items=len(descriptions),
+        total_items=len(items),
         original_input_file_id=file_record.id,
     )
     db.add(batch_job)
     db.flush()
 
-    # Criar as cotacoes individuais
-    for idx, desc in enumerate(descriptions):
+    # Criar as cotacoes individuais (com codigo se disponivel)
+    for idx, item in enumerate(items):
         quote = QuoteRequest(
             status=QuoteStatus.PROCESSING,
             input_type=QuoteInputType.FILE_BATCH,
-            input_text=desc,
+            input_text=item.descricao,
+            codigo_item=item.codigo,  # Codigo do material (opcional)
             project_id=project_id,
             config_version_id=config_version_id,
             local=local,
@@ -375,12 +385,12 @@ async def create_file_batch(
     batch_job.celery_task_id = task.id
     db.commit()
 
-    logger.info(f"Batch FILE criado: {batch_job.id} com {len(descriptions)} itens da coluna '{col_name}'")
+    logger.info(f"Batch FILE criado: {batch_job.id} com {len(items)} itens. {col_info}")
 
     return BatchCreateResponse(
         batch_id=batch_job.id,
-        total_items=len(descriptions),
-        message=f"Lote criado com {len(descriptions)} cotacoes a partir da coluna '{col_name}'"
+        total_items=len(items),
+        message=f"Lote criado com {len(items)} cotacoes. {col_info}"
     )
 
 
