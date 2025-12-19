@@ -191,7 +191,7 @@ class PDFGenerator:
                 ['Marca:', fipe_data.get('marca', 'N/A')],
                 ['Modelo:', fipe_data.get('modelo', 'N/A')],
                 ['Ano/Combustível:', fipe_data.get('ano_combustivel', 'N/A')],
-                ['Valor FIPE:', f"R$ {valor_medio:.2f}".replace('.', ',')],
+                ['Valor FIPE:', self._format_currency(valor_medio)],
             ]
         else:
             # Layout padrão para outros itens
@@ -201,7 +201,7 @@ class PDFGenerator:
                 ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
                 ['Pesquisador:', pesquisador or 'N/A'],
                 ['Local da Pesquisa:', local or 'N/A'],
-                ['Valor da Média:', f"R$ {valor_medio:.2f}".replace('.', ',')],
+                ['Valor da Média:', self._format_currency(valor_medio)],
             ]
 
             # Adicionar variação se disponível (apenas para não-veículos)
@@ -267,7 +267,7 @@ class PDFGenerator:
                 ['Cotação', f"#{idx + 1} de {total_sources}"],
                 ['Item', item_name],
                 ['Data da Pesquisa', data_pesquisa.strftime('%d/%m/%Y')],
-                ['Valor R$', f"R$ {source['price_value']:.2f}".replace('.', ',')],
+                ['Valor R$', self._format_currency(source['price_value'])],
             ]
 
             cot_table = Table(cot_data, colWidths=[45*mm, 135*mm])
@@ -424,6 +424,19 @@ class PDFGenerator:
             elements.append(header_table)
 
         return elements
+
+    def _format_currency(self, value) -> str:
+        """Formata valor em reais com separador de milhares e decimais brasileiros"""
+        try:
+            # Converter para float se necessário
+            val = float(value) if value else 0.0
+            # Formatar com 2 casas decimais e separador de milhares
+            formatted = f"{val:,.2f}"
+            # Trocar separadores para padrão brasileiro (. para milhar, , para decimal)
+            formatted = formatted.replace(",", "X").replace(".", ",").replace("X", ".")
+            return f"R$ {formatted}"
+        except:
+            return f"R$ {value}"
 
     def _format_date_extenso(self, date: datetime) -> str:
         try:
