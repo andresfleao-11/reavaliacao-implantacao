@@ -357,8 +357,6 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
-    "pbt_estimado_kg": null,
-    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
@@ -423,13 +421,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
-    "pbt_estimado_kg": 3500,
-    "pbt_categoria": "leve (≤3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "2011",
     "ano_dentro_periodo_fiat": false,
-    "justificativa": "Fiat consta na lista de trucks com restrição anos 1981-1984. Ano 2011 está FORA do intervalo. Ducato tem PBT ~3.500kg (leve). Usar endpoint cars."
+    "justificativa": "Fiat consta na lista de trucks com restrição anos 1981-1984. Ano 2011 está FORA do intervalo. Usar endpoint cars."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -489,13 +485,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "trucks",
-    "pbt_estimado_kg": null,
-    "pbt_categoria": "pesado (>3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "1983",
     "ano_dentro_periodo_fiat": true,
-    "justificativa": "Fiat consta na lista de trucks com restrição 1981-1984. Ano 1983 está DENTRO do intervalo. Caminhão tem PBT > 3.500kg. Usar endpoint trucks."
+    "justificativa": "Fiat consta na lista de trucks com restrição 1981-1984. Ano 1983 está DENTRO do intervalo. Usar endpoint trucks."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -555,13 +549,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "trucks",
-    "pbt_estimado_kg": 17000,
-    "pbt_categoria": "pesado (>3500kg)",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",
     "ano_dentro_periodo_fiat": null,
-    "justificativa": "Mercedes-Benz consta na lista de marcas autorizadas para trucks sem restrição de ano. Atego tem PBT ~17.000kg (pesado)."
+    "justificativa": "Mercedes-Benz consta na lista de marcas autorizadas para trucks sem restrição de ano."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -621,13 +613,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
-    "pbt_estimado_kg": 3500,
-    "pbt_categoria": "leve (≤3500kg)",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
     "ano_dentro_periodo_fiat": null,
-    "justificativa": "Renault NÃO consta na lista de marcas autorizadas para trucks. Master tem PBT ~3.500kg (leve). Usar endpoint cars independente do tipo de veículo."
+    "justificativa": "Renault NÃO consta na lista de marcas autorizadas para trucks. Usar endpoint cars independente do tipo de veículo."
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -687,8 +677,6 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "cars",
-    "pbt_estimado_kg": null,
-    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": null,
@@ -750,8 +738,6 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }},
   "classificacao_veiculo": {{
     "vehicle_type": "motorcycles",
-    "pbt_estimado_kg": null,
-    "pbt_categoria": "N/A",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",

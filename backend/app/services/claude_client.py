@@ -161,7 +161,7 @@ class ClaudeClient:
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 total_tokens=total_tokens,
-                prompt=ocr_prompt
+                prompt=PROMPT_OCR_IMAGEM
             ))
 
             logger.info(f"OCR tokens: {total_tokens}")
