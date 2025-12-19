@@ -139,7 +139,7 @@ function CotacaoContent() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-        {/* Projeto e Código do Item */}
+        {/* Projeto e Código (Material) */}
         <div className="card">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
@@ -163,7 +163,7 @@ function CotacaoContent() {
 
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 sm:mb-2">
-                Código do Item (opcional)
+                Código (Material)
               </label>
               <div className="relative">
                 <input
