@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '026_add_rfid_tables'
-down_revision = '025_add_api_fipe_extraction_method'
+revision = '026'
+down_revision = '025'
 branch_labels = None
 depends_on = None
 
