@@ -52,9 +52,8 @@ android {
 }
 
 dependencies {
-    // SDK Chainway R6
+    // SDK Chainway R6 - usar apenas o .aar (contem todas as classes)
     implementation(files("libs/DeviceAPI_ver20220518_release.aar"))
-    implementation(files("libs/cwDeviceAPI20220518.jar"))
 
     // Android Core
     implementation("androidx.core:core-ktx:1.12.0")

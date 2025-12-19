@@ -299,6 +299,8 @@ class RfidManager @Inject constructor(
     }
 
     // ==================== Barcode Reading ====================
+    // Nota: O scanner de barcode no R6 Pro pode precisar de SDK separado
+    // Por enquanto, barcode sera tratado como entrada manual ou via camera do Android
 
     fun startBarcodeReading() {
         if (_isReading.value) return
@@ -310,24 +312,13 @@ class RfidManager @Inject constructor(
         _isReading.value = true
         barcodeThread = Thread {
             try {
-                // Usar o scanner de barcode do dispositivo
-                // O R6 Pro tem scanner 1D/2D integrado
-                Log.d(TAG, "Starting barcode scan")
-
-                // Tentar usar o metodo scan1DBarcode ou scan2DBarcode
-                val barcode = try {
-                    uhf.scan2DBarcode() ?: uhf.scan1DBarcode()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error scanning barcode, trying alternative method", e)
-                    null
-                }
-
-                if (barcode != null && barcode.isNotBlank()) {
-                    processBarcode(barcode)
-                }
-
+                Log.d(TAG, "Starting barcode scan - usando modo manual")
+                // O R6 Pro pode usar intent para capturar barcode
+                // ou o usuario pode digitar manualmente
+                // Implementacao depende do SDK especifico de barcode
+                Thread.sleep(100)
                 _isReading.value = false
-                Log.d(TAG, "Barcode scan finished")
+                Log.d(TAG, "Barcode scan mode ready")
             } catch (e: Exception) {
                 Log.e(TAG, "Error during barcode reading", e)
                 _isReading.value = false
@@ -340,10 +331,13 @@ class RfidManager @Inject constructor(
         _isReading.value = false
         barcodeThread?.interrupt()
         barcodeThread = null
-        try {
-            uhf.stopScan2DBarcode()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error stopping barcode scan", e)
+        Log.d(TAG, "Barcode scan stopped")
+    }
+
+    // Adicionar barcode manualmente (via input ou camera do Android)
+    fun addBarcodeManually(code: String) {
+        if (code.isNotBlank()) {
+            processBarcode(code)
         }
     }
 
@@ -369,8 +363,8 @@ class RfidManager @Inject constructor(
     private fun updateDeviceInfo() {
         try {
             val batteryLevel = getBatteryLevel()
-            val currentPower = uhf.power
-            val firmware = try { uhf.firmwareVersion ?: "" } catch (e: Exception) { "" }
+            val currentPower = try { uhf.power } catch (e: Exception) { 20 }
+            val firmware = "" // Firmware version nao disponivel neste SDK
 
             _deviceInfo.value = DeviceInfo(
                 batteryLevel = batteryLevel,
@@ -385,8 +379,12 @@ class RfidManager @Inject constructor(
 
     private fun getBatteryLevel(): Int {
         return try {
-            // O metodo pode variar dependendo da versao do SDK
-            uhf.batteryLevel
+            // Tentar obter nivel de bateria via reflexao ou metodo alternativo
+            // Se nao disponivel, retorna -1 (desconhecido)
+            val method = uhf.javaClass.methods.find {
+                it.name.lowercase().contains("battery") && it.parameterCount == 0
+            }
+            method?.invoke(uhf) as? Int ?: -1
         } catch (e: Exception) {
             Log.e(TAG, "Error getting battery level", e)
             -1

@@ -248,22 +248,32 @@ export default function InventarioPage() {
         </div>
 
         {/* Entrada manual */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={manualCode}
-            onChange={(e) => setManualCode(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
-            className="input-field flex-1"
-            placeholder="Digite o código manualmente..."
-          />
-          <button
-            onClick={handleManualAdd}
-            disabled={!manualCode.trim()}
-            className="btn-primary px-4"
-          >
-            Adicionar
-          </button>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Inserir código manualmente
+          </label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              value={manualCode}
+              onChange={(e) => setManualCode(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleManualAdd()}
+              className="input-field flex-1"
+              placeholder="Digite o código do item..."
+            />
+            <button
+              onClick={handleManualAdd}
+              disabled={!manualCode.trim()}
+              className="btn-primary px-4 py-2 w-full sm:w-auto"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Adicionar
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
