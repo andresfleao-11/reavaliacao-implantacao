@@ -12,6 +12,7 @@ export default function Sidebar() {
   const [cadastrosOpen, setCadastrosOpen] = useState(false)
   const [cotacaoOpen, setCotacaoOpen] = useState(false)
   const [ferramentasOpen, setFerramentasOpen] = useState(false)
+  const [inventarioOpen, setInventarioOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -21,6 +22,7 @@ export default function Sidebar() {
   const [hoverCadastros, setHoverCadastros] = useState(false)
   const [hoverFerramentas, setHoverFerramentas] = useState(false)
   const [hoverConfig, setHoverConfig] = useState(false)
+  const [hoverInventario, setHoverInventario] = useState(false)
 
   // Usar role do usuário autenticado
   const userRole = user?.role || 'USER'
@@ -286,6 +288,47 @@ export default function Sidebar() {
           <span className={`ml-3 ${collapsed && !isMobile ? 'hidden' : ''}`}>Financeiro</span>
         </Link>
       )}
+
+      {/* Inventário - Submenu - apenas para ADMIN */}
+      {userRole === 'ADMIN' && (isMobile ? (
+        <div>
+          <button
+            onClick={() => setInventarioOpen(!inventarioOpen)}
+            className={`w-full flex items-center justify-between px-6 py-3 text-gray-700 dark:text-gray-200 hover:bg-primary-50 dark:hover:bg-gray-800 ${
+              isActive('/inventario') ? 'bg-primary-50 dark:bg-gray-800 text-primary-600 dark:text-primary-400' : ''
+            }`}
+          >
+            <div className="flex items-center">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              <span className="ml-3">Inventário</span>
+            </div>
+            <svg className={`w-4 h-4 transition-transform ${inventarioOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {inventarioOpen && (
+            <div className="bg-gray-50 dark:bg-gray-800 pl-4">
+              <SubmenuItem href="/inventario" label="Nova Leitura" />
+              <SubmenuItem href="/inventario/historico" label="Histórico de Leituras" />
+            </div>
+          )}
+        </div>
+      ) : (
+        <MenuWithSubmenu
+          icon={<svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>}
+          label="Inventário"
+          isOpen={inventarioOpen}
+          setIsOpen={setInventarioOpen}
+          isHovered={hoverInventario}
+          setIsHovered={setHoverInventario}
+          isActiveCheck={isActive('/inventario')}
+        >
+          <SubmenuItem href="/inventario" label="Nova Leitura" isCollapsed={collapsed} />
+          <SubmenuItem href="/inventario/historico" label="Histórico de Leituras" isCollapsed={collapsed} />
+        </MenuWithSubmenu>
+      ))}
 
       {/* Ferramentas - Submenu - apenas para ADMIN */}
       {userRole === 'ADMIN' && (
