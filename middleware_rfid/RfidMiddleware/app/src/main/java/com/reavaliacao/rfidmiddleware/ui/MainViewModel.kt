@@ -22,6 +22,7 @@ data class MainUiState(
     val unsyncedCount: Int = 0,
     val settings: AppSettings = AppSettings(),
     val syncStatus: SyncStatus = SyncStatus.Idle,
+    val connectionTestStatus: ConnectionTestStatus = ConnectionTestStatus.Idle,
     val errorMessage: String? = null,
     val deviceInfo: DeviceInfo = DeviceInfo(),
     val readMode: ReadMode = ReadMode.RFID
@@ -32,6 +33,13 @@ sealed class SyncStatus {
     object Syncing : SyncStatus()
     data class Success(val count: Int) : SyncStatus()
     data class Error(val message: String) : SyncStatus()
+}
+
+sealed class ConnectionTestStatus {
+    object Idle : ConnectionTestStatus()
+    object Testing : ConnectionTestStatus()
+    data class Success(val message: String) : ConnectionTestStatus()
+    data class Error(val message: String) : ConnectionTestStatus()
 }
 
 @HiltViewModel
@@ -301,6 +309,41 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             settingsDataStore.updateAutoSend(enabled)
         }
+    }
+
+    fun testConnection() {
+        viewModelScope.launch {
+            val settings = _uiState.value.settings
+            if (settings.serverUrl.isBlank()) {
+                _uiState.update {
+                    it.copy(
+                        connectionTestStatus = ConnectionTestStatus.Error("Configure a URL do servidor")
+                    )
+                }
+                return@launch
+            }
+
+            _uiState.update { it.copy(connectionTestStatus = ConnectionTestStatus.Testing) }
+
+            val result = tagRepository.testConnection()
+
+            result.fold(
+                onSuccess = { status ->
+                    _uiState.update {
+                        it.copy(connectionTestStatus = ConnectionTestStatus.Success("Conectado! Status: $status"))
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(connectionTestStatus = ConnectionTestStatus.Error(error.message ?: "Erro desconhecido"))
+                    }
+                }
+            )
+        }
+    }
+
+    fun clearConnectionTestStatus() {
+        _uiState.update { it.copy(connectionTestStatus = ConnectionTestStatus.Idle) }
     }
 
     fun clearError() {

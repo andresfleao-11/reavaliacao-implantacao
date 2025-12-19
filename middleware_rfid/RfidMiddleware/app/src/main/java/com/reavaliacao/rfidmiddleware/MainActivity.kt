@@ -163,10 +163,13 @@ fun AppContent(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 settings = uiState.settings,
+                connectionTestStatus = uiState.connectionTestStatus,
                 onUpdateServerUrl = viewModel::updateServerUrl,
                 onUpdateAuthToken = viewModel::updateAuthToken,
                 onUpdateReaderPower = viewModel::updateReaderPower,
                 onUpdateAutoSend = viewModel::updateAutoSend,
+                onTestConnection = viewModel::testConnection,
+                onClearConnectionTestStatus = viewModel::clearConnectionTestStatus,
                 onBack = { navController.popBackStack() }
             )
         }

@@ -16,16 +16,20 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.reavaliacao.rfidmiddleware.data.AppSettings
+import com.reavaliacao.rfidmiddleware.ui.ConnectionTestStatus
 import com.reavaliacao.rfidmiddleware.ui.theme.Success
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settings: AppSettings,
+    connectionTestStatus: ConnectionTestStatus,
     onUpdateServerUrl: (String) -> Unit,
     onUpdateAuthToken: (String) -> Unit,
     onUpdateReaderPower: (Int) -> Unit,
     onUpdateAutoSend: (Boolean) -> Unit,
+    onTestConnection: () -> Unit,
+    onClearConnectionTestStatus: () -> Unit,
     onBack: () -> Unit
 ) {
     var serverUrl by remember(settings.serverUrl) { mutableStateOf(settings.serverUrl) }
@@ -102,17 +106,119 @@ fun SettingsScreen(
                 visualTransformation = if (showToken) VisualTransformation.None else PasswordVisualTransformation()
             )
 
-            Button(
-                onClick = {
-                    onUpdateServerUrl(serverUrl)
-                    onUpdateAuthToken(authToken)
-                    savedMessage = true
-                },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.Save, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Salvar Configuracoes de Servidor")
+                Button(
+                    onClick = {
+                        onUpdateServerUrl(serverUrl)
+                        onUpdateAuthToken(authToken)
+                        savedMessage = true
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = null)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Salvar")
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        // Salvar primeiro, depois testar
+                        onUpdateServerUrl(serverUrl)
+                        onUpdateAuthToken(authToken)
+                        onTestConnection()
+                    },
+                    enabled = connectionTestStatus !is ConnectionTestStatus.Testing,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (connectionTestStatus is ConnectionTestStatus.Testing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.Wifi, contentDescription = null)
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Testar")
+                }
+            }
+
+            // Mensagem de teste de conexão
+            when (connectionTestStatus) {
+                is ConnectionTestStatus.Success -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Success.copy(alpha = 0.1f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Success
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = connectionTestStatus.message,
+                                color = Success,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = onClearConnectionTestStatus) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Fechar",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                is ConnectionTestStatus.Error -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = connectionTestStatus.message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = onClearConnectionTestStatus) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    contentDescription = "Fechar",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                else -> {}
             }
 
             if (savedMessage) {

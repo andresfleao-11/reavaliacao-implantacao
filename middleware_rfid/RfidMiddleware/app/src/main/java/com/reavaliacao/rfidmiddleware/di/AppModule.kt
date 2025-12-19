@@ -5,9 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
+import com.reavaliacao.rfidmiddleware.data.SettingsDataStore
 import com.reavaliacao.rfidmiddleware.data.local.AppDatabase
 import com.reavaliacao.rfidmiddleware.data.local.TagDao
 import com.reavaliacao.rfidmiddleware.data.remote.ApiService
+import com.reavaliacao.rfidmiddleware.data.remote.DynamicBaseUrlInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,12 +46,25 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideSettingsDataStore(dataStore: DataStore<Preferences>): SettingsDataStore {
+        return SettingsDataStore(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDynamicBaseUrlInterceptor(settingsDataStore: SettingsDataStore): DynamicBaseUrlInterceptor {
+        return DynamicBaseUrlInterceptor(settingsDataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(dynamicBaseUrlInterceptor: DynamicBaseUrlInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         return OkHttpClient.Builder()
+            .addInterceptor(dynamicBaseUrlInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -60,9 +75,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        // URL base padrao - sera substituida dinamicamente
+        // URL base placeholder - substituida dinamicamente pelo DynamicBaseUrlInterceptor
         return Retrofit.Builder()
-            .baseUrl("http://localhost:8000/")
+            .baseUrl("http://placeholder.local/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

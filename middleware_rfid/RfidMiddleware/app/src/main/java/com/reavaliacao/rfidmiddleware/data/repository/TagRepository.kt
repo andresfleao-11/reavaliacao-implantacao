@@ -92,4 +92,24 @@ class TagRepository @Inject constructor(
     suspend fun clearSyncedTags() {
         tagDao.deleteSynced()
     }
+
+    suspend fun testConnection(): Result<String> {
+        return try {
+            Log.d(TAG, "Testing connection to server...")
+            val response = apiService.checkHealth()
+
+            if (response.isSuccessful) {
+                val health = response.body()
+                Log.d(TAG, "Connection successful: ${health?.status}")
+                Result.success(health?.status ?: "OK")
+            } else {
+                val error = "Erro HTTP ${response.code()}: ${response.message()}"
+                Log.e(TAG, "Connection test failed: $error")
+                Result.failure(Exception(error))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Connection test error", e)
+            Result.failure(e)
+        }
+    }
 }

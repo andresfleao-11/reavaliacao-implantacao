@@ -482,14 +482,32 @@ def generate_pdf(quote_id: int, db: Session = Depends(get_db)):
 
     # Generate PDF
     pdf_generator = PDFGenerator()
-    pdf_filename = f"cotacao_{quote_id}.pdf"
+
+    # Determinar o nome do item baseado no tipo de entrada
+    # Para pesquisa por texto: usar input_text
+    # Para pesquisa por imagem: usar descrição do claude_payload_json
+    item_name = "Item"
+    input_type_str = quote_request.input_type.value if quote_request.input_type else "TEXT"
+
+    if input_type_str in ("IMAGE", "IMAGE_BATCH", "GOOGLE_LENS"):
+        # Para imagem: usar descrição/nome_canonico da análise
+        if quote_request.claude_payload_json and "nome_canonico" in quote_request.claude_payload_json:
+            item_name = quote_request.claude_payload_json["nome_canonico"]
+    else:
+        # Para texto: usar o input_text original
+        if quote_request.input_text:
+            item_name = quote_request.input_text
+        elif quote_request.claude_payload_json and "nome_canonico" in quote_request.claude_payload_json:
+            item_name = quote_request.claude_payload_json["nome_canonico"]
+
+    # Gerar nome do arquivo no novo formato
+    pdf_filename = pdf_generator.generate_filename(
+        quote_id=quote_id,
+        codigo=quote_request.codigo_item,
+        item_name=item_name
+    )
     pdf_path = os.path.join(settings.STORAGE_PATH, "pdfs", pdf_filename)
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
-
-    # Get item name from claude_payload_json
-    item_name = "Item"
-    if quote_request.claude_payload_json and "nome_canonico" in quote_request.claude_payload_json:
-        item_name = quote_request.claude_payload_json["nome_canonico"]
 
     # Detectar se é veículo (FIPE)
     is_vehicle = False
@@ -565,7 +583,9 @@ def generate_pdf(quote_id: int, db: Session = Depends(get_db)):
         variacao_percentual=quote_request.variacao_percentual,
         variacao_maxima_percent=variacao_maxima,
         is_vehicle=is_vehicle,
-        fipe_data=fipe_data
+        fipe_data=fipe_data,
+        input_type=input_type_str,
+        quote_id=quote_id
     )
 
     # Calculate SHA256
@@ -614,10 +634,13 @@ def download_pdf(quote_id: int, db: Session = Depends(get_db)):
     if not pdf_file or not os.path.exists(pdf_file.storage_path):
         raise HTTPException(status_code=404, detail="PDF file not found")
 
+    # Usar o nome do arquivo do storage_path ou gerar um nome adequado
+    pdf_filename = os.path.basename(pdf_file.storage_path)
+
     return FileResponse(
         pdf_file.storage_path,
         media_type="application/pdf",
-        filename=f"cotacao_{quote_id}.pdf"
+        filename=pdf_filename
     )
 
 
