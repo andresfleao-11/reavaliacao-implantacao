@@ -24,5 +24,15 @@ celery_app.conf.beat_schedule = {
         'schedule': crontab(hour=23, minute=0),  # Todos os dias às 23:00 (horário de Brasília)
         'options': {'queue': 'default'}
     },
+    'recover-stuck-quotes': {
+        'task': 'recover_stuck_quotes',
+        'schedule': crontab(minute='*/5'),  # A cada 5 minutos
+        'options': {'queue': 'default'}
+    },
+    'cleanup-old-processing-daily': {
+        'task': 'cleanup_old_processing',
+        'schedule': crontab(hour=4, minute=0),  # Diariamente às 04:00
+        'options': {'queue': 'default'}
+    },
 }
 

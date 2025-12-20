@@ -96,6 +96,14 @@ class QuoteRequest(Base):
     google_shopping_response_json = Column(JSON, nullable=True)  # Resposta completa da API
     shopping_response_saved_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Sistema de checkpoints para retomada
+    processing_checkpoint = Column(String(50), nullable=True)  # Etapa atual: INIT, AI_ANALYSIS, SHOPPING_SEARCH, PRICE_EXTRACTION, FINALIZATION
+    last_heartbeat = Column(DateTime(timezone=True), nullable=True)  # Ultimo sinal de vida do worker
+    worker_id = Column(String(100), nullable=True)  # ID do worker que esta processando
+    resume_data = Column(JSON, nullable=True)  # Dados necessarios para retomar (produtos ja testados, etc)
+    started_at = Column(DateTime(timezone=True), nullable=True)  # Quando iniciou processamento
+    completed_at = Column(DateTime(timezone=True), nullable=True)  # Quando finalizou
+
     sources = relationship("QuoteSource", back_populates="quote_request", cascade="all, delete-orphan")
     input_images = relationship("File", foreign_keys="[File.quote_request_id]",
                                 primaryjoin="and_(File.quote_request_id==QuoteRequest.id, File.type=='INPUT_IMAGE')")

@@ -79,3 +79,131 @@ def manual_update_exchange_rate():
     Pode ser chamada via API.
     """
     return update_exchange_rate()
+
+
+@celery_app.task(name="recover_stuck_quotes")
+def recover_stuck_quotes():
+    """
+    Task para recuperar cotacoes travadas.
+    Executada a cada 5 minutos.
+
+    Identifica cotacoes com status PROCESSING mas sem heartbeat recente
+    e as coloca novamente na fila de processamento.
+    """
+    from app.services.checkpoint_manager import (
+        find_stuck_quotes,
+        reset_stuck_quote,
+        get_processing_stats,
+        HEARTBEAT_TIMEOUT_MINUTES
+    )
+    from app.tasks.quote_tasks import process_quote_request
+
+    logger.info("Iniciando verificacao de cotacoes travadas...")
+
+    db = SessionLocal()
+    recovered = 0
+    errors = 0
+
+    try:
+        # Buscar cotacoes travadas
+        stuck_quotes = find_stuck_quotes(db, timeout_minutes=HEARTBEAT_TIMEOUT_MINUTES)
+
+        if not stuck_quotes:
+            logger.info("Nenhuma cotacao travada encontrada")
+            return {"success": True, "recovered": 0}
+
+        logger.warning(f"Encontradas {len(stuck_quotes)} cotacoes travadas")
+
+        for quote in stuck_quotes:
+            try:
+                # Log detalhado
+                logger.info(
+                    f"Cotacao {quote.id} travada: "
+                    f"checkpoint={quote.processing_checkpoint}, "
+                    f"last_heartbeat={quote.last_heartbeat}, "
+                    f"worker={quote.worker_id}"
+                )
+
+                # Reseta a cotacao
+                reset_stuck_quote(db, quote)
+
+                # Re-enfileira para processamento
+                process_quote_request.delay(quote.id)
+                recovered += 1
+
+                logger.info(f"Cotacao {quote.id} re-enfileirada para processamento")
+
+            except Exception as e:
+                logger.error(f"Erro ao recuperar cotacao {quote.id}: {str(e)}")
+                errors += 1
+
+        # Log de estatisticas
+        stats = get_processing_stats(db)
+        logger.info(f"Estatisticas apos recuperacao: {stats}")
+
+        return {
+            "success": True,
+            "recovered": recovered,
+            "errors": errors,
+            "total_stuck": len(stuck_quotes)
+        }
+
+    except Exception as e:
+        logger.error(f"Erro na task de recuperacao: {str(e)}")
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="cleanup_old_processing")
+def cleanup_old_processing():
+    """
+    Task para limpar cotacoes muito antigas em PROCESSING.
+    Executada diariamente.
+
+    Cotacoes em PROCESSING por mais de 24 horas sao marcadas como ERROR.
+    """
+    from datetime import timedelta
+    from app.models.quote_request import QuoteRequest, QuoteStatus
+    from sqlalchemy import and_
+
+    logger.info("Iniciando limpeza de cotacoes antigas em PROCESSING...")
+
+    db = SessionLocal()
+    cleaned = 0
+
+    try:
+        # Cotacoes em PROCESSING por mais de 24 horas
+        cutoff = datetime.utcnow() - timedelta(hours=24)
+
+        old_processing = db.query(QuoteRequest).filter(
+            and_(
+                QuoteRequest.status == QuoteStatus.PROCESSING,
+                QuoteRequest.created_at < cutoff
+            )
+        ).all()
+
+        for quote in old_processing:
+            logger.warning(
+                f"Cotacao {quote.id} em PROCESSING por mais de 24h. "
+                f"Criada em {quote.created_at}. Marcando como ERROR."
+            )
+
+            quote.status = QuoteStatus.ERROR
+            quote.error_message = "Timeout: processamento excedeu 24 horas"
+            quote.completed_at = datetime.utcnow()
+            quote.worker_id = None
+            cleaned += 1
+
+        db.commit()
+
+        logger.info(f"Limpeza concluida: {cleaned} cotacoes marcadas como ERROR")
+
+        return {"success": True, "cleaned": cleaned}
+
+    except Exception as e:
+        logger.error(f"Erro na limpeza: {str(e)}")
+        db.rollback()
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()
