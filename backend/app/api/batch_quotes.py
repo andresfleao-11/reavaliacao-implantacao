@@ -683,6 +683,97 @@ def list_batches(
     )
 
 
+@router.get("/{batch_id}/download/zip")
+def download_batch_zip(
+    batch_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Download do arquivo ZIP contendo todos os PDFs do lote."""
+    from fastapi.responses import FileResponse
+
+    batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Lote nao encontrado")
+
+    if not batch.result_zip_path or not os.path.exists(batch.result_zip_path):
+        # Tentar gerar se ainda nao existe
+        from app.services.batch_result_generator import generate_batch_zip
+        zip_path = generate_batch_zip(db, batch)
+        if zip_path:
+            batch.result_zip_path = zip_path
+            db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="Arquivo ZIP nao disponivel. Verifique se as cotacoes possuem PDFs gerados.")
+
+    filename = os.path.basename(batch.result_zip_path)
+    return FileResponse(
+        batch.result_zip_path,
+        media_type="application/zip",
+        filename=filename,
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.get("/{batch_id}/download/excel")
+def download_batch_excel(
+    batch_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Download do arquivo Excel com resumo do lote."""
+    from fastapi.responses import FileResponse
+
+    batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Lote nao encontrado")
+
+    if not batch.result_excel_path or not os.path.exists(batch.result_excel_path):
+        # Tentar gerar se ainda nao existe
+        from app.services.batch_result_generator import generate_batch_excel
+        excel_path = generate_batch_excel(db, batch)
+        if excel_path:
+            batch.result_excel_path = excel_path
+            db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="Arquivo Excel nao disponivel.")
+
+    filename = os.path.basename(batch.result_excel_path)
+    return FileResponse(
+        batch.result_excel_path,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        filename=filename,
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.post("/{batch_id}/generate-results")
+def generate_batch_results_endpoint(
+    batch_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Gera ou regenera os arquivos de resultado do lote (ZIP e Excel)."""
+    from app.services.batch_result_generator import generate_batch_results
+
+    batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_id).first()
+    if not batch:
+        raise HTTPException(status_code=404, detail="Lote nao encontrado")
+
+    if batch.status not in [BatchJobStatus.COMPLETED, BatchJobStatus.PARTIALLY_COMPLETED]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Lote ainda nao finalizado. Status atual: {batch.status.value}"
+        )
+
+    result = generate_batch_results(db, batch_id)
+    return {
+        "message": "Arquivos de resultado gerados",
+        "zip_available": result.get("zip_path") is not None,
+        "excel_available": result.get("excel_path") is not None
+    }
+
+
 @router.get("/{batch_id}/costs")
 def get_batch_costs(
     batch_id: int,

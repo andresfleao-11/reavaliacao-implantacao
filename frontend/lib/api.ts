@@ -669,6 +669,21 @@ export const batchQuotesApi = {
     const response = await api.get(`/api/batch-quotes/${id}/costs`)
     return response.data
   },
+
+  // Gerar URLs de download para ZIP e Excel
+  getDownloadZipUrl: (id: number): string => {
+    return `${API_URL}/api/batch-quotes/${id}/download/zip`
+  },
+
+  getDownloadExcelUrl: (id: number): string => {
+    return `${API_URL}/api/batch-quotes/${id}/download/excel`
+  },
+
+  // Regenerar arquivos de resultado
+  generateResults: async (id: number) => {
+    const response = await api.post(`/api/batch-quotes/${id}/generate-results`)
+    return response.data
+  },
 }
 
 export interface BatchCosts {

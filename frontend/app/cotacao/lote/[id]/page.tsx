@@ -289,6 +289,40 @@ export default function BatchDetailPage() {
           )}
         </div>
 
+        {/* Botões de Download - quando lote finalizado */}
+        {(batch.status === 'COMPLETED' || batch.status === 'PARTIALLY_COMPLETED') && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
+              Arquivos de Resultado
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href={batchQuotesApi.getDownloadZipUrl(batchId)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm"
+                download
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Baixar PDFs (ZIP)
+              </a>
+              <a
+                href={batchQuotesApi.getDownloadExcelUrl(batchId)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm"
+                download
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Baixar Resumo (Excel)
+              </a>
+            </div>
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              O ZIP contém todos os PDFs das cotações. O Excel contém o resumo com valores de cada cotação.
+            </p>
+          </div>
+        )}
+
         {/* Resumo de Custos */}
         {costs && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">

@@ -459,6 +459,14 @@ export default function QuoteDetailPage() {
         </div>
       )}
 
+      {/* Descrição Informada - quando input é texto */}
+      {quote.input_type === 'TEXT' && quote.input_text && (
+        <div className="card mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Descrição Informada</h2>
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{quote.input_text}</p>
+        </div>
+      )}
+
       {quote.claude_payload_json && (
         <div className="card mb-4 sm:mb-6 p-3 sm:p-4">
           <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Análise do Item</h2>

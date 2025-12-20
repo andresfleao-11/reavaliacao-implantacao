@@ -58,6 +58,10 @@ class BatchQuoteJob(Base):
     # Mensagem de erro
     error_message = Column(Text, nullable=True)
 
+    # Arquivos de resultado do lote
+    result_zip_path = Column(String(500), nullable=True)  # ZIP com todos os PDFs
+    result_excel_path = Column(String(500), nullable=True)  # Excel com resumo
+
     # Relationships
     project = relationship("Project")
     config_version = relationship("ProjectConfigVersion")

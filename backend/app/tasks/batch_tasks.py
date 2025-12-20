@@ -209,6 +209,13 @@ def _update_batch_on_quote_complete(db: Session, batch_job_id: int):
 
             logger.info(f"Batch {batch_job_id} finished: {completed} success, {failed} failed")
 
+            # Gerar arquivos de resultado (ZIP e Excel)
+            try:
+                from app.services.batch_result_generator import generate_batch_results
+                generate_batch_results(db, batch_job_id)
+            except Exception as e:
+                logger.error(f"Error generating batch results for {batch_job_id}: {e}")
+
         db.commit()
     except Exception as e:
         logger.error(f"Error updating batch {batch_job_id}: {e}")
