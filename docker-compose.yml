@@ -78,6 +78,27 @@ services:
     # Rate limit=3/s: ver docs/ANALISE_PERFORMANCE_CELERY.md
     command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=6 --prefetch-multiplier=1
 
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/cotacao_db
+      - REDIS_URL=redis://redis:6379/0
+      - STORAGE_PATH=/data
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Celery Beat: agendador de tasks periódicas
+    # Executa: update_exchange_rate, recover_stuck_quotes, fix_stuck_batches, etc.
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+
   frontend:
     build:
       context: ./frontend
