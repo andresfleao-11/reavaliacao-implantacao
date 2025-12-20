@@ -4,15 +4,22 @@ Gera ZIP com PDFs e Excel com resumo.
 """
 import os
 import zipfile
+import hashlib
 import logging
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.orm import Session
 import pandas as pd
 
-from app.models import QuoteRequest, QuoteSource
+from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument
 from app.models.quote_request import QuoteStatus
 from app.models.batch_quote import BatchQuoteJob
+from app.models.file import FileType
+from app.models.vehicle_price import VehiclePriceBank
+from app.models.project_config import ProjectConfigVersion
+from app.models.setting import Setting
+from app.services.pdf_generator import PDFGenerator
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +32,192 @@ def ensure_results_dir():
     os.makedirs(BATCH_RESULTS_DIR, exist_ok=True)
 
 
+def _calculate_sha256(file_path: str) -> str:
+    """Calcula o hash SHA256 de um arquivo."""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+
+def generate_pdf_for_quote(db: Session, quote: QuoteRequest) -> Optional[str]:
+    """
+    Gera o PDF para uma cotacao individual.
+
+    Returns:
+        Caminho do PDF gerado ou None se erro.
+    """
+    # Verificar se ja existe PDF
+    if quote.documents:
+        doc = quote.documents[0]
+        if doc.pdf_file and doc.pdf_file.storage_path and os.path.exists(doc.pdf_file.storage_path):
+            logger.debug(f"PDF ja existe para cotacao {quote.id}")
+            return doc.pdf_file.storage_path
+
+    # Verificar se cotacao esta concluida
+    if quote.status not in [QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW]:
+        logger.debug(f"Cotacao {quote.id} nao esta concluida (status: {quote.status})")
+        return None
+
+    # Buscar fontes aceitas
+    sources = db.query(QuoteSource).filter(
+        QuoteSource.quote_request_id == quote.id,
+        QuoteSource.is_accepted == True
+    ).all()
+
+    if not sources:
+        logger.debug(f"Nenhuma fonte aceita para cotacao {quote.id}")
+        return None
+
+    # Preparar dados das fontes
+    sources_data = []
+    for source in sources:
+        screenshot_path = None
+        if source.screenshot_file_id:
+            screenshot_file = db.query(File).filter(File.id == source.screenshot_file_id).first()
+            if screenshot_file:
+                screenshot_path = screenshot_file.storage_path
+
+        sources_data.append({
+            "url": source.url,
+            "price_value": source.price_value,
+            "screenshot_path": screenshot_path
+        })
+
+    # Instanciar gerador de PDF
+    pdf_generator = PDFGenerator()
+
+    # Determinar nome do item
+    item_name = "Item"
+    input_type_str = quote.input_type.value if quote.input_type else "TEXT"
+
+    if input_type_str in ("IMAGE", "IMAGE_BATCH", "GOOGLE_LENS"):
+        if quote.claude_payload_json and "nome_canonico" in quote.claude_payload_json:
+            item_name = quote.claude_payload_json["nome_canonico"]
+    else:
+        if quote.input_text:
+            item_name = quote.input_text
+        elif quote.claude_payload_json and "nome_canonico" in quote.claude_payload_json:
+            item_name = quote.claude_payload_json["nome_canonico"]
+
+    # Gerar nome do arquivo
+    pdf_filename = pdf_generator.generate_filename(
+        quote_id=quote.id,
+        codigo=quote.codigo_item,
+        item_name=item_name
+    )
+    pdf_path = os.path.join(settings.STORAGE_PATH, "pdfs", pdf_filename)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+
+    # Detectar se e veiculo (FIPE)
+    is_vehicle = False
+    fipe_data = None
+
+    if quote.claude_payload_json:
+        natureza = quote.claude_payload_json.get("natureza", "")
+        if natureza and natureza.startswith("veiculo_"):
+            is_vehicle = True
+
+    # Se for veiculo, buscar dados FIPE
+    if is_vehicle:
+        vehicle_price = db.query(VehiclePriceBank).filter(
+            VehiclePriceBank.quote_request_id == quote.id
+        ).first()
+
+        if vehicle_price:
+            fipe_data = {
+                "codigo_fipe": vehicle_price.codigo_fipe,
+                "marca": vehicle_price.brand_name,
+                "modelo": vehicle_price.model_name,
+                "ano_combustivel": f"{vehicle_price.year_model} {vehicle_price.fuel_type or ''}".strip()
+            }
+
+        # Para veiculos FIPE, usar APENAS a fonte FIPE
+        sources_data = []
+
+        # Buscar screenshot FIPE se existir
+        fipe_screenshot_dir = os.path.join(settings.STORAGE_PATH, "screenshots", "fipe")
+        fipe_screenshot_path = None
+        if os.path.exists(fipe_screenshot_dir):
+            for filename in os.listdir(fipe_screenshot_dir):
+                if f"fipe_screenshot_{quote.id}_" in filename:
+                    fipe_screenshot_path = os.path.join(fipe_screenshot_dir, filename)
+                    break
+
+        sources_data.append({
+            "url": "https://veiculos.fipe.org.br/",
+            "price_value": quote.valor_medio,
+            "screenshot_path": fipe_screenshot_path
+        })
+
+    # Obter configuracao de variacao
+    variacao_maxima = 25.0
+
+    if quote.config_version_id:
+        config_version = db.query(ProjectConfigVersion).filter(
+            ProjectConfigVersion.id == quote.config_version_id
+        ).first()
+        if config_version and config_version.variacao_maxima_percent is not None:
+            variacao_maxima = float(config_version.variacao_maxima_percent)
+
+    if variacao_maxima == 25.0:
+        setting = db.query(Setting).filter(Setting.key == "parameters").first()
+        if setting and setting.value_json:
+            variacao_maxima = setting.value_json.get("variacao_maxima_percent", 25.0)
+
+    try:
+        # Gerar PDF
+        pdf_generator.generate_quote_pdf(
+            output_path=pdf_path,
+            item_name=item_name,
+            codigo=quote.codigo_item,
+            sources=sources_data,
+            valor_medio=quote.valor_medio,
+            local=quote.local or "N/A",
+            pesquisador=quote.pesquisador or "Sistema",
+            data_pesquisa=datetime.now(),
+            variacao_percentual=quote.variacao_percentual,
+            variacao_maxima_percent=variacao_maxima,
+            is_vehicle=is_vehicle,
+            fipe_data=fipe_data,
+            input_type=input_type_str,
+            quote_id=quote.id
+        )
+
+        # Salvar registro do arquivo
+        pdf_file = File(
+            type=FileType.PDF,
+            mime_type="application/pdf",
+            storage_path=pdf_path,
+            sha256=_calculate_sha256(pdf_path)
+        )
+        db.add(pdf_file)
+        db.flush()
+
+        # Criar registro do documento gerado
+        generated_doc = GeneratedDocument(
+            quote_request_id=quote.id,
+            pdf_file_id=pdf_file.id
+        )
+        db.add(generated_doc)
+        db.commit()
+
+        logger.info(f"PDF gerado para cotacao {quote.id}: {pdf_path}")
+        return pdf_path
+
+    except Exception as e:
+        logger.error(f"Erro ao gerar PDF para cotacao {quote.id}: {e}")
+        db.rollback()
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
+        return None
+
+
 def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
     """
     Gera um arquivo ZIP contendo todos os PDFs das cotacoes do lote.
+    Gera os PDFs que ainda nao existem antes de criar o ZIP.
 
     Returns:
         Caminho do arquivo ZIP ou None se nenhum PDF disponivel.
@@ -44,6 +234,22 @@ def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
         logger.info(f"Nenhuma cotacao concluida para o lote {batch.id}")
         return None
 
+    # Gerar PDFs que ainda nao existem
+    logger.info(f"Verificando/gerando PDFs para {len(quotes)} cotacoes do lote {batch.id}")
+    for quote in quotes:
+        # Verificar se ja existe PDF
+        has_pdf = False
+        if quote.documents:
+            doc = quote.documents[0]
+            if doc.pdf_file and doc.pdf_file.storage_path and os.path.exists(doc.pdf_file.storage_path):
+                has_pdf = True
+
+        if not has_pdf:
+            logger.info(f"Gerando PDF para cotacao {quote.id} (lote {batch.id})")
+            generate_pdf_for_quote(db, quote)
+            # Refresh para pegar o documento recem criado
+            db.refresh(quote)
+
     # Nome do arquivo ZIP
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     zip_filename = f"lote_{batch.id}_pdfs_{timestamp}.zip"
@@ -56,7 +262,7 @@ def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
                 # Obter PDF via relacionamento documents -> pdf_file -> storage_path
                 pdf_path = None
                 if quote.documents:
-                    doc = quote.documents[0]  # Primeiro documento gerado
+                    doc = quote.documents[0]
                     if doc.pdf_file and doc.pdf_file.storage_path:
                         pdf_path = doc.pdf_file.storage_path
 
@@ -222,7 +428,7 @@ def generate_batch_results(db: Session, batch_id: int, numero_cotacoes: int = 3)
         "excel_path": None
     }
 
-    # Gerar ZIP com PDFs
+    # Gerar ZIP com PDFs (inclui geracao de PDFs faltantes)
     zip_path = generate_batch_zip(db, batch)
     if zip_path:
         batch.result_zip_path = zip_path
