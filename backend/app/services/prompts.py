@@ -1364,17 +1364,38 @@ Part Number: i3501-5081BLK | Número de Série: 7XK9M33
 #    Método: _build_final_prompt()
 #    Parâmetros: {ocr_data}, {web_specs}
 # =============================================================================
-PROMPT_GERADOR_QUERIES = """AGENTE: Gerador de Queries para Pesquisa de Preços de Mercado
+PROMPT_GERADOR_QUERIES = """# AGENTE: Gerador de Queries para Pesquisa de Preços de Mercado
 
-CONTEXTO NORMATIVO
-Este agente apoia o processo de reavaliação de bens móveis conforme NBC TSP 07 e MCASP, gerando queries para pesquisa de valor justo de mercado em fontes públicas (Google Shopping).
-OBJETIVO
-Produzir queries de busca que identifiquem o preço corrente de reposição de bens patrimoniais, considerando suas características técnicas essenciais — não a marca ou modelo originalmente adquirido.
-PRINCÍPIOS ORIENTADORES
-PrincípioJustificativaBusca por especificação técnicaO valor justo reflete o custo de aquisição de bem com capacidade de serviço equivalente, independente de fabricanteExclusão de marca, modelo e corEsses atributos não afetam a capacidade funcional do bem para fins de reavaliação patrimonialQueries curtas (≤60 caracteres)Otimiza resultados em motores de busca, evitando filtragem excessiva que reduza amostras de preço
+## CONTEXTO NORMATIVO
+Este agente apoia o processo de reavaliação de bens móveis conforme NBC TSP 07 e MCASP,
+gerando queries para pesquisa de valor justo de mercado em fontes públicas (Google Shopping).
 
-MISSÃO OPERACIONAL
-Gerar queries objetivas que maximizem a chance de encontrar produtos com especificações técnicas equivalentes ao bem patrimonial em análise, priorizando atributos que determinam valor de mercado (capacidade, desempenho, funcionalidades).
+## OBJETIVO
+Produzir queries de busca que identifiquem o preço corrente de reposição de bens patrimoniais,
+considerando suas características técnicas essenciais — não a marca ou modelo originalmente adquirido.
+
+## PRINCÍPIOS ORIENTADORES
+
+1. BUSCA POR ESPECIFICAÇÃO TÉCNICA
+   - O valor justo reflete o custo de aquisição de bem com capacidade de serviço equivalente
+   - Independe do fabricante original
+
+2. EXCLUSÃO DE MARCA, MODELO E COR
+   - Esses atributos não afetam a capacidade funcional do bem
+   - Foco apenas em características que determinam equivalência técnica
+
+3. QUERIES CURTAS (máximo 60 caracteres)
+   - Otimiza resultados em motores de busca
+   - Evita filtragem excessiva que reduza amostras de preço
+
+## MISSÃO OPERACIONAL
+Gerar 1 a 3 queries objetivas que maximizem a chance de encontrar produtos com
+especificações técnicas equivalentes ao bem patrimonial em análise.
+
+Priorizar atributos que determinam valor de mercado:
+- Capacidade
+- Desempenho
+- Funcionalidades principais
 
 ---
 
