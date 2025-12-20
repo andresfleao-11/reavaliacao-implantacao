@@ -131,6 +131,23 @@ class PDFGenerator:
             spaceAfter=4,
         )
 
+        # Estilo para células de tabela com quebra de linha
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=9,
+            fontName=font_regular,
+            leading=11,  # Espaçamento entre linhas
+        )
+
+        cell_style_bold = ParagraphStyle(
+            'CellStyleBold',
+            parent=styles['Normal'],
+            fontSize=9,
+            fontName=font_bold,
+            leading=11,
+        )
+
         header_style = ParagraphStyle(
             'Header',
             parent=styles['Normal'],
@@ -178,39 +195,39 @@ class PDFGenerator:
         story.append(Paragraph("Resumo de cotações", section_title_style))
         story.append(Spacer(1, 3*mm))
 
-        # Tabela de resumo
+        # Tabela de resumo - usar Paragraph para permitir quebra de linha
         if is_vehicle and fipe_data:
             # Layout específico para veículos FIPE
             header_data = [
-                ['Código (Material):', codigo or 'N/A'],
-                ['Item:', item_name],
-                ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
-                ['Pesquisador:', pesquisador or 'N/A'],
-                ['Local da Pesquisa:', local or 'N/A'],
-                ['Código FIPE:', fipe_data.get('codigo_fipe', 'N/A')],
-                ['Marca:', fipe_data.get('marca', 'N/A')],
-                ['Modelo:', fipe_data.get('modelo', 'N/A')],
-                ['Ano/Combustível:', fipe_data.get('ano_combustivel', 'N/A')],
-                ['Valor FIPE:', self._format_currency(valor_medio)],
+                [Paragraph('Código (Material):', cell_style_bold), Paragraph(codigo or 'N/A', cell_style)],
+                [Paragraph('Item:', cell_style_bold), Paragraph(item_name, cell_style)],
+                [Paragraph('Data da Pesquisa:', cell_style_bold), Paragraph(data_pesquisa.strftime('%d/%m/%Y'), cell_style)],
+                [Paragraph('Pesquisador:', cell_style_bold), Paragraph(pesquisador or 'N/A', cell_style)],
+                [Paragraph('Local da Pesquisa:', cell_style_bold), Paragraph(local or 'N/A', cell_style)],
+                [Paragraph('Código FIPE:', cell_style_bold), Paragraph(fipe_data.get('codigo_fipe', 'N/A'), cell_style)],
+                [Paragraph('Marca:', cell_style_bold), Paragraph(fipe_data.get('marca', 'N/A'), cell_style)],
+                [Paragraph('Modelo:', cell_style_bold), Paragraph(fipe_data.get('modelo', 'N/A'), cell_style)],
+                [Paragraph('Ano/Combustível:', cell_style_bold), Paragraph(fipe_data.get('ano_combustivel', 'N/A'), cell_style)],
+                [Paragraph('Valor FIPE:', cell_style_bold), Paragraph(self._format_currency(valor_medio), cell_style)],
             ]
         else:
             # Layout padrão para outros itens
             header_data = [
-                ['Código (Material):', codigo or 'N/A'],
-                ['Item:', item_name],
-                ['Data da Pesquisa:', data_pesquisa.strftime('%d/%m/%Y')],
-                ['Pesquisador:', pesquisador or 'N/A'],
-                ['Local da Pesquisa:', local or 'N/A'],
-                ['Valor da Média:', self._format_currency(valor_medio)],
+                [Paragraph('Código (Material):', cell_style_bold), Paragraph(codigo or 'N/A', cell_style)],
+                [Paragraph('Item:', cell_style_bold), Paragraph(item_name, cell_style)],
+                [Paragraph('Data da Pesquisa:', cell_style_bold), Paragraph(data_pesquisa.strftime('%d/%m/%Y'), cell_style)],
+                [Paragraph('Pesquisador:', cell_style_bold), Paragraph(pesquisador or 'N/A', cell_style)],
+                [Paragraph('Local da Pesquisa:', cell_style_bold), Paragraph(local or 'N/A', cell_style)],
+                [Paragraph('Valor da Média:', cell_style_bold), Paragraph(self._format_currency(valor_medio), cell_style)],
             ]
 
             # Adicionar variação se disponível (apenas para não-veículos)
             if variacao_percentual is not None:
                 variacao_str = f"{float(variacao_percentual):.2f}%".replace('.', ',')
-                header_data.append(['Variação Calculada:', variacao_str])
+                header_data.append([Paragraph('Variação Calculada:', cell_style_bold), Paragraph(variacao_str, cell_style)])
 
             if variacao_maxima_percent is not None:
-                header_data.append(['Variação Máx. Configurada:', f"{variacao_maxima_percent:.1f}%".replace('.', ',')])
+                header_data.append([Paragraph('Variação Máx. Configurada:', cell_style_bold), Paragraph(f"{variacao_maxima_percent:.1f}%".replace('.', ','), cell_style)])
 
         header_table = Table(header_data, colWidths=[self.FIRST_COL_WIDTH, self.SECOND_COL_WIDTH])
 
@@ -219,11 +236,8 @@ class PDFGenerator:
             ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8E8E8')),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (0, -1), font_bold),
-            ('FONTNAME', (1, 0), (1, -1), font_regular),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # TOP para alinhar texto no topo quando há quebra
             ('LEFTPADDING', (0, 0), (-1, -1), 4),
             ('RIGHTPADDING', (0, 0), (-1, -1), 4),
             ('TOPPADDING', (0, 0), (-1, -1), 4),
@@ -262,12 +276,12 @@ class PDFGenerator:
 
             story.append(Spacer(1, 6*mm))
 
-            # Tabela com dados da cotação individual
+            # Tabela com dados da cotação individual - usar Paragraph para quebra de linha
             cot_data = [
-                ['Cotação', f"#{idx + 1} de {total_sources}"],
-                ['Item', item_name],
-                ['Data da Pesquisa', data_pesquisa.strftime('%d/%m/%Y')],
-                ['Valor R$', self._format_currency(source['price_value'])],
+                [Paragraph('Cotação', cell_style_bold), Paragraph(f"#{idx + 1} de {total_sources}", cell_style)],
+                [Paragraph('Item', cell_style_bold), Paragraph(item_name, cell_style)],
+                [Paragraph('Data da Pesquisa', cell_style_bold), Paragraph(data_pesquisa.strftime('%d/%m/%Y'), cell_style)],
+                [Paragraph('Valor R$', cell_style_bold), Paragraph(self._format_currency(source['price_value']), cell_style)],
             ]
 
             cot_table = Table(cot_data, colWidths=[45*mm, 135*mm])
@@ -275,11 +289,8 @@ class PDFGenerator:
                 ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#F0F0F0')),
                 ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (0, -1), font_bold),
-                ('FONTNAME', (1, 0), (1, -1), font_regular),
-                ('FONTSIZE', (0, 0), (-1, -1), 9),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # TOP para alinhar texto no topo quando há quebra
                 ('LEFTPADDING', (0, 0), (-1, -1), 4),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
                 ('TOPPADDING', (0, 0), (-1, -1), 3),
