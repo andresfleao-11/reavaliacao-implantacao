@@ -57,5 +57,16 @@ celery_app.conf.beat_schedule = {
         'schedule': crontab(hour=4, minute=0),  # Diariamente às 04:00
         'options': {'queue': 'default'}
     },
+    # ===== Tarefas de Inventário =====
+    'sync-inventory-master-data-daily': {
+        'task': 'sync_inventory_master_data',
+        'schedule': crontab(hour=2, minute=0),  # Diariamente às 02:00 (horário de baixo uso)
+        'options': {'queue': 'default'}
+    },
+    'check-inventory-sessions-hourly': {
+        'task': 'check_inventory_sessions_status',
+        'schedule': crontab(minute=30),  # A cada hora (minuto 30)
+        'options': {'queue': 'default'}
+    },
 }
 

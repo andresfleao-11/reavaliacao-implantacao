@@ -34,6 +34,30 @@ from .vehicle_price import VehiclePriceBank
 from .rfid_tag import RfidTag, RfidTagBatch
 from .reading_session import ReadingSession, SessionReading, ReadingType, SessionStatus
 
+# Inventory Module
+from .external_system import (
+    ExternalSystem,
+    SystemType,
+    AuthType,
+    SyncStatus,
+    InventoryMasterUG,
+    InventoryMasterUL,
+    InventoryMasterUA,
+    InventoryMasterPhysicalStatus,
+    InventoryMasterCharacteristic,
+    InventoryMasterSyncLog,
+)
+from .inventory_session import (
+    InventorySession,
+    InventorySessionStatus,
+    InventoryExpectedAsset,
+    InventoryReadAsset,
+    InventorySyncLog,
+    AssetCategory,
+    ReadMethod,
+    PhysicalCondition,
+)
+
 __all__ = [
     "QuoteRequest",
     "QuoteStatus",
@@ -76,4 +100,23 @@ __all__ = [
     "SessionReading",
     "ReadingType",
     "SessionStatus",
+    # Inventory Module
+    "ExternalSystem",
+    "SystemType",
+    "AuthType",
+    "SyncStatus",
+    "InventoryMasterUG",
+    "InventoryMasterUL",
+    "InventoryMasterUA",
+    "InventoryMasterPhysicalStatus",
+    "InventoryMasterCharacteristic",
+    "InventoryMasterSyncLog",
+    "InventorySession",
+    "InventorySessionStatus",
+    "InventoryExpectedAsset",
+    "InventoryReadAsset",
+    "InventorySyncLog",
+    "AssetCategory",
+    "ReadMethod",
+    "PhysicalCondition",
 ]

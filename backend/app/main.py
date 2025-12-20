@@ -5,7 +5,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.api import quotes, settings, clients, projects, materials, project_config, users, financial, blocked_domains, financial_v2, batch_quotes, debug_serpapi, vehicle_prices, rfid, reading_sessions, system_health
+from app.api import quotes, settings, clients, projects, materials, project_config, users, financial, blocked_domains, financial_v2, batch_quotes, debug_serpapi, vehicle_prices, rfid, reading_sessions, system_health, external_systems, inventory_sessions, inventory_reports
 from app.core.database import engine, Base
 from app.core.logging import setup_logging
 import logging
@@ -115,6 +115,9 @@ app.include_router(vehicle_prices.router)
 app.include_router(rfid.router)
 app.include_router(reading_sessions.router)
 app.include_router(system_health.router)
+app.include_router(external_systems.router)
+app.include_router(inventory_sessions.router)
+app.include_router(inventory_reports.router)
 
 
 @app.on_event("startup")

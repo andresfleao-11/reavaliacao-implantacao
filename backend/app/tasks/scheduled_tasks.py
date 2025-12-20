@@ -1,9 +1,11 @@
 """
 Tasks agendadas (Celery Beat)
 - Atualização diária da taxa de câmbio USD -> BRL às 23:00
+- Sincronização periódica de dados mestres de inventário
 """
 import logging
 from datetime import datetime
+import asyncio
 
 from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
@@ -11,6 +13,230 @@ from app.models import Setting
 from sqlalchemy.orm.attributes import flag_modified
 
 logger = logging.getLogger(__name__)
+
+
+# ===== Inventory Sync Tasks =====
+
+@celery_app.task(name="sync_inventory_master_data")
+def sync_inventory_master_data():
+    """
+    Task para sincronizar dados mestres de inventário dos sistemas externos.
+    Executada diariamente às 02:00 (horário de baixo uso).
+
+    Sincroniza:
+    - UGs (Unidades Gestoras)
+    - ULs (Unidades Locais)
+    - Situações Físicas
+    - Características
+    """
+    from app.models import ExternalSystem
+    from app.services.external_system_sync import ExternalSystemSyncService
+
+    logger.info("Iniciando sincronização automática de dados mestres de inventário...")
+
+    db = SessionLocal()
+    results = {}
+    errors = []
+
+    try:
+        # Buscar todos os sistemas externos ativos
+        systems = db.query(ExternalSystem).filter(
+            ExternalSystem.is_active == True
+        ).all()
+
+        if not systems:
+            logger.warning("Nenhum sistema externo ativo encontrado para sincronização")
+            return {"success": True, "message": "Nenhum sistema configurado", "results": {}}
+
+        for system in systems:
+            logger.info(f"Sincronizando dados do sistema: {system.name}")
+            system_results = {}
+
+            try:
+                sync_service = ExternalSystemSyncService(db, system)
+
+                # Executar sync_all de forma síncrona
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    sync_result = loop.run_until_complete(sync_service.sync_all())
+                    system_results = sync_result
+                finally:
+                    loop.close()
+
+                results[system.name] = {
+                    "success": True,
+                    "data": system_results
+                }
+
+                logger.info(f"Sincronização do sistema {system.name} concluída: {system_results}")
+
+            except Exception as e:
+                error_msg = f"Erro ao sincronizar sistema {system.name}: {str(e)}"
+                logger.error(error_msg)
+                errors.append(error_msg)
+                results[system.name] = {
+                    "success": False,
+                    "error": str(e)
+                }
+
+        return {
+            "success": len(errors) == 0,
+            "results": results,
+            "errors": errors if errors else None,
+            "synced_at": datetime.utcnow().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Erro na sincronização automática: {str(e)}")
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="sync_inventory_master_data_for_system")
+def sync_inventory_master_data_for_system(system_id: int):
+    """
+    Task para sincronizar dados mestres de um sistema externo específico.
+    Pode ser chamada manualmente via API.
+    """
+    from app.models import ExternalSystem
+    from app.services.external_system_sync import ExternalSystemSyncService
+
+    logger.info(f"Iniciando sincronização do sistema {system_id}...")
+
+    db = SessionLocal()
+
+    try:
+        system = db.query(ExternalSystem).filter(ExternalSystem.id == system_id).first()
+
+        if not system:
+            return {"success": False, "error": "Sistema não encontrado"}
+
+        if not system.is_active:
+            return {"success": False, "error": "Sistema está desativado"}
+
+        sync_service = ExternalSystemSyncService(db, system)
+
+        # Executar sync_all de forma síncrona
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            results = loop.run_until_complete(sync_service.sync_all())
+        finally:
+            loop.close()
+
+        logger.info(f"Sincronização do sistema {system.name} concluída: {results}")
+
+        return {
+            "success": True,
+            "system_name": system.name,
+            "results": results,
+            "synced_at": datetime.utcnow().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Erro na sincronização do sistema {system_id}: {str(e)}")
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()
+
+
+@celery_app.task(name="check_inventory_sessions_status")
+def check_inventory_sessions_status():
+    """
+    Task para verificar e atualizar status de sessões de inventário.
+    Executada a cada hora.
+
+    - Identifica sessões em andamento há muito tempo
+    - Verifica sessões com leituras pendentes de sincronização
+    - Atualiza estatísticas de sessões
+    """
+    from app.models import InventorySession, InventorySessionStatus
+    from app.models.inventory_session import InventoryReadAsset, InventoryExpectedAsset
+    from datetime import timedelta
+    from sqlalchemy import func
+
+    logger.info("Verificando status de sessões de inventário...")
+
+    db = SessionLocal()
+    updated = 0
+    warnings = []
+
+    try:
+        # Buscar sessões em andamento há mais de 7 dias
+        cutoff = datetime.utcnow() - timedelta(days=7)
+        old_sessions = db.query(InventorySession).filter(
+            InventorySession.status == InventorySessionStatus.IN_PROGRESS.value,
+            InventorySession.started_at < cutoff
+        ).all()
+
+        for session in old_sessions:
+            warning = f"Sessão {session.code} em andamento há mais de 7 dias (iniciada em {session.started_at})"
+            logger.warning(warning)
+            warnings.append(warning)
+
+        # Atualizar estatísticas de todas as sessões ativas
+        active_sessions = db.query(InventorySession).filter(
+            InventorySession.status.in_([
+                InventorySessionStatus.IN_PROGRESS.value,
+                InventorySessionStatus.PAUSED.value
+            ])
+        ).all()
+
+        for session in active_sessions:
+            # Contar bens por categoria
+            found_count = db.query(func.count(InventoryReadAsset.id)).filter(
+                InventoryReadAsset.session_id == session.id,
+                InventoryReadAsset.category == 'found'
+            ).scalar() or 0
+
+            unregistered_count = db.query(func.count(InventoryReadAsset.id)).filter(
+                InventoryReadAsset.session_id == session.id,
+                InventoryReadAsset.category == 'unregistered'
+            ).scalar() or 0
+
+            written_off_count = db.query(func.count(InventoryReadAsset.id)).filter(
+                InventoryReadAsset.session_id == session.id,
+                InventoryReadAsset.category == 'written_off'
+            ).scalar() or 0
+
+            expected_count = db.query(func.count(InventoryExpectedAsset.id)).filter(
+                InventoryExpectedAsset.session_id == session.id
+            ).scalar() or 0
+
+            not_found_count = expected_count - found_count
+
+            # Atualizar estatísticas se mudaram
+            if (session.total_expected != expected_count or
+                session.total_found != found_count or
+                session.total_not_found != not_found_count or
+                session.total_unregistered != unregistered_count or
+                session.total_written_off != written_off_count):
+
+                session.total_expected = expected_count
+                session.total_found = found_count
+                session.total_not_found = max(0, not_found_count)
+                session.total_unregistered = unregistered_count
+                session.total_written_off = written_off_count
+                updated += 1
+
+        db.commit()
+
+        logger.info(f"Verificação de sessões concluída: {updated} atualizadas, {len(warnings)} avisos")
+
+        return {
+            "success": True,
+            "sessions_updated": updated,
+            "warnings": warnings if warnings else None
+        }
+
+    except Exception as e:
+        logger.error(f"Erro ao verificar sessões: {str(e)}")
+        db.rollback()
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()
 
 
 @celery_app.task(name="update_exchange_rate")

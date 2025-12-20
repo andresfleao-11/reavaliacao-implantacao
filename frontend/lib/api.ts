@@ -852,3 +852,420 @@ export const vehiclePricesApi = {
     window.URL.revokeObjectURL(urlBlob)
   },
 }
+
+// ==================== INVENTORY - EXTERNAL SYSTEMS API ====================
+
+export interface ExternalSystem {
+  id: number
+  name: string
+  system_type: string
+  host: string
+  port: number | null
+  context_path: string | null
+  full_url: string | null
+  auth_type: string
+  auth_username: string | null
+  is_active: boolean
+  is_default: boolean
+  timeout_seconds: number
+  retry_attempts: number
+  double_json_encoding: boolean
+  last_test_at: string | null
+  last_test_success: boolean | null
+  last_test_message: string | null
+  last_sync_at: string | null
+  created_at: string
+}
+
+export interface ExternalSystemCreate {
+  name: string
+  system_type: string
+  host: string
+  port?: number
+  context_path?: string
+  full_url?: string
+  auth_type: string
+  auth_username?: string
+  auth_password?: string
+  auth_token?: string
+  auth_header_name?: string
+  timeout_seconds?: number
+  retry_attempts?: number
+  double_json_encoding?: boolean
+  is_default?: boolean
+}
+
+export interface ConnectionTestResult {
+  success: boolean
+  message: string
+  response_time_ms?: number
+  server_info?: any
+  error_details?: string
+}
+
+export interface SyncResult {
+  received: number
+  created: number
+  updated: number
+  failed: number
+}
+
+export interface MasterDataItem {
+  id: number
+  code: string
+  name: string
+  extra_data?: any
+  synced_at: string
+}
+
+export const externalSystemsApi = {
+  list: async (): Promise<ExternalSystem[]> => {
+    const response = await api.get('/api/inventory/systems')
+    // API returns {items: [...], total: N}
+    return response.data.items || response.data
+  },
+
+  get: async (id: number): Promise<ExternalSystem> => {
+    const response = await api.get(`/api/inventory/systems/${id}`)
+    return response.data
+  },
+
+  create: async (data: ExternalSystemCreate): Promise<ExternalSystem> => {
+    const response = await api.post('/api/inventory/systems', data)
+    return response.data
+  },
+
+  update: async (id: number, data: Partial<ExternalSystemCreate>): Promise<ExternalSystem> => {
+    const response = await api.put(`/api/inventory/systems/${id}`, data)
+    return response.data
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/inventory/systems/${id}`)
+  },
+
+  testConnection: async (id: number): Promise<ConnectionTestResult> => {
+    const response = await api.post(`/api/inventory/systems/${id}/test`)
+    return response.data
+  },
+
+  testUrl: async (data: {
+    host: string
+    port?: number
+    context_path?: string
+    full_url?: string
+    auth_type: string
+    auth_username?: string
+    auth_password?: string
+    auth_token?: string
+    auth_header_name?: string
+    timeout_seconds?: number
+    double_json_encoding?: boolean
+  }): Promise<ConnectionTestResult> => {
+    const response = await api.post('/api/inventory/systems/test-url', data)
+    return response.data
+  },
+
+  sync: async (id: number): Promise<Record<string, SyncResult>> => {
+    const response = await api.post(`/api/inventory/systems/${id}/sync`)
+    return response.data
+  },
+
+  syncUGs: async (id: number): Promise<SyncResult> => {
+    const response = await api.post(`/api/inventory/systems/${id}/sync/ug`)
+    return response.data
+  },
+
+  syncULs: async (id: number): Promise<SyncResult> => {
+    const response = await api.post(`/api/inventory/systems/${id}/sync/ul`)
+    return response.data
+  },
+
+  getUGs: async (id: number): Promise<MasterDataItem[]> => {
+    const response = await api.get(`/api/inventory/systems/${id}/ug`)
+    return response.data
+  },
+
+  getULs: async (id: number, ugId?: number): Promise<MasterDataItem[]> => {
+    const response = await api.get(`/api/inventory/systems/${id}/ul`, {
+      params: ugId ? { ug_id: ugId } : undefined
+    })
+    return response.data
+  },
+
+  getSyncLogs: async (id: number): Promise<any[]> => {
+    const response = await api.get(`/api/inventory/systems/${id}/sync-logs`)
+    return response.data
+  },
+}
+
+// ==================== INVENTORY - SESSIONS API ====================
+
+export interface InventorySession {
+  id: number
+  code: string
+  name: string | null
+  description: string | null
+  status: string
+  project: {
+    id: number
+    name: string
+    inventory_config?: any
+  } | null
+  ug: { id: number; code: string; name: string } | null
+  ul: { id: number; code: string; name: string } | null
+  ua: { id: number; code: string; name: string } | null
+  statistics: {
+    total_expected: number
+    total_found: number
+    total_not_found: number
+    total_unregistered: number
+    total_written_off: number
+    completion_percentage: number
+  }
+  scheduled_start: string | null
+  scheduled_end: string | null
+  started_at: string | null
+  completed_at: string | null
+  created_by: { id: number; name: string } | null
+  created_at: string
+  updated_at: string | null
+}
+
+export interface InventorySessionCreate {
+  project_id: number
+  name: string
+  description?: string
+  ug_id?: number
+  ul_id?: number
+  ua_id?: number
+  scheduled_start?: string
+  scheduled_end?: string
+}
+
+export interface ExpectedAsset {
+  id: number
+  asset_code: string
+  description: string | null
+  rfid_code: string | null
+  barcode: string | null
+  category: string | null
+  expected_ul_code: string | null
+  expected_ua_code: string | null
+  is_written_off: boolean
+  extra_data: any
+  verified: boolean
+  reading: {
+    id: number
+    category: string
+    read_method: string
+    physical_condition: string | null
+    read_at: string
+  } | null
+}
+
+export interface AssetReading {
+  id: number
+  asset_code: string
+  rfid_code: string | null
+  barcode: string | null
+  category: string
+  read_method: string
+  physical_condition: string | null
+  notes: string | null
+  read_latitude: number | null
+  read_longitude: number | null
+  read_at: string
+  expected_asset: {
+    id: number
+    description: string
+    rfid_code: string | null
+  } | null
+}
+
+export interface SessionStatistics {
+  total_expected: number
+  total_found: number
+  total_not_found: number
+  total_unregistered: number
+  total_written_off: number
+  completion_percentage: number
+  by_method?: Record<string, number>
+  by_condition?: Record<string, number>
+}
+
+export const inventorySessionsApi = {
+  list: async (params?: {
+    project_id?: number
+    status?: string
+    skip?: number
+    limit?: number
+  }): Promise<{ total: number; items: InventorySession[] }> => {
+    const response = await api.get('/api/inventory/sessions', { params })
+    return response.data
+  },
+
+  get: async (id: number): Promise<InventorySession> => {
+    const response = await api.get(`/api/inventory/sessions/${id}`)
+    return response.data
+  },
+
+  create: async (data: InventorySessionCreate): Promise<{ id: number; code: string; name: string; status: string; message: string }> => {
+    const response = await api.post('/api/inventory/sessions', data)
+    return response.data
+  },
+
+  update: async (id: number, data: Partial<InventorySessionCreate & { status?: string }>): Promise<{ message: string }> => {
+    const response = await api.put(`/api/inventory/sessions/${id}`, data)
+    return response.data
+  },
+
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/api/inventory/sessions/${id}`)
+  },
+
+  start: async (id: number): Promise<{ message: string; started_at: string }> => {
+    const response = await api.post(`/api/inventory/sessions/${id}/start`)
+    return response.data
+  },
+
+  pause: async (id: number): Promise<{ message: string }> => {
+    const response = await api.post(`/api/inventory/sessions/${id}/pause`)
+    return response.data
+  },
+
+  complete: async (id: number): Promise<{ message: string; statistics: SessionStatistics; completed_at: string }> => {
+    const response = await api.post(`/api/inventory/sessions/${id}/complete`)
+    return response.data
+  },
+
+  // Expected Assets
+  listExpectedAssets: async (sessionId: number, params?: {
+    search?: string
+    verified?: boolean
+    skip?: number
+    limit?: number
+  }): Promise<{ total: number; items: ExpectedAsset[] }> => {
+    const response = await api.get(`/api/inventory/sessions/${sessionId}/expected`, { params })
+    return response.data
+  },
+
+  addExpectedAsset: async (sessionId: number, data: {
+    asset_code: string
+    description: string
+    rfid_code?: string
+    barcode?: string
+    category?: string
+    expected_ul_code?: string
+    expected_ua_code?: string
+    extra_data?: any
+  }): Promise<{ id: number; message: string }> => {
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/expected`, data)
+    return response.data
+  },
+
+  uploadExpectedAssets: async (sessionId: number, file: File): Promise<{
+    message: string
+    created: number
+    updated: number
+    errors: string[]
+  }> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/expected/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
+  syncExpectedAssets: async (sessionId: number, options?: {
+    limit?: number
+    clear_existing?: boolean
+  }): Promise<{
+    success: boolean
+    message: string
+    system: string
+    statistics: {
+      received: number
+      mapped: number
+      created: number
+      updated: number
+      failed: number
+      total_expected: number
+    }
+    errors?: string[]
+  }> => {
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/expected/sync`, options || {})
+    return response.data
+  },
+
+  uploadResults: async (sessionId: number, options?: {
+    include_photos?: boolean
+  }): Promise<{
+    success: boolean
+    message: string
+    system: string
+    transmission_number: string
+    inventory_id: string
+    items_sent: number
+  }> => {
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/upload`, options || {})
+    return response.data
+  },
+
+  // Readings
+  listReadings: async (sessionId: number, params?: {
+    category?: string
+    skip?: number
+    limit?: number
+  }): Promise<{ total: number; items: AssetReading[] }> => {
+    const response = await api.get(`/api/inventory/sessions/${sessionId}/readings`, { params })
+    return response.data
+  },
+
+  registerReading: async (sessionId: number, data: {
+    identifier: string
+    read_method?: string
+    physical_condition?: string
+    physical_status_id?: number
+    observations?: string
+    photo_file_id?: number
+    latitude?: number
+    longitude?: number
+  }): Promise<{
+    id: number
+    category: string
+    message: string
+    expected_asset: { id: number; description: string } | null
+  }> => {
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/readings`, data)
+    return response.data
+  },
+
+  registerBulkReadings: async (sessionId: number, readings: Array<{
+    identifier: string
+    read_method?: string
+  }>): Promise<{
+    found: number
+    unregistered: number
+    updated: number
+    errors: string[]
+  }> => {
+    const response = await api.post(`/api/inventory/sessions/${sessionId}/readings/bulk`, { readings })
+    return response.data
+  },
+
+  updateReadingCategory: async (sessionId: number, readingId: number, data: {
+    category: string
+    notes?: string
+  }): Promise<{ message: string }> => {
+    const response = await api.put(`/api/inventory/sessions/${sessionId}/readings/${readingId}/category`, data)
+    return response.data
+  },
+
+  // Statistics
+  getStatistics: async (sessionId: number): Promise<SessionStatistics> => {
+    const response = await api.get(`/api/inventory/sessions/${sessionId}/statistics`)
+    return response.data
+  },
+}
