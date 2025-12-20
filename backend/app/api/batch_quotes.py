@@ -689,21 +689,27 @@ def download_batch_zip(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Download do arquivo ZIP contendo todos os PDFs do lote."""
+    """Download do arquivo ZIP contendo todos os PDFs do lote.
+
+    SEMPRE regenera o ZIP para garantir que todos os PDFs estao incluidos.
+    Os PDFs ja gerados sao reaproveitados, apenas o ZIP e recriado.
+    """
     from fastapi.responses import FileResponse
+    from app.services.batch_result_generator import generate_batch_zip
 
     batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_id).first()
     if not batch:
         raise HTTPException(status_code=404, detail="Lote nao encontrado")
 
-    if not batch.result_zip_path or not os.path.exists(batch.result_zip_path):
-        # Tentar gerar se ainda nao existe
-        from app.services.batch_result_generator import generate_batch_zip
-        zip_path = generate_batch_zip(db, batch)
-        if zip_path:
-            batch.result_zip_path = zip_path
-            db.commit()
-        else:
+    # SEMPRE regenerar o ZIP para incluir PDFs que podem ter sido
+    # gerados apos a criacao do ZIP original
+    zip_path = generate_batch_zip(db, batch)
+    if zip_path:
+        batch.result_zip_path = zip_path
+        db.commit()
+    else:
+        # Se falhou ao gerar, tentar usar existente como fallback
+        if not batch.result_zip_path or not os.path.exists(batch.result_zip_path):
             raise HTTPException(status_code=404, detail="Arquivo ZIP nao disponivel. Verifique se as cotacoes possuem PDFs gerados.")
 
     filename = os.path.basename(batch.result_zip_path)
@@ -721,21 +727,28 @@ def download_batch_excel(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Download do arquivo Excel com resumo do lote."""
+    """Download do arquivo Excel com resumo do lote.
+
+    SEMPRE regenera o Excel para garantir que os dados estao atualizados.
+    Isso evita problemas onde o usuario baixa uma versao antiga gerada
+    enquanto as cotacoes ainda estavam processando.
+    """
     from fastapi.responses import FileResponse
+    from app.services.batch_result_generator import generate_batch_excel
 
     batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_id).first()
     if not batch:
         raise HTTPException(status_code=404, detail="Lote nao encontrado")
 
-    if not batch.result_excel_path or not os.path.exists(batch.result_excel_path):
-        # Tentar gerar se ainda nao existe
-        from app.services.batch_result_generator import generate_batch_excel
-        excel_path = generate_batch_excel(db, batch)
-        if excel_path:
-            batch.result_excel_path = excel_path
-            db.commit()
-        else:
+    # SEMPRE regenerar o Excel para garantir dados atualizados
+    # Isso resolve o problema de usuarios baixando versoes antigas
+    excel_path = generate_batch_excel(db, batch)
+    if excel_path:
+        batch.result_excel_path = excel_path
+        db.commit()
+    else:
+        # Se falhou ao gerar, tentar usar existente como fallback
+        if not batch.result_excel_path or not os.path.exists(batch.result_excel_path):
             raise HTTPException(status_code=404, detail="Arquivo Excel nao disponivel.")
 
     filename = os.path.basename(batch.result_excel_path)

@@ -12,6 +12,7 @@ from app.models.quote_request import QuoteStatus, QuoteInputType
 from app.models.file import FileType
 from app.models.project import Project
 from app.models.project_config import ProjectConfigVersion
+from app.models.batch_quote import BatchQuoteJob, BatchJobStatus
 from app.utils.file_validation import validate_multiple_uploads, sanitize_filename, ALLOWED_IMAGE_EXTENSIONS
 from app.api.schemas import (
     QuoteCreateResponse,
@@ -728,6 +729,7 @@ def requote(quote_id: int, db: Session = Depends(get_db)):
             config_version_id = active_config.id
 
     # Criar nova cotação com os mesmos dados (preservar input_type)
+    # IMPORTANTE: Manter batch_job_id e batch_index para cotações em lote
     new_quote = QuoteRequest(
         status=QuoteStatus.PROCESSING,
         input_type=original_quote.input_type,  # Preservar tipo de entrada
@@ -738,11 +740,31 @@ def requote(quote_id: int, db: Session = Depends(get_db)):
         project_id=original_quote.project_id,
         config_version_id=config_version_id,
         original_quote_id=root_quote_id,
-        attempt_number=existing_attempts + 1
+        attempt_number=existing_attempts + 1,
+        # Manter no mesmo lote
+        batch_job_id=original_quote.batch_job_id,
+        batch_index=original_quote.batch_index
     )
     db.add(new_quote)
     db.commit()
     db.refresh(new_quote)
+
+    # Se a cotação pertencia a um lote, atualizar contadores do lote
+    if original_quote.batch_job_id:
+        batch = db.query(BatchQuoteJob).filter(
+            BatchQuoteJob.id == original_quote.batch_job_id
+        ).first()
+
+        if batch:
+            # Decrementar failed_items já que vamos reprocessar
+            if batch.failed_items and batch.failed_items > 0:
+                batch.failed_items -= 1
+
+            # Se o lote estava finalizado, voltar para PROCESSING
+            if batch.status in [BatchJobStatus.COMPLETED, BatchJobStatus.PARTIALLY_COMPLETED, BatchJobStatus.ERROR]:
+                batch.status = BatchJobStatus.PROCESSING
+
+            db.commit()
 
     # Copiar imagens de entrada se existirem
     if original_quote.input_images:
