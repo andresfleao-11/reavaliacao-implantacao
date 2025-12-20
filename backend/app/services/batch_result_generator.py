@@ -34,15 +34,14 @@ def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
     """
     ensure_results_dir()
 
-    # Buscar cotacoes com PDF
+    # Buscar cotacoes concluidas do lote
     quotes = db.query(QuoteRequest).filter(
         QuoteRequest.batch_job_id == batch.id,
-        QuoteRequest.status.in_([QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW]),
-        QuoteRequest.pdf_path.isnot(None)
+        QuoteRequest.status.in_([QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW])
     ).order_by(QuoteRequest.batch_index).all()
 
     if not quotes:
-        logger.info(f"Nenhum PDF disponivel para o lote {batch.id}")
+        logger.info(f"Nenhuma cotacao concluida para o lote {batch.id}")
         return None
 
     # Nome do arquivo ZIP
@@ -50,10 +49,18 @@ def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
     zip_filename = f"lote_{batch.id}_pdfs_{timestamp}.zip"
     zip_path = os.path.join(BATCH_RESULTS_DIR, zip_filename)
 
+    pdfs_added = 0
     try:
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for quote in quotes:
-                if quote.pdf_path and os.path.exists(quote.pdf_path):
+                # Obter PDF via relacionamento documents -> pdf_file -> storage_path
+                pdf_path = None
+                if quote.documents:
+                    doc = quote.documents[0]  # Primeiro documento gerado
+                    if doc.pdf_file and doc.pdf_file.storage_path:
+                        pdf_path = doc.pdf_file.storage_path
+
+                if pdf_path and os.path.exists(pdf_path):
                     # Nome do arquivo dentro do ZIP
                     nome_item = "item"
                     if quote.claude_payload_json and isinstance(quote.claude_payload_json, dict):
@@ -67,10 +74,16 @@ def generate_batch_zip(db: Session, batch: BatchQuoteJob) -> Optional[str]:
                     else:
                         arcname = f"{quote.batch_index + 1:03d}_{safe_name}.pdf"
 
-                    zipf.write(quote.pdf_path, arcname)
+                    zipf.write(pdf_path, arcname)
+                    pdfs_added += 1
                     logger.debug(f"Adicionado ao ZIP: {arcname}")
 
-        logger.info(f"ZIP gerado para lote {batch.id}: {zip_path} ({len(quotes)} PDFs)")
+        if pdfs_added == 0:
+            logger.info(f"Nenhum PDF disponivel para o lote {batch.id}")
+            os.remove(zip_path)
+            return None
+
+        logger.info(f"ZIP gerado para lote {batch.id}: {zip_path} ({pdfs_added} PDFs)")
         return zip_path
 
     except Exception as e:
