@@ -24,10 +24,11 @@ celery_app.conf.update(
     task_acks_late=True,
     # Rejeitar task se worker morrer
     task_reject_on_worker_lost=True,
-    # Rate limit global para tasks de cotação (2 por segundo)
+    # Rate limit global para tasks de cotação (3 por segundo)
+    # Valor otimizado para 6 workers - ver docs/ANALISE_PERFORMANCE_CELERY.md
     task_annotations={
-        'process_quote_request': {'rate_limit': '2/s'},
-        'process_batch_quote': {'rate_limit': '2/s'},
+        'process_quote_request': {'rate_limit': '3/s'},
+        'process_batch_quote': {'rate_limit': '3/s'},
     },
     # Timeout para tasks longas (10 minutos)
     task_time_limit=600,

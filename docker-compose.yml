@@ -73,9 +73,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    # Concurrency=4: processa até 4 cotações simultaneamente
+    # Concurrency=6: processa até 6 cotações simultaneamente
     # Prefetch=1: pega 1 task por vez (evita acúmulo)
-    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4 --prefetch-multiplier=1
+    # Rate limit=3/s: ver docs/ANALISE_PERFORMANCE_CELERY.md
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=6 --prefetch-multiplier=1
 
   frontend:
     build:
