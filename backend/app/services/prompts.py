@@ -368,6 +368,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "preco": "/{{vehicleType}}/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
   }},
+  "fallback_google_shopping": {{
+    "query_principal": "query para Google Shopping caso FIPE falhe (OBRIGATÓRIO)",
+    "query_alternativas": ["variação 1", "variação 2"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
+  }},
   "avaliacao": {{
     "confianca": 0.00,
     "completude_dados": "alta | media | baixa",
@@ -376,6 +381,10 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
   }}
 }}
 ```
+
+> **IMPORTANTE**: O campo `fallback_google_shopping.query_principal` é **OBRIGATÓRIO** para veículos.
+> Caso a consulta FIPE falhe, o sistema usará essa query para buscar no Google Shopping.
+> Formato: `"[MARCA] [MODELO] [ANO] [COMBUSTÍVEL] preço"` (ex: "Volkswagen Gol 1.0 2020 flex preço")
 
 ---
 
@@ -473,6 +482,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
   }},
+  "fallback_google_shopping": {{
+    "query_principal": "Volkswagen Gol 1.0 2020 flex preço",
+    "query_alternativas": ["VW Gol 1.0 MPI 2020", "Gol 1.0 flex 2020 valor"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
+  }},
   "avaliacao": {{
     "confianca": 0.96,
     "completude_dados": "alta",
@@ -536,6 +550,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
       "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
+  }},
+  "fallback_google_shopping": {{
+    "query_principal": "Fiat Ducato Minibus 2.3 2011 diesel preço",
+    "query_alternativas": ["Ducato 2.3 diesel 2011", "Fiat Ducato van 2011 valor"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
   }},
   "avaliacao": {{
     "confianca": 0.90,
@@ -601,6 +620,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "preco": "/trucks/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
   }},
+  "fallback_google_shopping": {{
+    "query_principal": "Fiat 180 caminhão 1983 preço",
+    "query_alternativas": ["caminhão Fiat 180 diesel", "Fiat 180 1983 valor"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
+  }},
   "avaliacao": {{
     "confianca": 0.75,
     "completude_dados": "media",
@@ -664,6 +688,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "anos": "/trucks/brands/{{brandId}}/models/{{modelId}}/years",
       "preco": "/trucks/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
+  }},
+  "fallback_google_shopping": {{
+    "query_principal": "Mercedes-Benz Atego 1719 2020 diesel preço",
+    "query_alternativas": ["caminhão MB Atego 1719 2020", "Mercedes Atego 2020 valor"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
   }},
   "avaliacao": {{
     "confianca": 0.92,
@@ -729,6 +758,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
   }},
+  "fallback_google_shopping": {{
+    "query_principal": "Renault Master Ônibus Escolar 2019 preço",
+    "query_alternativas": ["Renault Master minibus 2019 diesel", "van Renault Master 2019 valor"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
+  }},
   "avaliacao": {{
     "confianca": 0.85,
     "completude_dados": "alta",
@@ -789,6 +823,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
       "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
+  }},
+  "fallback_google_shopping": {{
+    "query_principal": "Chevrolet Corsa Sedan preço",
+    "query_alternativas": ["GM Corsa Sedan valor", "Corsa Classic preço tabela"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
   }},
   "avaliacao": {{
     "confianca": 0.35,
@@ -853,6 +892,11 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
       "anos": "/motorcycles/brands/{{brandId}}/models/{{modelId}}/years",
       "preco": "/motorcycles/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
     }}
+  }},
+  "fallback_google_shopping": {{
+    "query_principal": "Honda CG 160 Start 2020 preço",
+    "query_alternativas": ["moto Honda CG 160 2020 flex valor", "CG 160 Start 2020 tabela"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
   }},
   "avaliacao": {{
     "confianca": 0.94,

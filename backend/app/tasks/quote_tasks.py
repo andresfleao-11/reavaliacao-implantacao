@@ -2126,16 +2126,31 @@ def _process_fipe_quote(db: Session, quote_request: QuoteRequest, analysis_resul
 
         if not fipe_result.success:
             # FIPE falhou - tentar fallback para Google Shopping se disponível
+            fallback_query = ""
             if analysis_result.fallback_google_shopping:
-                logger.warning(f"FIPE search failed: {fipe_result.error_message}. Trying Google Shopping fallback...")
+                fallback_query = analysis_result.fallback_google_shopping.get("query_principal", "")
+
+            if fallback_query and fallback_query.strip():
+                logger.warning(f"FIPE search failed: {fipe_result.error_message}. Trying Google Shopping fallback with query: {fallback_query}")
                 quote_request.error_message = f"FIPE: {fipe_result.error_message}. Tentando Google Shopping..."
                 db.commit()
                 # Alterar query para usar fallback
-                analysis_result.query_principal = analysis_result.fallback_google_shopping.get("query_principal", "")
+                analysis_result.query_principal = fallback_query
                 # Retornar True para continuar com fluxo normal (Google Shopping)
                 return True
             else:
-                raise ValueError(f"Consulta FIPE falhou: {fipe_result.error_message}")
+                # Sem fallback válido - criar query baseada nos dados do veículo
+                marca = analysis_result.bem_patrimonial.get("marca", "") if analysis_result.bem_patrimonial else ""
+                modelo = analysis_result.bem_patrimonial.get("modelo", "") if analysis_result.bem_patrimonial else ""
+                if marca and modelo:
+                    fallback_query = f"{marca} {modelo} preço"
+                    logger.warning(f"FIPE failed, no fallback. Generated query from vehicle data: {fallback_query}")
+                    quote_request.error_message = f"FIPE: {fipe_result.error_message}. Usando busca genérica..."
+                    db.commit()
+                    analysis_result.query_principal = fallback_query
+                    return True
+                else:
+                    raise ValueError(f"Consulta FIPE falhou e não há dados suficientes para busca alternativa: {fipe_result.error_message}")
 
         _update_progress(db, quote_request, "processing_fipe_result", 70,
                         f"Preço FIPE encontrado: {fipe_result.price.price}")
