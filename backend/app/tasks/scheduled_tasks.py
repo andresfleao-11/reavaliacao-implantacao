@@ -207,3 +207,96 @@ def cleanup_old_processing():
         return {"success": False, "error": str(e)}
     finally:
         db.close()
+
+
+@celery_app.task(name="fix_stuck_batches")
+def fix_stuck_batches():
+    """
+    Task para corrigir lotes com status incorreto.
+    Executada a cada 10 minutos.
+
+    Verifica lotes em PROCESSING onde todas as cotacoes ja terminaram
+    e atualiza o status corretamente.
+    """
+    from app.models.batch_quote import BatchQuoteJob, BatchJobStatus
+    from app.models.quote_request import QuoteRequest, QuoteStatus
+    from sqlalchemy import func
+
+    logger.info("Verificando lotes com status incorreto...")
+
+    db = SessionLocal()
+    fixed = 0
+
+    try:
+        # Buscar lotes em PROCESSING
+        processing_batches = db.query(BatchQuoteJob).filter(
+            BatchQuoteJob.status == BatchJobStatus.PROCESSING
+        ).all()
+
+        for batch in processing_batches:
+            # Contar cotacoes por status
+            status_counts = db.query(
+                QuoteRequest.status,
+                func.count(QuoteRequest.id)
+            ).filter(
+                QuoteRequest.batch_job_id == batch.id
+            ).group_by(QuoteRequest.status).all()
+
+            completed = 0
+            failed = 0
+            cancelled = 0
+            processing = 0
+
+            for status, count in status_counts:
+                if status in [QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW]:
+                    completed += count
+                elif status == QuoteStatus.ERROR:
+                    failed += count
+                elif status == QuoteStatus.CANCELLED:
+                    cancelled += count
+                elif status == QuoteStatus.PROCESSING:
+                    processing += count
+
+            # Atualizar contadores
+            batch.completed_items = completed
+            batch.failed_items = failed
+
+            # Se nao ha cotacoes em PROCESSING, o lote terminou
+            if processing == 0:
+                total_finished = completed + failed + cancelled
+
+                if total_finished >= batch.total_items:
+                    if failed > 0 and completed > 0:
+                        batch.status = BatchJobStatus.PARTIALLY_COMPLETED
+                        batch.error_message = f"{failed} de {batch.total_items} cotacoes falharam"
+                    elif completed == 0:
+                        batch.status = BatchJobStatus.ERROR
+                        batch.error_message = f"Todas as {batch.total_items} cotacoes falharam"
+                    else:
+                        batch.status = BatchJobStatus.COMPLETED
+
+                    logger.info(
+                        f"Lote {batch.id} corrigido: status={batch.status.value}, "
+                        f"completed={completed}, failed={failed}"
+                    )
+                    fixed += 1
+
+                    # Gerar arquivos de resultado
+                    try:
+                        from app.services.batch_result_generator import generate_batch_results
+                        generate_batch_results(db, batch.id)
+                    except Exception as e:
+                        logger.error(f"Erro ao gerar resultados do lote {batch.id}: {e}")
+
+        db.commit()
+
+        logger.info(f"Verificacao de lotes concluida: {fixed} lotes corrigidos")
+
+        return {"success": True, "fixed": fixed}
+
+    except Exception as e:
+        logger.error(f"Erro ao verificar lotes: {str(e)}")
+        db.rollback()
+        return {"success": False, "error": str(e)}
+    finally:
+        db.close()

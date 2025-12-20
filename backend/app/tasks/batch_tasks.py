@@ -178,36 +178,71 @@ def process_batch_quote(self, quote_request_id: int, batch_job_id: int):
 
 
 def _update_batch_on_quote_complete(db: Session, batch_job_id: int):
-    """Atualiza o batch apos uma cotacao completar e verifica se todas terminaram."""
+    """
+    Atualiza o batch apos uma cotacao completar e verifica se todas terminaram.
+
+    IMPORTANTE: Esta função é chamada de forma concorrente por múltiplas tasks.
+    Usa FOR UPDATE para evitar race conditions na atualização.
+    """
+    from sqlalchemy import func
+
     try:
-        batch = db.query(BatchQuoteJob).filter(BatchQuoteJob.id == batch_job_id).first()
+        # Lock no batch para evitar race condition
+        batch = db.query(BatchQuoteJob).filter(
+            BatchQuoteJob.id == batch_job_id
+        ).with_for_update().first()
+
         if not batch:
             return
 
-        # Contar cotacoes por status
-        completed = db.query(QuoteRequest).filter(
-            QuoteRequest.batch_job_id == batch_job_id,
-            QuoteRequest.status.in_([QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW])
-        ).count()
+        # Contar cotacoes por status (inclui CANCELLED)
+        status_counts = db.query(
+            QuoteRequest.status,
+            func.count(QuoteRequest.id)
+        ).filter(
+            QuoteRequest.batch_job_id == batch_job_id
+        ).group_by(QuoteRequest.status).all()
 
-        failed = db.query(QuoteRequest).filter(
-            QuoteRequest.batch_job_id == batch_job_id,
-            QuoteRequest.status == QuoteStatus.ERROR
-        ).count()
+        # Processar contagens
+        completed = 0
+        failed = 0
+        cancelled = 0
+        processing = 0
+
+        for status, count in status_counts:
+            if status in [QuoteStatus.DONE, QuoteStatus.AWAITING_REVIEW]:
+                completed += count
+            elif status == QuoteStatus.ERROR:
+                failed += count
+            elif status == QuoteStatus.CANCELLED:
+                cancelled += count
+            elif status == QuoteStatus.PROCESSING:
+                processing += count
 
         batch.completed_items = completed
         batch.failed_items = failed
 
-        # Verificar se todas as cotacoes terminaram
-        total_finished = completed + failed
-        if total_finished >= batch.total_items:
-            if failed > 0:
+        # Total de finalizados (exclui PROCESSING)
+        total_finished = completed + failed + cancelled
+
+        logger.info(
+            f"Batch {batch_job_id} progress: "
+            f"completed={completed}, failed={failed}, cancelled={cancelled}, "
+            f"processing={processing}, total={batch.total_items}"
+        )
+
+        # Verificar se todas as cotacoes terminaram (nenhuma em PROCESSING)
+        if processing == 0 and total_finished >= batch.total_items:
+            if failed > 0 and completed > 0:
                 batch.status = BatchJobStatus.PARTIALLY_COMPLETED
                 batch.error_message = f"{failed} de {batch.total_items} cotacoes falharam"
+            elif completed == 0:
+                batch.status = BatchJobStatus.ERROR
+                batch.error_message = f"Todas as {batch.total_items} cotacoes falharam"
             else:
                 batch.status = BatchJobStatus.COMPLETED
 
-            logger.info(f"Batch {batch_job_id} finished: {completed} success, {failed} failed")
+            logger.info(f"Batch {batch_job_id} finished: {completed} success, {failed} failed, {cancelled} cancelled")
 
             # Gerar arquivos de resultado (ZIP e Excel)
             try:

@@ -15,6 +15,23 @@ celery_app.conf.update(
     result_serializer='json',
     timezone='America/Sao_Paulo',
     enable_utc=True,
+    # ============================================
+    # CONFIGURAÇÕES DE PERFORMANCE E RATE LIMITING
+    # ============================================
+    # Limitar prefetch para evitar acúmulo de tasks
+    worker_prefetch_multiplier=1,
+    # Ack late para garantir reprocessamento em caso de crash
+    task_acks_late=True,
+    # Rejeitar task se worker morrer
+    task_reject_on_worker_lost=True,
+    # Rate limit global para tasks de cotação (2 por segundo)
+    task_annotations={
+        'process_quote_request': {'rate_limit': '2/s'},
+        'process_batch_quote': {'rate_limit': '2/s'},
+    },
+    # Timeout para tasks longas (10 minutos)
+    task_time_limit=600,
+    task_soft_time_limit=540,
 )
 
 # Configuração do Celery Beat - Tarefas agendadas
@@ -27,6 +44,11 @@ celery_app.conf.beat_schedule = {
     'recover-stuck-quotes': {
         'task': 'recover_stuck_quotes',
         'schedule': crontab(minute='*/5'),  # A cada 5 minutos
+        'options': {'queue': 'default'}
+    },
+    'fix-stuck-batches': {
+        'task': 'fix_stuck_batches',
+        'schedule': crontab(minute='*/10'),  # A cada 10 minutos
         'options': {'queue': 'default'}
     },
     'cleanup-old-processing-daily': {
