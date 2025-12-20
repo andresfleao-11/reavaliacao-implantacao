@@ -157,6 +157,43 @@ Para que um veículo seja consultado no endpoint `trucks`, a marca **DEVE OBRIGA
 | `equipamento` | Ar-condicionado, refrigeradores, ferramentas | Google Shopping |
 | `instrumento` | Medição, laboratório, calibração, topografia | Google Shopping |
 
+### REGRA CRÍTICA: Classificação de Mobiliário
+
+> **Princípio MCASP**: Bens móveis permanentes de órgãos públicos são adquiridos para uso institucional. O valor justo de reposição deve refletir o **contexto de uso administrativo**, assegurando comparabilidade com bens de mesma finalidade funcional.
+
+**REGRA PADRÃO**: Todo mobiliário deve ser classificado como **MOBILIÁRIO DE ESCRITÓRIO**, salvo indicação inequívoca em contrário.
+
+| Situação | Classificação | Ação na Query |
+|----------|---------------|---------------|
+| Descrição genérica (mesa, cadeira, armário, estante) | Escritório | Adicionar "escritório" ou "comercial" à query |
+| Descrição com termos institucionais (reunião, recepção, auditório) | Escritório | Manter contexto institucional |
+| Descrição **inequivocamente doméstica** | Doméstico | Manter classificação original |
+
+**Indicadores de uso doméstico** (lista taxativa):
+- Guarda-roupa / roupeiro
+- Cama / beliche / colchão
+- Sofá residencial / poltrona de sala
+- Mesa de jantar / mesa de centro
+- Cômodas / criado-mudo
+- Berço / móveis infantis de quarto
+- Estante de TV residencial
+
+**Aplicação prática**:
+
+| Descrição Original | Classificação | Query Gerada |
+|--------------------|---------------|--------------|
+| "Armário 2 portas MDF" | Escritório | `armário escritório 2 portas MDF` |
+| "Mesa retangular 6 lugares" | Escritório | `mesa reunião escritório 6 lugares` |
+| "Estante 5 prateleiras aço" | Escritório | `estante escritório aço 5 prateleiras` |
+| "Cadeira fixa sem braço" | Escritório | `cadeira escritório fixa sem braço` |
+| "Guarda-roupa 4 portas MDF" | Doméstico | `guarda-roupa 4 portas MDF` |
+| "Cama de solteiro MDF" | Doméstico | `cama solteiro MDF` |
+
+**Justificativa normativa**:
+1. **NBC TSP 07 / MCASP**: O valor justo considera o mercado de atuação do ente público — predominantemente administrativo
+2. **Comparabilidade**: Mobiliário de escritório e doméstico possuem faixas de preço distintas; classificação incorreta distorce a reavaliação
+3. **Prudência**: Na dúvida, presumir uso institucional (maior ocorrência no patrimônio público)
+
 ---
 
 ## PROCESSAMENTO DE VEÍCULOS (API FIPE)
@@ -870,18 +907,19 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 }}
 ```
 
-### Exemplo 9: Cadeira
+### Exemplo 9: Cadeira (Mobiliário - Regra de Escritório aplicada)
 **Entrada:** `"Cadeira giratória tipo presidente, couro sintético preto, braços reguláveis, base cromada"`
 
 ```json
 {{
   "tipo_processamento": "GOOGLE_SHOPPING",
   "bem_patrimonial": {{
-    "nome_canonico": "Cadeira Presidente Giratória Couro Sintético",
+    "nome_canonico": "Cadeira Escritório Presidente Giratória Couro Sintético",
     "marca": null,
     "modelo": null,
     "categoria": "Mobiliário",
-    "natureza": "mobiliario"
+    "natureza": "mobiliario",
+    "contexto_uso": "escritorio"
   }},
   "especificacoes": {{
     "essenciais": {{
@@ -896,23 +934,27 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
     }}
   }},
   "queries": {{
-    "principal": "cadeira presidente giratoria couro sintetico",
+    "principal": "cadeira escritorio presidente giratoria couro",
     "alternativas": [
-      "cadeira escritorio presidente braco regulavel",
-      "poltrona executiva giratoria couro"
+      "poltrona executiva escritorio giratoria couro",
+      "cadeira presidente braco regulavel escritorio"
     ],
     "com_marca": ""
   }},
   "busca": {{
-    "palavras_chave": ["cadeira", "presidente", "giratoria", "couro", "sintetico"],
-    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "outlet"],
+    "palavras_chave": ["cadeira", "escritorio", "presidente", "giratoria", "couro"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "outlet", "gamer", "residencial"],
     "ordenacao": "relevancia"
+  }},
+  "classificacao_mobiliario": {{
+    "regra_aplicada": "ESCRITORIO_PADRAO",
+    "justificativa": "Descrição genérica sem indicadores de uso doméstico. Aplicada presunção de uso institucional conforme MCASP."
   }},
   "avaliacao": {{
     "confianca": 0.85,
     "completude_dados": "media",
     "dados_faltantes": ["dimensoes", "capacidade_peso"],
-    "observacoes": "Sem marca. Dimensões melhorariam precisão."
+    "observacoes": "Sem marca. Dimensões melhorariam precisão. Contexto escritório aplicado por padrão."
   }}
 }}
 ```
@@ -962,6 +1004,57 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 }}
 ```
 
+### Exemplo 11: Guarda-roupa (Mobiliário Doméstico - Exceção à regra)
+**Entrada:** `"Guarda-roupa 6 portas MDF branco com espelho"`
+
+```json
+{{
+  "tipo_processamento": "GOOGLE_SHOPPING",
+  "bem_patrimonial": {{
+    "nome_canonico": "Guarda-roupa 6 Portas MDF com Espelho",
+    "marca": null,
+    "modelo": null,
+    "categoria": "Mobiliário",
+    "natureza": "mobiliario",
+    "contexto_uso": "domestico"
+  }},
+  "especificacoes": {{
+    "essenciais": {{
+      "tipo": "guarda-roupa",
+      "portas": "6",
+      "material": "MDF"
+    }},
+    "complementares": {{
+      "cor": "branco",
+      "acessorios": "espelho"
+    }}
+  }},
+  "queries": {{
+    "principal": "guarda-roupa 6 portas MDF espelho",
+    "alternativas": [
+      "roupeiro 6 portas MDF branco",
+      "armario guarda roupa 6 portas espelho"
+    ],
+    "com_marca": ""
+  }},
+  "busca": {{
+    "palavras_chave": ["guarda-roupa", "roupeiro", "6 portas", "MDF", "espelho"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"],
+    "ordenacao": "relevancia"
+  }},
+  "classificacao_mobiliario": {{
+    "regra_aplicada": "DOMESTICO_EXPLICITO",
+    "justificativa": "Item 'guarda-roupa' consta na lista taxativa de indicadores de uso doméstico. Exceção à presunção de escritório."
+  }},
+  "avaliacao": {{
+    "confianca": 0.80,
+    "completude_dados": "media",
+    "dados_faltantes": ["dimensoes", "marca"],
+    "observacoes": "Mobiliário doméstico identificado. Sem necessidade de adicionar 'escritório' à query."
+  }}
+}}
+```
+
 ---
 
 ## INSTRUÇÃO FINAL
@@ -976,6 +1069,10 @@ Analise a descrição do bem e:
    - **Se marca é Fiat**: verificar se ano está entre 1981-1984
    - Gerar JSON com `"tipo_processamento": "FIPE"` e `vehicle_type` correto
 3. **Se bem geral**: JSON com `"tipo_processamento": "GOOGLE_SHOPPING"` e queries otimizadas
+4. **Se mobiliário**:
+   - **REGRA PADRÃO**: Classificar como **ESCRITÓRIO** e incluir termo na query
+   - **EXCEÇÃO**: Apenas se item constar na lista taxativa de uso doméstico (guarda-roupa, cama, sofá residencial, etc.)
+   - Registrar classificação em `classificacao_mobiliario` com justificativa
 
 **Retorne APENAS o JSON**, sem texto adicional.
 '''
