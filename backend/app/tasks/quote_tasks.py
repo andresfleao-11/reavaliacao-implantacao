@@ -77,10 +77,9 @@ def process_quote_request(self, quote_request_id: int):
         # CHECKPOINT: Inicializar gerenciador
         # ========================================
         checkpoint_mgr = CheckpointManager(db)
-        worker_id = f"celery-{self.request.id}" if self.request.id else f"celery-{quote_request_id}"
 
         # Tentar claim da cotação (evita processamento duplicado)
-        if not checkpoint_mgr.claim_for_processing(quote_request, worker_id):
+        if not checkpoint_mgr.claim_for_processing(quote_request):
             logger.warning(f"Quote {quote_request_id} já está sendo processada por outro worker")
             return
 
@@ -91,7 +90,7 @@ def process_quote_request(self, quote_request_id: int):
         if resume_checkpoint:
             logger.info(f"Retomando cotação {quote_request_id} do checkpoint: {resume_checkpoint}")
         else:
-            checkpoint_mgr.start_processing(quote_request, worker_id)
+            checkpoint_mgr.start_processing(quote_request)
             logger.info(f"Iniciando processamento da cotação {quote_request_id}")
 
         # Iniciando processamento
