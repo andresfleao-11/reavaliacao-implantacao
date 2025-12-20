@@ -3,6 +3,7 @@ from app.tasks.celery_app import celery_app
 from app.core.database import SessionLocal
 from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, IntegrationLog, BlockedDomain, QuoteSourceFailure, CaptureFailureReason
 from app.models.quote_request import QuoteStatus, QuoteInputType
+from app.services.checkpoint_manager import CheckpointManager, ProcessingCheckpoint
 from app.models.file import FileType
 from app.models.financial import ApiCostConfig, FinancialTransaction
 from app.services.claude_client import ClaudeClient, FipeApiParams
@@ -72,8 +73,38 @@ def process_quote_request(self, quote_request_id: int):
 
         logger.info(f"Processing quote request {quote_request_id}")
 
+        # ========================================
+        # CHECKPOINT: Inicializar gerenciador
+        # ========================================
+        checkpoint_mgr = CheckpointManager(db)
+        worker_id = f"celery-{self.request.id}" if self.request.id else f"celery-{quote_request_id}"
+
+        # Tentar claim da cotação (evita processamento duplicado)
+        if not checkpoint_mgr.claim_for_processing(quote_request, worker_id):
+            logger.warning(f"Quote {quote_request_id} já está sendo processada por outro worker")
+            return
+
+        # Verificar se pode retomar de checkpoint anterior
+        can_resume = checkpoint_mgr.can_resume(quote_request)
+        resume_checkpoint = checkpoint_mgr.get_resume_checkpoint(quote_request) if can_resume else None
+
+        if resume_checkpoint:
+            logger.info(f"Retomando cotação {quote_request_id} do checkpoint: {resume_checkpoint}")
+        else:
+            checkpoint_mgr.start_processing(quote_request, worker_id)
+            logger.info(f"Iniciando processamento da cotação {quote_request_id}")
+
         # Iniciando processamento
         _update_progress(db, quote_request, "initializing", 5, "Carregando configurações e integrações...")
+
+        # ========================================
+        # CHECKPOINT: Verificar se pode pular análise IA
+        # ========================================
+        skip_ai_analysis = False
+        if resume_checkpoint and quote_request.claude_payload_json:
+            # Já tem resultado da IA, pode pular
+            skip_ai_analysis = True
+            logger.info(f"Pulando análise IA - já existe resultado salvo")
 
         # Determinar qual provedor de IA usar
         ai_provider = _get_integration_other_setting(db, "ANTHROPIC", "ai_provider")
@@ -84,96 +115,115 @@ def process_quote_request(self, quote_request_id: int):
 
         logger.info(f"Using AI provider: {ai_provider}")
 
-        if ai_provider == "openai":
-            # Usar OpenAI
-            api_key = _get_integration_setting(db, "OPENAI", "api_key")
-            if not api_key:
-                api_key = settings.OPENAI_API_KEY
+        # Inicializar variáveis para model
+        model = None
+        ai_provider_name = ai_provider.capitalize() if ai_provider else "Anthropic"
 
-            model = _get_integration_other_setting(db, "OPENAI", "model")
-            if not model:
-                model = settings.OPENAI_MODEL
+        if not skip_ai_analysis:
+            # CHECKPOINT: Marcar início da análise IA
+            checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.AI_ANALYSIS_START, progress_percentage=10)
 
-            ai_client = OpenAIClient(api_key=api_key, model=model)
-            ai_provider_name = "OpenAI"
-        else:
-            # Usar Anthropic (padrão)
-            api_key = _get_integration_setting(db, "ANTHROPIC", "api_key")
-            if not api_key:
-                api_key = settings.ANTHROPIC_API_KEY
+            if ai_provider == "openai":
+                # Usar OpenAI
+                api_key = _get_integration_setting(db, "OPENAI", "api_key")
+                if not api_key:
+                    api_key = settings.OPENAI_API_KEY
 
-            model = _get_integration_other_setting(db, "ANTHROPIC", "model")
-            if not model:
-                model = settings.ANTHROPIC_MODEL
+                model = _get_integration_other_setting(db, "OPENAI", "model")
+                if not model:
+                    model = settings.OPENAI_MODEL
 
-            ai_client = ClaudeClient(api_key=api_key, model=model)
-            ai_provider_name = "Anthropic"
+                ai_client = OpenAIClient(api_key=api_key, model=model)
+                ai_provider_name = "OpenAI"
+            else:
+                # Usar Anthropic (padrão)
+                api_key = _get_integration_setting(db, "ANTHROPIC", "api_key")
+                if not api_key:
+                    api_key = settings.ANTHROPIC_API_KEY
 
-        logger.info(f"AI Client initialized: {ai_provider_name} with model {model}")
+                model = _get_integration_other_setting(db, "ANTHROPIC", "model")
+                if not model:
+                    model = settings.ANTHROPIC_MODEL
 
-        input_images = db.query(File).filter(
-            File.quote_request_id == quote_request_id,
-            File.type == FileType.INPUT_IMAGE
-        ).all()
+                ai_client = ClaudeClient(api_key=api_key, model=model)
+                ai_provider_name = "Anthropic"
 
-        image_data_list = []
-        for img_file in input_images:
-            with open(img_file.storage_path, 'rb') as f:
-                image_data_list.append(f.read())
+            logger.info(f"AI Client initialized: {ai_provider_name} with model {model}")
 
-        # Analisando entrada (imagem ou texto)
-        if image_data_list:
-            _update_progress(db, quote_request, "analyzing_image", 10, "Processando imagens e extraindo especificações técnicas...")
-        else:
-            _update_progress(db, quote_request, "analyzing_text", 10, "Analisando descrição e identificando produto...")
+            input_images = db.query(File).filter(
+                File.quote_request_id == quote_request_id,
+                File.type == FileType.INPUT_IMAGE
+            ).all()
 
-        import asyncio
-        analysis_result = asyncio.run(
-            ai_client.analyze_item(
-                input_text=quote_request.input_text,
-                image_files=image_data_list if image_data_list else None
-            )
-        )
+            image_data_list = []
+            for img_file in input_images:
+                with open(img_file.storage_path, 'rb') as f:
+                    image_data_list.append(f.read())
 
-        quote_request.claude_payload_json = analysis_result.dict()
-        quote_request.search_query_final = analysis_result.query_principal
-        db.commit()
+            # Analisando entrada (imagem ou texto)
+            if image_data_list:
+                _update_progress(db, quote_request, "analyzing_image", 10, "Processando imagens e extraindo especificações técnicas...")
+            else:
+                _update_progress(db, quote_request, "analyzing_text", 10, "Analisando descrição e identificando produto...")
 
-        logger.info(f"{ai_provider_name} analysis complete. Query: {analysis_result.query_principal}")
-
-        # Registrar logs de chamadas individuais do AI
-        # Determinar o integration_type baseado no ai_provider
-        integration_type = "openai" if ai_provider == "openai" else "anthropic"
-
-        for call_log in analysis_result.call_logs:
-            # Extrair prompt do call_log (pode ser dict ou objeto)
-            prompt_text = None
-            if hasattr(call_log, 'prompt'):
-                prompt_text = call_log.prompt
-            elif isinstance(call_log, dict):
-                prompt_text = call_log.get('prompt')
-
-            log_anthropic_call(
-                db=db,
-                quote_request_id=quote_request.id,
-                model=model,
-                input_tokens=call_log.input_tokens if hasattr(call_log, 'input_tokens') else call_log.get('input_tokens', 0),
-                output_tokens=call_log.output_tokens if hasattr(call_log, 'output_tokens') else call_log.get('output_tokens', 0),
-                activity=f"[{ai_provider_name}] {call_log.activity if hasattr(call_log, 'activity') else call_log.get('activity', '')}",
-                integration_type=integration_type,
-                request_data={"prompt": prompt_text} if prompt_text else None
+            import asyncio
+            analysis_result = asyncio.run(
+                ai_client.analyze_item(
+                    input_text=quote_request.input_text,
+                    image_files=image_data_list if image_data_list else None
+                )
             )
 
-        # Mostrar tokens usados
-        if analysis_result.total_tokens_used > 0:
-            _update_progress(db, quote_request, "analysis_complete", 30, f"Análise completa - {analysis_result.total_tokens_used} tokens processados pela IA")
+            quote_request.claude_payload_json = analysis_result.dict()
+            quote_request.search_query_final = analysis_result.query_principal
+            db.commit()
+
+            logger.info(f"{ai_provider_name} analysis complete. Query: {analysis_result.query_principal}")
+
+            # Registrar logs de chamadas individuais do AI
+            # Determinar o integration_type baseado no ai_provider
+            integration_type = "openai" if ai_provider == "openai" else "anthropic"
+
+            for call_log in analysis_result.call_logs:
+                # Extrair prompt do call_log (pode ser dict ou objeto)
+                prompt_text = None
+                if hasattr(call_log, 'prompt'):
+                    prompt_text = call_log.prompt
+                elif isinstance(call_log, dict):
+                    prompt_text = call_log.get('prompt')
+
+                log_anthropic_call(
+                    db=db,
+                    quote_request_id=quote_request.id,
+                    model=model,
+                    input_tokens=call_log.input_tokens if hasattr(call_log, 'input_tokens') else call_log.get('input_tokens', 0),
+                    output_tokens=call_log.output_tokens if hasattr(call_log, 'output_tokens') else call_log.get('output_tokens', 0),
+                    activity=f"[{ai_provider_name}] {call_log.activity if hasattr(call_log, 'activity') else call_log.get('activity', '')}",
+                    integration_type=integration_type,
+                    request_data={"prompt": prompt_text} if prompt_text else None
+                )
+
+            # Mostrar tokens usados
+            if analysis_result.total_tokens_used > 0:
+                _update_progress(db, quote_request, "analysis_complete", 30, f"Análise completa - {analysis_result.total_tokens_used} tokens processados pela IA")
+
+            # Registrar custo da análise de IA (Anthropic ou OpenAI)
+            if analysis_result.total_tokens_used > 0:
+                _register_ai_cost(db, quote_request, model, analysis_result.total_tokens_used, ai_provider)
+
+            # ========================================
+            # CHECKPOINT: Salvar após análise IA concluída
+            # ========================================
+            checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.AI_ANALYSIS_DONE, progress_percentage=30)
+
+        else:
+            # Recuperar analysis_result do JSON salvo
+            from app.services.claude_client import ClaudeAnalysisResult
+            analysis_result = ClaudeAnalysisResult(**quote_request.claude_payload_json)
+            logger.info(f"Análise IA recuperada do checkpoint. Query: {analysis_result.query_principal}")
 
         # Preparando busca
         _update_progress(db, quote_request, "preparing_search", 40, "Preparando busca de preços em lojas online...")
-
-        # Registrar custo da análise de IA (Anthropic ou OpenAI)
-        if analysis_result.total_tokens_used > 0:
-            _register_ai_cost(db, quote_request, model, analysis_result.total_tokens_used, ai_provider)
 
         # Verificar se é veículo (processamento via FIPE)
         if analysis_result.tipo_processamento == "FIPE" and analysis_result.fipe_api:
@@ -212,55 +262,92 @@ def process_quote_request(self, quote_request_id: int):
         if not analysis_result.query_principal or not analysis_result.query_principal.strip():
             raise ValueError("Claude não conseguiu gerar uma query de busca válida. Verifique a descrição do item e tente novamente.")
 
-        # Buscando produtos no Google Shopping (sem chamar Immersive API ainda)
-        _update_progress(db, quote_request, "searching_products", 50, f"Buscando '{analysis_result.query_principal}' no Google Shopping...")
+        # ========================================
+        # CHECKPOINT: Verificar se pode pular busca Google Shopping
+        # ========================================
+        skip_shopping_search = False
+        if resume_checkpoint and quote_request.google_shopping_response_json:
+            # Já tem resultados do Google Shopping, pode pular
+            skip_shopping_search = True
+            logger.info(f"Pulando busca Google Shopping - já existe resultado salvo")
 
-        # NOVO FLUXO: Buscar produtos do Google Shopping SEM chamar Immersive API
-        # A Immersive API será chamada durante o loop de extração, produto por produto
-        shopping_products, shopping_log = asyncio.run(
-            search_provider.get_shopping_products(
-                query=analysis_result.query_principal
+        if not skip_shopping_search:
+            # CHECKPOINT: Marcar início da busca Google Shopping
+            checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.SHOPPING_SEARCH_START, progress_percentage=40)
+
+            # Buscando produtos no Google Shopping (sem chamar Immersive API ainda)
+            _update_progress(db, quote_request, "searching_products", 50, f"Buscando '{analysis_result.query_principal}' no Google Shopping...")
+
+            # NOVO FLUXO: Buscar produtos do Google Shopping SEM chamar Immersive API
+            # A Immersive API será chamada durante o loop de extração, produto por produto
+            shopping_products, shopping_log = asyncio.run(
+                search_provider.get_shopping_products(
+                    query=analysis_result.query_principal
+                )
             )
-        )
 
-        logger.info(f"Found {len(shopping_products)} shopping products (filtered)")
-        logger.info(f"Shopping log: {shopping_log.model_dump_json()}")
+            logger.info(f"Found {len(shopping_products)} shopping products (filtered)")
+            logger.info(f"Shopping log: {shopping_log.model_dump_json()}")
 
-        # Registrar chamada inicial do Google Shopping
-        log_serpapi_call(
-            db=db,
-            quote_request_id=quote_request.id,
-            api_used="google_shopping",
-            search_url=f"https://serpapi.com/search?engine=google_shopping&q={analysis_result.query_principal}",
-            activity=f"Busca inicial no Google Shopping: {analysis_result.query_principal}",
-            request_data={"query": analysis_result.query_principal},
-            response_summary={
-                "total_raw_products": shopping_log.total_raw_products,
-                "after_source_filter": shopping_log.after_source_filter,
-                "after_price_filter": shopping_log.after_price_filter
-            },
-            product_link=None
-        )
+            # Registrar chamada inicial do Google Shopping
+            log_serpapi_call(
+                db=db,
+                quote_request_id=quote_request.id,
+                api_used="google_shopping",
+                search_url=f"https://serpapi.com/search?engine=google_shopping&q={analysis_result.query_principal}",
+                activity=f"Busca inicial no Google Shopping: {analysis_result.query_principal}",
+                request_data={"query": analysis_result.query_principal},
+                response_summary={
+                    "total_raw_products": shopping_log.total_raw_products,
+                    "after_source_filter": shopping_log.after_source_filter,
+                    "after_price_filter": shopping_log.after_price_filter
+                },
+                product_link=None
+            )
 
-        # Salvar resposta bruta do Google Shopping para consulta
-        quote_request.google_shopping_response_json = {
-            "raw_api_response": shopping_log.raw_shopping_response,
-            "processed_results": {
-                "results_count": len(shopping_products),
-                "products": [
-                    {
-                        "title": p.title,
-                        "price": p.price,
-                        "extracted_price": float(p.extracted_price) if p.extracted_price else None,
-                        "source": p.source,
-                        "has_immersive_api": bool(p.serpapi_immersive_product_api)
-                    } for p in shopping_products
-                ]
-            },
-            "shopping_log": shopping_log.model_dump(),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-        db.commit()
+            # Salvar resposta bruta do Google Shopping para consulta
+            quote_request.google_shopping_response_json = {
+                "raw_api_response": shopping_log.raw_shopping_response,
+                "processed_results": {
+                    "results_count": len(shopping_products),
+                    "products": [
+                        {
+                            "title": p.title,
+                            "price": p.price,
+                            "extracted_price": float(p.extracted_price) if p.extracted_price else None,
+                            "source": p.source,
+                            "has_immersive_api": bool(p.serpapi_immersive_product_api)
+                        } for p in shopping_products
+                    ]
+                },
+                "shopping_log": shopping_log.model_dump(),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            db.commit()
+
+            # ========================================
+            # CHECKPOINT: Salvar após busca Google Shopping
+            # ========================================
+            checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.SHOPPING_SEARCH_DONE, progress_percentage=50)
+        else:
+            # Recuperar shopping_products do JSON salvo
+            saved_data = quote_request.google_shopping_response_json
+            if saved_data and "processed_results" in saved_data:
+                # Reconstruir lista de ShoppingProduct
+                shopping_products = []
+                for p_data in saved_data["processed_results"].get("products", []):
+                    product = ShoppingProduct(
+                        title=p_data.get("title", ""),
+                        price=p_data.get("price", ""),
+                        extracted_price=Decimal(str(p_data.get("extracted_price", 0))) if p_data.get("extracted_price") else None,
+                        source=p_data.get("source", ""),
+                        serpapi_immersive_product_api=p_data.get("serpapi_immersive_product_api")
+                    )
+                    shopping_products.append(product)
+                logger.info(f"Busca Google Shopping recuperada do checkpoint. {len(shopping_products)} produtos")
+            else:
+                shopping_products = []
+                logger.warning(f"Não foi possível recuperar produtos do checkpoint")
 
         # ============================================================================
         # SISTEMA DE COTAÇÃO DE PREÇOS - LÓGICA DE BLOCOS
@@ -268,6 +355,12 @@ def process_quote_request(self, quote_request_id: int):
         # Objetivo: Obter NUM_COTACOES válidas de um ÚNICO BLOCO garantindo
         # variação máxima de VAR_MAX_PERCENT entre menor e maior preço.
         # ============================================================================
+
+        # ========================================
+        # CHECKPOINT: Marcar início da extração de preços
+        # ========================================
+        checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.PRICE_EXTRACTION_START, progress_percentage=55)
+
         _update_progress(db, quote_request, "extracting_prices", 60, f"Processando {len(shopping_products)} produtos...")
 
         # Estado global da cotação
@@ -602,6 +695,11 @@ def process_quote_request(self, quote_request_id: int):
 
                             logger.info(f"  → Validando (Google Only): {product.source} - R$ {google_price}")
                             search_stats["products_tested"] += 1
+
+                            # ========================================
+                            # CHECKPOINT: Atualizar heartbeat a cada produto
+                            # ========================================
+                            checkpoint_mgr.update_heartbeat(quote_request)
 
                             test_record = {
                                 "product_index": next((i for i, sp in enumerate(sorted_products)
@@ -1034,6 +1132,11 @@ def process_quote_request(self, quote_request_id: int):
                             logger.info(f"  → Validando: {product.source} - R$ {product.extracted_price}")
                             search_stats["products_tested"] += 1
 
+                            # ========================================
+                            # CHECKPOINT: Atualizar heartbeat a cada produto
+                            # ========================================
+                            checkpoint_mgr.update_heartbeat(quote_request)
+
                             # Preparar registro do teste
                             test_record = {
                                 "product_index": available_products.index(product) if product in available_products else -1,
@@ -1380,6 +1483,11 @@ def process_quote_request(self, quote_request_id: int):
                 variacao = (quote_request.valor_maximo / quote_request.valor_minimo - 1) * 100
                 quote_request.variacao_percentual = variacao
 
+        # ========================================
+        # CHECKPOINT: Marcar início da finalização
+        # ========================================
+        checkpoint_mgr.save_checkpoint(quote_request, ProcessingCheckpoint.FINALIZATION, progress_percentage=90)
+
         # Finalizando
         _update_progress(db, quote_request, "finalizing", 95, "Salvando resultados e finalizando cotação...")
 
@@ -1401,6 +1509,11 @@ def process_quote_request(self, quote_request_id: int):
         quote_request.progress_percentage = 100
         db.commit()
         db.refresh(quote_request)
+
+        # ========================================
+        # CHECKPOINT: Marcar processamento concluído
+        # ========================================
+        checkpoint_mgr.complete_processing(quote_request, quote_request.status)
 
         logger.info(f"Quote request {quote_request_id} finalized. Average price: R$ {quote_request.valor_medio}")
 
