@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { batchQuotesApi, BatchJob, BatchQuoteItem, BatchCosts } from '@/lib/api'
+import { batchQuotesApi, BatchJob, BatchQuoteItem, BatchCosts, API_URL } from '@/lib/api'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Link from 'next/link'
@@ -136,6 +136,56 @@ export default function BatchDetailPage() {
       await loadQuotes()
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erro ao retomar lote')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  // Função para download com autenticação
+  const handleDownload = async (type: 'zip' | 'excel') => {
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      setError('Você precisa estar autenticado para baixar arquivos')
+      return
+    }
+
+    setActionLoading(true)
+    try {
+      const url = type === 'zip'
+        ? `${API_URL}/api/batch-quotes/${batchId}/download/zip`
+        : `${API_URL}/api/batch-quotes/${batchId}/download/excel`
+
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || 'Erro ao baixar arquivo')
+      }
+
+      // Extrair nome do arquivo do header ou usar padrão
+      const contentDisposition = response.headers.get('content-disposition')
+      let filename = type === 'zip' ? `lote_${batchId}_pdfs.zip` : `lote_${batchId}_resumo.xlsx`
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=([^;]+)/)
+        if (match) filename = match[1].replace(/"/g, '')
+      }
+
+      // Criar blob e fazer download
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(downloadUrl)
+    } catch (err: any) {
+      setError(err.message || 'Erro ao baixar arquivo')
     } finally {
       setActionLoading(false)
     }
@@ -296,26 +346,26 @@ export default function BatchDetailPage() {
               Arquivos de Resultado
             </h2>
             <div className="flex flex-wrap gap-3">
-              <a
-                href={batchQuotesApi.getDownloadZipUrl(batchId)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm"
-                download
+              <button
+                onClick={() => handleDownload('zip')}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Baixar PDFs (ZIP)
-              </a>
-              <a
-                href={batchQuotesApi.getDownloadExcelUrl(batchId)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm"
-                download
+                {actionLoading ? 'Baixando...' : 'Baixar PDFs (ZIP)'}
+              </button>
+              <button
+                onClick={() => handleDownload('excel')}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Baixar Resumo (Excel)
-              </a>
+                {actionLoading ? 'Baixando...' : 'Baixar Resumo (Excel)'}
+              </button>
             </div>
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               O ZIP contém todos os PDFs das cotações. O Excel contém o resumo com valores de cada cotação.
