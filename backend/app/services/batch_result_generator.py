@@ -11,13 +11,12 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 import pandas as pd
 
-from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument
+from app.models import QuoteRequest, QuoteSource, File, GeneratedDocument, Setting
 from app.models.quote_request import QuoteStatus
 from app.models.batch_quote import BatchQuoteJob
 from app.models.file import FileType
 from app.models.vehicle_price import VehiclePriceBank
 from app.models.project_config import ProjectConfigVersion
-from app.models.setting import Setting
 from app.services.pdf_generator import PDFGenerator
 from app.core.config import settings
 
