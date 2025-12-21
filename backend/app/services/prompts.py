@@ -28,7 +28,7 @@ NBC TSP 07 | MCASP | Lei 14.133/2021
 
 ## DADO DE ENTRADA
 ```
-Descrição do bem: "{{input_text}}"
+Descrição do bem: "{input_text}"
 ```
 
 ---
@@ -157,6 +157,148 @@ Para que um veículo seja consultado no endpoint `trucks`, a marca **DEVE OBRIGA
 | `equipamento` | Ar-condicionado, refrigeradores, ferramentas | Google Shopping |
 | `instrumento` | Medição, laboratório, calibração, topografia | Google Shopping |
 
+---
+
+## REGRAS GERAIS PARA COTAÇÃO (Google Shopping)
+
+### REGRA FUNDAMENTAL: Exclusão de Marca, Cor e Modelo
+
+> **Princípio NBC TSP 07/MCASP**: A busca deve encontrar bens **EQUIVALENTES FUNCIONAIS**, não o bem exato original. O valor justo de reposição independe de marca ou fabricante.
+
+**SEMPRE REMOVER da query de busca:**
+
+| Elemento | Ação | Justificativa |
+|----------|------|---------------|
+| **Marca** | ❌ REMOVER | Buscar equivalentes de qualquer fabricante |
+| **Modelo** | ❌ REMOVER | Buscar por especificações funcionais |
+| **Cor** | ❌ REMOVER | Cor não afeta valor funcional |
+
+**MANTER na query:**
+- ✅ Tipo de bem (mesa, cadeira, notebook)
+- ✅ Material (MDF, aço, couro)
+- ✅ Especificações técnicas (i5, 8GB, 256GB, 12000 BTUs)
+- ✅ Contexto de uso (escritório, industrial)
+- ✅ Capacidade/Potência (quando aplicável)
+
+**Exemplos de transformação:**
+```
+ANTES:  "Notebook Dell Latitude 5480 preto i5 8GB 256GB"
+DEPOIS: "Notebook i5 8GB 256GB SSD"
+
+ANTES:  "Cadeira escritório Flexform Uni Me preta giratória"
+DEPOIS: "Cadeira escritório giratória com braço"
+
+ANTES:  "Armário alto MDF Artely 2 portas branco"
+DEPOIS: "Armário escritório MDF 2 portas"
+
+ANTES:  "Mesa reunião Tok Stok mogno 2,40m x 1,20m"
+DEPOIS: "Mesa reunião escritório MDF"
+
+ANTES:  "Ar-condicionado Springer Midea 12000 BTUs branco"
+DEPOIS: "Ar-condicionado split 12000 BTUs"
+```
+
+> **EXCEÇÃO**: A `query_com_marca` pode conter marca + modelo apenas para buscar **especificações técnicas** (ficha técnica) - NÃO para cotação de preço.
+
+---
+
+### REGRA ESPECÍFICA: Cadeiras e Poltronas
+
+Quando o bem for **cadeira** OU **poltrona**, aplicar os seguintes defaults se não houver informação explícita em contrário:
+
+**CADEIRA:**
+| Característica | Default | Condição |
+|----------------|---------|----------|
+| Base | **FIXA** | Se não mencionar "giratória" |
+| Giratória | **NÃO** | Se não mencionar "giratória" |
+| Braço de apoio | **NÃO** | Se não mencionar "com braço" ou "braços" |
+
+**POLTRONA:**
+| Característica | Default | Condição |
+|----------------|---------|----------|
+| Base | **FIXA** | Se não mencionar "giratória" |
+| Giratória | **NÃO** | Se não mencionar "giratória" |
+| Braço de apoio | **SIM** | SEMPRE (poltronas têm braço por definição) |
+
+**Aplicação na query:**
+```
+ENTRADA: "Cadeira escritório tecido"
+QUERY:   "Cadeira escritório fixa sem braço tecido"
+
+ENTRADA: "Cadeira escritório com braço tecido"
+QUERY:   "Cadeira escritório fixa com braço tecido"
+(mantém com braço pois está explícito)
+
+ENTRADA: "Poltrona recepção couro"
+QUERY:   "Poltrona escritório fixa com braço couro"
+(poltrona SEMPRE com braço)
+
+ENTRADA: "Cadeira giratória presidente"
+QUERY:   "Cadeira escritório giratória sem braço presidente"
+(mantém giratória pois está explícito, sem braço por default)
+
+ENTRADA: "Cadeira giratória presidente com braços"
+QUERY:   "Cadeira escritório giratória com braço presidente"
+(mantém ambos pois estão explícitos)
+```
+
+**Registrar no JSON:**
+```json
+"ajustes_mobiliario": {
+  "regra_aplicada": "CADEIRA_POLTRONA_DEFAULTS",
+  "tipo_bem": "cadeira",
+  "defaults_adicionados": ["fixa", "sem braço"],
+  "justificativa": "Cadeira: base fixa e SEM braço quando não explicitado."
+}
+```
+
+```json
+"ajustes_mobiliario": {
+  "regra_aplicada": "CADEIRA_POLTRONA_DEFAULTS",
+  "tipo_bem": "poltrona",
+  "defaults_adicionados": ["fixa", "com braço"],
+  "justificativa": "Poltrona: base fixa e SEMPRE com braço por definição."
+}
+```
+
+---
+
+### REGRA ESPECÍFICA: Obsolescência Tecnológica (Eletrônicos/TI)
+
+Para bens de **TI/Eletrônicos** (notebooks, desktops, monitores), aplicar regra de obsolescência:
+
+**Princípio:** Cotar versão equivalente atual, não se ater a gerações obsoletas de processadores.
+
+**Ações:**
+1. **REMOVER** geração específica de processador (ex: "7ª geração", "10ª ger")
+2. **MANTER** classe do processador (i3, i5, i7, Ryzen 5, etc.)
+3. **MANTER** especificações de memória e armazenamento
+4. **NÃO ELEVAR** classe (i5 deve buscar i5, não i7)
+
+**Exemplo:**
+```
+ENTRADA: "Notebook i5 7ª geração, 8GB RAM, 256GB SSD"
+QUERY:   "Notebook i5 8GB 256GB SSD"
+
+ENTRADA: "Desktop Intel Core i7 4ª ger 16GB 1TB HD"
+QUERY:   "Desktop i7 16GB 1TB"
+
+ENTRADA: "Monitor Dell 24 polegadas Full HD preto"
+QUERY:   "Monitor 24 polegadas Full HD"
+```
+
+**Registrar no JSON:**
+```json
+"ajustes_ti": {
+  "regra_aplicada": "OBSOLESCENCIA_TECNOLOGICA",
+  "geracao_removida": "7ª geração",
+  "classe_mantida": "i5",
+  "justificativa": "Geração de processador removida para buscar equivalente atual. Classe i5 mantida para não elevar valor artificialmente."
+}
+```
+
+---
+
 ### REGRA CRÍTICA: Classificação de Mobiliário
 
 > **Princípio MCASP**: Bens móveis permanentes de órgãos públicos são adquiridos para uso institucional. O valor justo de reposição deve refletir o **contexto de uso administrativo**, assegurando comparabilidade com bens de mesma finalidade funcional.
@@ -204,15 +346,15 @@ Para que um veículo seja consultado no endpoint `trucks`, a marca **DEVE OBRIGA
 
 ### Fluxo por hierarquia:
 ```
-GET /{{vehicleType}}/brands → GET .../brands/{{brandId}}/models → GET .../models/{{modelId}}/years → GET .../years/{{yearId}}
+GET /{vehicleType}/brands → GET .../brands/{brandId}/models → GET .../models/{modelId}/years → GET .../years/{yearId}
 ```
 
 ### Fluxo por código FIPE (quando disponível):
 ```
-GET /{{vehicleType}}/{{fipeCode}}/years → GET .../years/{{yearId}}
+GET /{vehicleType}/{fipeCode}/years → GET .../years/{yearId}
 ```
 
-### Formato yearId: `{{ANO}}-{{COMBUSTÍVEL}}`
+### Formato yearId: `{ANO}-{COMBUSTÍVEL}`
 | Combustível | Código | Exemplo |
 |-------------|--------|---------|
 | Gasolina/Flex/Elétrico/Híbrido | 1 | 2020-1 |
@@ -275,10 +417,10 @@ Quando **marca** e/ou **modelo** estiverem presentes, executar busca web para ob
 
 | Prioridade | Estratégia | Query |
 |------------|------------|-------|
-| **1ª** | Marca + Modelo | `"{{marca}}" "{{modelo}}" ficha técnica especificações` |
-| **2ª** | Part Number + Marca | `"{{marca}}" "{{part_number}}" especificações` |
-| **3ª** | S/N + Marca (suporte) | `"{{marca}}" suporte "{{numero_serie}}"` |
-| **4ª** | Modelo genérico | `"{{modelo}}" specs datasheet` |
+| **1ª** | Marca + Modelo | `"{marca}" "{modelo}" ficha técnica especificações` |
+| **2ª** | Part Number + Marca | `"{marca}" "{part_number}" especificações` |
+| **3ª** | S/N + Marca (suporte) | `"{marca}" suporte "{numero_serie}"` |
+| **4ª** | Modelo genérico | `"{modelo}" specs datasheet` |
 
 > **Marca + Modelo** é a busca mais direta e comum.
 > **Part Number** refina para configuração exata quando o modelo tem variantes.
@@ -315,15 +457,15 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 ## FORMATO DE SAÍDA: VEÍCULOS
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Descrição padronizada",
     "marca": "OBRIGATÓRIO",
     "modelo": "OBRIGATÓRIO",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "cars | motorcycles | trucks",
     "pbt_estimado_kg": "número ou null",
     "pbt_categoria": "leve (≤3500kg) | pesado (>3500kg) | N/A",
@@ -332,54 +474,54 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
     "ano_referencia": "AAAA ou null",
     "ano_dentro_periodo_fiat": true | false | null,
     "justificativa": "Explicação da classificação (incluindo análise de PBT)"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "AAAA ou null",
       "ano_fabricacao": "AAAA ou null",
       "combustivel": "gasolina|alcool|diesel|flex|gnv|eletrico|hibrido|null",
       "versao": "string ou null",
       "motorizacao": "string ou null",
       "transmissao": "manual|automatico|cvt|null"
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "cars | motorcycles | trucks",
     "codigo_fipe": "000000-0 ou null",
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "termo normalizado",
       "variacoes": ["variação1", "variação2"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "termo principal",
       "variacoes": ["var1", "var2"],
       "palavras_chave": ["palavra1", "palavra2"]
-    }},
+    },
     "year_id_estimado": "AAAA-C ou null",
     "fluxo_recomendado": "por_hierarquia | por_codigo_fipe",
-    "endpoints": {{
-      "marcas": "/{{vehicleType}}/brands",
-      "modelos": "/{{vehicleType}}/brands/{{brandId}}/models",
-      "anos": "/{{vehicleType}}/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/{{vehicleType}}/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+    "endpoints": {
+      "marcas": "/{vehicleType}/brands",
+      "modelos": "/{vehicleType}/brands/{brandId}/models",
+      "anos": "/{vehicleType}/brands/{brandId}/models/{modelId}/years",
+      "preco": "/{vehicleType}/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "query para Google Shopping caso FIPE falhe (OBRIGATÓRIO)",
     "query_alternativas": ["variação 1", "variação 2"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.00,
     "completude_dados": "alta | media | baixa",
     "dados_faltantes": [],
     "observacoes": "notas relevantes"
-  }}
-}}
+  }
+}
 ```
 
 > **IMPORTANTE**: O campo `fallback_google_shopping.query_principal` é **OBRIGATÓRIO** para veículos.
@@ -391,36 +533,36 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 ## FORMATO DE SAÍDA: BENS GERAIS
 
 ```json
-{{
+{
   "tipo_processamento": "GOOGLE_SHOPPING",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Descrição padronizada",
     "marca": "string ou null",
     "modelo": "string ou null",
     "categoria": "Eletrônicos | Mobiliário | Equipamentos | Instrumentos",
     "natureza": "eletronico | mobiliario | equipamento | instrumento"
-  }},
-  "especificacoes": {{
-    "essenciais": {{}},
-    "complementares": {{}}
-  }},
-  "queries": {{
+  },
+  "especificacoes": {
+    "essenciais": {},
+    "complementares": {}
+  },
+  "queries": {
     "principal": "query SEM marca (OBRIGATÓRIO)",
     "alternativas": ["variação 1", "variação 2"],
     "com_marca": "query COM marca ou vazio"
-  }},
-  "busca": {{
+  },
+  "busca": {
     "palavras_chave": ["termo1", "termo2"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "outlet"],
     "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.00,
     "completude_dados": "alta | media | baixa",
     "dados_faltantes": [],
     "observacoes": "notas relevantes"
-  }}
-}}
+  }
+}
 ```
 
 ---
@@ -431,672 +573,929 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 **Entrada:** `"Veículo Volkswagen Gol 1.0 MPI, ano 2019/2020, flex, cor prata, placa ABC-1234"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Volkswagen Gol 1.0 MPI Flex 2019/2020",
     "marca": "Volkswagen",
     "modelo": "Gol 1.0 MPI",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "cars",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
     "ano_dentro_periodo_fiat": null,
     "justificativa": "Volkswagen está na lista de trucks, porém Gol é automóvel de passeio. Classificado como cars."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "2020",
       "ano_fabricacao": "2019",
       "combustivel": "flex",
       "versao": "1.0 MPI",
       "motorizacao": "1.0",
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": "prata", "placa": "ABC-1234", "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "cars",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "VW - VolksWagen",
       "variacoes": ["Volkswagen", "VW"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "Gol 1.0",
       "variacoes": ["GOL 1.0 MPI", "GOL"],
       "palavras_chave": ["Gol", "1.0", "MPI"]
-    }},
+    },
     "year_id_estimado": "2020-1",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/cars/brands",
-      "modelos": "/cars/brands/{{brandId}}/models",
-      "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/cars/brands/{brandId}/models",
+      "anos": "/cars/brands/{brandId}/models/{modelId}/years",
+      "preco": "/cars/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Volkswagen Gol 1.0 2020 flex preço",
     "query_alternativas": ["VW Gol 1.0 MPI 2020", "Gol 1.0 flex 2020 valor"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.96,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "Dados completos. Usar ano modelo 2020, combustível flex (código 1)."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 2: Fiat fora do período trucks (REGRA FIAT)
 **Entrada:** `"Fiat Ducato Minibus ME 2.3 Diesel 2011"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Fiat Ducato Minibus 2.3 Diesel 2011",
     "marca": "Fiat",
     "modelo": "Ducato Minibus ME 2.3",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "cars",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "2011",
     "ano_dentro_periodo_fiat": false,
     "justificativa": "Fiat consta na lista de trucks com restrição anos 1981-1984. Ano 2011 está FORA do intervalo. Usar endpoint cars."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "2011",
       "ano_fabricacao": "2011",
       "combustivel": "diesel",
       "versao": "Minibus ME 2.3",
       "motorizacao": "2.3",
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "cars",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "Fiat",
       "variacoes": ["FIAT"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "Ducato Minibus",
       "variacoes": ["DUCATO MINIBUS ME", "DUCATO 2.3", "DUCATO"],
       "palavras_chave": ["Ducato", "Minibus", "2.3"]
-    }},
+    },
     "year_id_estimado": "2011-3",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/cars/brands",
-      "modelos": "/cars/brands/{{brandId}}/models",
-      "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/cars/brands/{brandId}/models",
+      "anos": "/cars/brands/{brandId}/models/{modelId}/years",
+      "preco": "/cars/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Fiat Ducato Minibus 2.3 2011 diesel preço",
     "query_alternativas": ["Ducato 2.3 diesel 2011", "Fiat Ducato van 2011 valor"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.90,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "Fiat 2011 → usar endpoint CARS (regra Fiat: somente 1981-1984 em trucks)."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 3: Fiat dentro do período trucks (REGRA FIAT)
 **Entrada:** `"Caminhão Fiat 180 1983"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Fiat 180 1983",
     "marca": "Fiat",
     "modelo": "180",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "trucks",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": true,
     "ano_referencia": "1983",
     "ano_dentro_periodo_fiat": true,
     "justificativa": "Fiat consta na lista de trucks com restrição 1981-1984. Ano 1983 está DENTRO do intervalo. Usar endpoint trucks."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "1983",
       "ano_fabricacao": "1983",
       "combustivel": "diesel",
       "versao": null,
       "motorizacao": null,
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "trucks",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "Fiat",
       "variacoes": ["FIAT"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "180",
       "variacoes": ["FIAT 180"],
       "palavras_chave": ["180"]
-    }},
+    },
     "year_id_estimado": "1983-3",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/trucks/brands",
-      "modelos": "/trucks/brands/{{brandId}}/models",
-      "anos": "/trucks/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/trucks/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/trucks/brands/{brandId}/models",
+      "anos": "/trucks/brands/{brandId}/models/{modelId}/years",
+      "preco": "/trucks/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Fiat 180 caminhão 1983 preço",
     "query_alternativas": ["caminhão Fiat 180 diesel", "Fiat 180 1983 valor"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.75,
     "completude_dados": "media",
     "dados_faltantes": ["versao", "motorizacao"],
     "observacoes": "Fiat 1983 → usar endpoint TRUCKS (dentro do período 1981-1984)."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 4: Caminhão marca autorizada
 **Entrada:** `"Mercedes-Benz Atego 1719 2020 diesel"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Mercedes-Benz Atego 1719 Diesel 2020",
     "marca": "Mercedes-Benz",
     "modelo": "Atego 1719",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "trucks",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",
     "ano_dentro_periodo_fiat": null,
     "justificativa": "Mercedes-Benz consta na lista de marcas autorizadas para trucks sem restrição de ano."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "2020",
       "ano_fabricacao": "2020",
       "combustivel": "diesel",
       "versao": "1719",
       "motorizacao": null,
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "trucks",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "Mercedes-Benz",
       "variacoes": ["Mercedes-Benz", "MB", "Mercedes"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "Atego 1719",
       "variacoes": ["ATEGO 1719", "ATEGO"],
       "palavras_chave": ["Atego", "1719"]
-    }},
+    },
     "year_id_estimado": "2020-3",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/trucks/brands",
-      "modelos": "/trucks/brands/{{brandId}}/models",
-      "anos": "/trucks/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/trucks/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/trucks/brands/{brandId}/models",
+      "anos": "/trucks/brands/{brandId}/models/{modelId}/years",
+      "preco": "/trucks/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Mercedes-Benz Atego 1719 2020 diesel preço",
     "query_alternativas": ["caminhão MB Atego 1719 2020", "Mercedes Atego 2020 valor"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.92,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "Mercedes-Benz → usar endpoint TRUCKS."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 5: Marca NÃO autorizada para trucks
 **Entrada:** `"Renault Master Ônibus Escolar 2019"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Renault Master Ônibus Escolar 2019",
     "marca": "Renault",
     "modelo": "Master Ônibus Escolar",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "cars",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2019",
     "ano_dentro_periodo_fiat": null,
     "justificativa": "Renault NÃO consta na lista de marcas autorizadas para trucks. Usar endpoint cars independente do tipo de veículo."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "2019",
       "ano_fabricacao": "2019",
       "combustivel": "diesel",
       "versao": "Ônibus Escolar",
       "motorizacao": null,
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "cars",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "Renault",
       "variacoes": ["RENAULT"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "Master",
       "variacoes": ["MASTER MINIBUS", "MASTER ESCOLAR", "MASTER"],
       "palavras_chave": ["Master", "Minibus", "Escolar"]
-    }},
+    },
     "year_id_estimado": "2019-3",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/cars/brands",
-      "modelos": "/cars/brands/{{brandId}}/models",
-      "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/cars/brands/{brandId}/models",
+      "anos": "/cars/brands/{brandId}/models/{modelId}/years",
+      "preco": "/cars/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Renault Master Ônibus Escolar 2019 preço",
     "query_alternativas": ["Renault Master minibus 2019 diesel", "van Renault Master 2019 valor"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.85,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "ATENÇÃO: Renault não autorizada para trucks → usar endpoint CARS."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 6: Veículo incompleto
 **Entrada:** `"Veículo GM Corsa sedan"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Chevrolet Corsa Sedan",
     "marca": "Chevrolet",
     "modelo": "Corsa Sedan",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "cars",
     "marca_autorizada_trucks": true,
     "regra_fiat_aplicada": false,
     "ano_referencia": null,
     "ano_dentro_periodo_fiat": null,
     "justificativa": "Chevrolet está na lista de trucks, porém Corsa Sedan é automóvel de passeio. Classificado como cars."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": null, "ano_fabricacao": null, "combustivel": null,
       "versao": null, "motorizacao": null, "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null,
       "observacoes": "Corsa Sedan produzido 1995-2012, múltiplas versões"
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "cars",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "GM - Chevrolet",
       "variacoes": ["Chevrolet", "GM"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "Corsa Sedan",
       "variacoes": ["CORSA SEDAN", "CORSA CLASSIC", "CLASSIC"],
       "palavras_chave": ["Corsa", "Sedan"]
-    }},
+    },
     "year_id_estimado": null,
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/cars/brands",
-      "modelos": "/cars/brands/{{brandId}}/models",
-      "anos": "/cars/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/cars/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/cars/brands/{brandId}/models",
+      "anos": "/cars/brands/{brandId}/models/{modelId}/years",
+      "preco": "/cars/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Chevrolet Corsa Sedan preço",
     "query_alternativas": ["GM Corsa Sedan valor", "Corsa Classic preço tabela"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.35,
     "completude_dados": "baixa",
     "dados_faltantes": ["ano_modelo", "combustivel", "versao", "motorizacao"],
     "observacoes": "DADOS INSUFICIENTES. Necessário: ano, motorização, combustível."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 7: Motocicleta
 **Entrada:** `"Honda CG 160 Start 2020 flex"`
 
 ```json
-{{
+{
   "tipo_processamento": "FIPE",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Honda CG 160 Start Flex 2020",
     "marca": "Honda",
     "modelo": "CG 160 Start",
     "categoria": "Veículos"
-  }},
-  "classificacao_veiculo": {{
+  },
+  "classificacao_veiculo": {
     "vehicle_type": "motorcycles",
     "marca_autorizada_trucks": false,
     "regra_fiat_aplicada": false,
     "ano_referencia": "2020",
     "ano_dentro_periodo_fiat": null,
     "justificativa": "Motocicleta identificada. Usar endpoint motorcycles."
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "ano_modelo": "2020",
       "ano_fabricacao": "2020",
       "combustivel": "flex",
       "versao": "Start",
       "motorizacao": "160cc",
       "transmissao": null
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": null, "placa": null, "renavam": null, "chassi": null,
       "quilometragem": null, "portas": null, "observacoes": null
-    }}
-  }},
-  "fipe_api": {{
+    }
+  },
+  "fipe_api": {
     "vehicle_type": "motorcycles",
     "codigo_fipe": null,
-    "busca_marca": {{
+    "busca_marca": {
       "termo_principal": "Honda",
       "variacoes": ["HONDA"]
-    }},
-    "busca_modelo": {{
+    },
+    "busca_modelo": {
       "termo_principal": "CG 160 Start",
       "variacoes": ["CG 160", "CG160 START"],
       "palavras_chave": ["CG", "160", "Start"]
-    }},
+    },
     "year_id_estimado": "2020-1",
     "fluxo_recomendado": "por_hierarquia",
-    "endpoints": {{
+    "endpoints": {
       "marcas": "/motorcycles/brands",
-      "modelos": "/motorcycles/brands/{{brandId}}/models",
-      "anos": "/motorcycles/brands/{{brandId}}/models/{{modelId}}/years",
-      "preco": "/motorcycles/brands/{{brandId}}/models/{{modelId}}/years/{{yearId}}"
-    }}
-  }},
-  "fallback_google_shopping": {{
+      "modelos": "/motorcycles/brands/{brandId}/models",
+      "anos": "/motorcycles/brands/{brandId}/models/{modelId}/years",
+      "preco": "/motorcycles/brands/{brandId}/models/{modelId}/years/{yearId}"
+    }
+  },
+  "fallback_google_shopping": {
     "query_principal": "Honda CG 160 Start 2020 preço",
     "query_alternativas": ["moto Honda CG 160 2020 flex valor", "CG 160 Start 2020 tabela"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "sucata"]
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.94,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "Motocicleta com dados completos."
-  }}
-}}
+  }
+}
 ```
 
-### Exemplo 8: Notebook
-**Entrada:** `"Notebook Dell Inspiron 15, Intel Core i5, 8GB RAM, SSD 256GB, tela 15.6 polegadas"`
+### Exemplo 8: Notebook (com regras de exclusão de marca/cor)
+**Entrada:** `"Notebook Dell Inspiron 15, Intel Core i5 7ª geração, 8GB RAM, SSD 256GB, tela 15.6 polegadas, cor preta"`
 
 ```json
-{{
+{
   "tipo_processamento": "GOOGLE_SHOPPING",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Notebook Intel Core i5 8GB SSD 256GB 15.6\\"",
     "marca": "Dell",
     "modelo": "Inspiron 15",
     "categoria": "Eletrônicos",
     "natureza": "eletronico"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "processador": "Intel Core i5",
       "memoria_ram": "8GB",
       "armazenamento": "SSD 256GB",
       "tela": "15.6 polegadas"
-    }},
-    "complementares": {{}}
-  }},
-  "queries": {{
+    },
+    "complementares": {
+      "cor": "preta",
+      "geracao_original": "7ª geração"
+    }
+  },
+  "queries": {
     "principal": "notebook i5 8gb ssd 256gb 15.6 polegadas",
     "alternativas": [
       "notebook intel core i5 8gb ssd 256",
       "laptop i5 8gb ram ssd 256gb"
     ],
-    "com_marca": "notebook dell inspiron i5 8gb ssd 256gb"
-  }},
-  "busca": {{
+    "com_marca": "dell inspiron 15 ficha tecnica especificacoes"
+  },
+  "busca": {
     "palavras_chave": ["notebook", "i5", "8gb", "ssd", "256gb", "15.6"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "outlet"],
     "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
+  },
+  "ajustes_ti": {
+    "regra_aplicada": "OBSOLESCENCIA_TECNOLOGICA",
+    "marca_removida": "Dell",
+    "modelo_removido": "Inspiron 15",
+    "cor_removida": "preta",
+    "geracao_removida": "7ª geração",
+    "classe_mantida": "i5",
+    "justificativa": "Marca, modelo, cor e geração de processador removidos da query principal. Buscar equivalente funcional atual conforme NBC TSP 07."
+  },
+  "avaliacao": {
     "confianca": 0.95,
     "completude_dados": "alta",
     "dados_faltantes": [],
-    "observacoes": "Especificações completas para busca precisa."
-  }}
-}}
+    "observacoes": "Especificações completas. Query com_marca apenas para busca de ficha técnica, NÃO para cotação."
+  }
+}
 ```
 
-### Exemplo 9: Cadeira (Mobiliário - Regra de Escritório aplicada)
+### Exemplo 9: Cadeira Giratória (Mobiliário - com braço obrigatório)
 **Entrada:** `"Cadeira giratória tipo presidente, couro sintético preto, braços reguláveis, base cromada"`
 
 ```json
-{{
+{
   "tipo_processamento": "GOOGLE_SHOPPING",
-  "bem_patrimonial": {{
-    "nome_canonico": "Cadeira Escritório Presidente Giratória Couro Sintético",
+  "bem_patrimonial": {
+    "nome_canonico": "Cadeira Escritório Presidente Giratória com Braço Couro Sintético",
     "marca": null,
     "modelo": null,
     "categoria": "Mobiliário",
     "natureza": "mobiliario",
     "contexto_uso": "escritorio"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "tipo": "presidente",
       "material": "couro sintético",
-      "base": "giratória"
-    }},
-    "complementares": {{
+      "base": "giratória",
+      "braco": "sim"
+    },
+    "complementares": {
       "cor": "preto",
       "bracos": "reguláveis",
       "acabamento_base": "cromada"
-    }}
-  }},
-  "queries": {{
-    "principal": "cadeira escritorio presidente giratoria couro",
+    }
+  },
+  "queries": {
+    "principal": "cadeira escritorio presidente giratoria com braco couro",
     "alternativas": [
-      "poltrona executiva escritorio giratoria couro",
-      "cadeira presidente braco regulavel escritorio"
+      "poltrona executiva escritorio giratoria com braco",
+      "cadeira presidente giratoria braco regulavel"
     ],
     "com_marca": ""
-  }},
-  "busca": {{
-    "palavras_chave": ["cadeira", "escritorio", "presidente", "giratoria", "couro"],
+  },
+  "busca": {
+    "palavras_chave": ["cadeira", "escritorio", "presidente", "giratoria", "braco", "couro"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "outlet", "gamer", "residencial"],
     "ordenacao": "relevancia"
-  }},
-  "classificacao_mobiliario": {{
+  },
+  "ajustes_mobiliario": {
+    "regra_aplicada": "CADEIRA_POLTRONA_DEFAULTS",
+    "tipo_bem": "cadeira",
+    "cor_removida": "preto",
+    "braco_explicito": true,
+    "justificativa": "Cor removida. Braço MANTIDO pois está explícito na descrição ('braços reguláveis'). Giratória mantida pois explícita."
+  },
+  "classificacao_mobiliario": {
     "regra_aplicada": "ESCRITORIO_PADRAO",
-    "justificativa": "Descrição genérica sem indicadores de uso doméstico. Aplicada presunção de uso institucional conforme MCASP."
-  }},
-  "avaliacao": {{
+    "justificativa": "Descrição genérica sem indicadores de uso doméstico. Contexto escritório aplicado."
+  },
+  "avaliacao": {
+    "confianca": 0.88,
+    "completude_dados": "alta",
+    "dados_faltantes": [],
+    "observacoes": "Cadeira giratória com braço explícito. Cor removida da query."
+  }
+}
+```
+
+### Exemplo 9b: Cadeira Fixa (Mobiliário - defaults aplicados)
+**Entrada:** `"Cadeira escritório tecido azul Marca Flexform"`
+
+```json
+{
+  "tipo_processamento": "GOOGLE_SHOPPING",
+  "bem_patrimonial": {
+    "nome_canonico": "Cadeira Escritório Fixa sem Braço Tecido",
+    "marca": "Flexform",
+    "modelo": null,
+    "categoria": "Mobiliário",
+    "natureza": "mobiliario",
+    "contexto_uso": "escritorio"
+  },
+  "especificacoes": {
+    "essenciais": {
+      "tipo": "cadeira",
+      "material": "tecido",
+      "base": "fixa",
+      "braco": "nao"
+    },
+    "complementares": {
+      "cor": "azul"
+    }
+  },
+  "queries": {
+    "principal": "cadeira escritorio fixa sem braco tecido",
+    "alternativas": [
+      "cadeira escritorio fixa estofada",
+      "cadeira visitante escritorio sem braco"
+    ],
+    "com_marca": ""
+  },
+  "busca": {
+    "palavras_chave": ["cadeira", "escritorio", "fixa", "sem braco", "tecido"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "giratoria", "rodizio", "com braco"],
+    "ordenacao": "relevancia"
+  },
+  "ajustes_mobiliario": {
+    "regra_aplicada": "CADEIRA_POLTRONA_DEFAULTS",
+    "tipo_bem": "cadeira",
+    "marca_removida": "Flexform",
+    "cor_removida": "azul",
+    "defaults_aplicados": {
+      "base_fixa": true,
+      "sem_braco": true
+    },
+    "justificativa": "Marca e cor removidas. Cadeira: default FIXA e SEM BRAÇO (braço não mencionado na descrição)."
+  },
+  "classificacao_mobiliario": {
+    "regra_aplicada": "ESCRITORIO_PADRAO",
+    "justificativa": "Contexto escritório aplicado por padrão."
+  },
+  "avaliacao": {
     "confianca": 0.85,
     "completude_dados": "media",
-    "dados_faltantes": ["dimensoes", "capacidade_peso"],
-    "observacoes": "Sem marca. Dimensões melhorariam precisão. Contexto escritório aplicado por padrão."
-  }}
-}}
+    "dados_faltantes": ["dimensoes"],
+    "observacoes": "Cadeira: defaults fixa + sem braço aplicados. Marca e cor removidas."
+  }
+}
+```
+
+### Exemplo 9c: Mesa com Dimensões
+**Entrada:** `"Mesa reunião MDF Tok Stok mogno 4,50m x 1,20m x 0,75m"`
+
+```json
+{
+  "tipo_processamento": "GOOGLE_SHOPPING",
+  "bem_patrimonial": {
+    "nome_canonico": "Mesa Reunião Escritório MDF 4,50m x 1,20m",
+    "marca": "Tok Stok",
+    "modelo": null,
+    "categoria": "Mobiliário",
+    "natureza": "mobiliario",
+    "contexto_uso": "escritorio"
+  },
+  "especificacoes": {
+    "essenciais": {
+      "tipo": "mesa reunião",
+      "material": "MDF",
+      "comprimento": "4,50m",
+      "largura": "1,20m",
+      "altura": "0,75m"
+    },
+    "complementares": {
+      "cor": "mogno"
+    }
+  },
+  "queries": {
+    "principal": "mesa reuniao escritorio MDF 4,50m x 1,20m",
+    "alternativas": [
+      "mesa escritorio reuniao MDF 4,50 x 1,20",
+      "mesa conferencia escritorio MDF grande"
+    ],
+    "com_marca": ""
+  },
+  "busca": {
+    "palavras_chave": ["mesa", "reuniao", "escritorio", "MDF", "4,50m", "1,20m"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "residencial", "jantar"],
+    "ordenacao": "relevancia"
+  },
+  "ajustes_mobiliario": {
+    "marca_removida": "Tok Stok",
+    "cor_removida": "mogno",
+    "justificativa": "Marca e cor removidas. Dimensões MANTIDAS na query."
+  },
+  "classificacao_mobiliario": {
+    "regra_aplicada": "ESCRITORIO_PADRAO",
+    "justificativa": "Mesa de reunião - contexto institucional."
+  },
+  "avaliacao": {
+    "confianca": 0.85,
+    "completude_dados": "alta",
+    "dados_faltantes": [],
+    "observacoes": "Dimensões mantidas na query principal."
+  }
+}
+```
+
+### Exemplo 9d: Sofá com Dimensões
+**Entrada:** `"Sofá 4 lugares couro sintético preto 2,80m Marca Etna"`
+
+```json
+{
+  "tipo_processamento": "GOOGLE_SHOPPING",
+  "bem_patrimonial": {
+    "nome_canonico": "Sofá Escritório Couro Sintético 2,80m",
+    "marca": "Etna",
+    "modelo": null,
+    "categoria": "Mobiliário",
+    "natureza": "mobiliario",
+    "contexto_uso": "escritorio"
+  },
+  "especificacoes": {
+    "essenciais": {
+      "tipo": "sofá",
+      "lugares": "4",
+      "material": "couro sintético",
+      "comprimento": "2,80m"
+    },
+    "complementares": {
+      "cor": "preto"
+    }
+  },
+  "queries": {
+    "principal": "sofa escritorio couro sintetico 2,80m",
+    "alternativas": [
+      "sofa recepcao escritorio couro 2,80",
+      "sofa comercial couro sintetico 4 lugares"
+    ],
+    "com_marca": ""
+  },
+  "busca": {
+    "palavras_chave": ["sofa", "escritorio", "couro", "sintetico", "2,80m"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "residencial", "sala"],
+    "ordenacao": "relevancia"
+  },
+  "ajustes_mobiliario": {
+    "marca_removida": "Etna",
+    "cor_removida": "preto",
+    "justificativa": "Marca e cor removidas. Dimensões MANTIDAS na query."
+  },
+  "classificacao_mobiliario": {
+    "regra_aplicada": "ESCRITORIO_PADRAO",
+    "justificativa": "Sofá sem indicador 'residencial' - presumir uso institucional (recepção/escritório)."
+  },
+  "avaliacao": {
+    "confianca": 0.82,
+    "completude_dados": "media",
+    "dados_faltantes": ["largura", "altura"],
+    "observacoes": "Dimensões mantidas na query principal."
+  }
+}
+```
+
+### Exemplo 9e: Poltrona (mesma regra de cadeira)
+**Entrada:** `"Poltrona recepção couro marrom Cavaletti"`
+
+```json
+{
+  "tipo_processamento": "GOOGLE_SHOPPING",
+  "bem_patrimonial": {
+    "nome_canonico": "Poltrona Escritório Fixa com Braço Couro",
+    "marca": "Cavaletti",
+    "modelo": null,
+    "categoria": "Mobiliário",
+    "natureza": "mobiliario",
+    "contexto_uso": "escritorio"
+  },
+  "especificacoes": {
+    "essenciais": {
+      "tipo": "poltrona",
+      "material": "couro",
+      "base": "fixa",
+      "braco": "sim"
+    },
+    "complementares": {
+      "cor": "marrom"
+    }
+  },
+  "queries": {
+    "principal": "poltrona escritorio fixa com braco couro",
+    "alternativas": [
+      "poltrona recepcao escritorio com braco",
+      "poltrona executiva fixa braco couro"
+    ],
+    "com_marca": ""
+  },
+  "busca": {
+    "palavras_chave": ["poltrona", "escritorio", "fixa", "braco", "couro"],
+    "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "giratoria", "residencial"],
+    "ordenacao": "relevancia"
+  },
+  "ajustes_mobiliario": {
+    "regra_aplicada": "POLTRONA_DEFAULTS",
+    "tipo_bem": "poltrona",
+    "marca_removida": "Cavaletti",
+    "cor_removida": "marrom",
+    "defaults_aplicados": {
+      "base_fixa": true,
+      "com_braco": true
+    },
+    "justificativa": "POLTRONA: braço SEMPRE aplicado (por definição). Base fixa pois não mencionou giratória. Marca e cor removidas."
+  },
+  "classificacao_mobiliario": {
+    "regra_aplicada": "ESCRITORIO_PADRAO",
+    "justificativa": "Poltrona de recepção - contexto institucional."
+  },
+  "avaliacao": {
+    "confianca": 0.82,
+    "completude_dados": "media",
+    "dados_faltantes": ["dimensoes"],
+    "observacoes": "Poltrona SEMPRE com braço por definição. Default fixa aplicado."
+  }
+}
 ```
 
 ### Exemplo 10: Ar-condicionado
 **Entrada:** `"Ar condicionado split 12000 BTUs inverter 220V quente/frio"`
 
 ```json
-{{
+{
   "tipo_processamento": "GOOGLE_SHOPPING",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Ar-condicionado Split 12000 BTUs Inverter 220V",
     "marca": null,
     "modelo": null,
     "categoria": "Equipamentos",
     "natureza": "equipamento"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "tipo": "split",
       "capacidade": "12000 BTUs",
       "tecnologia": "inverter",
       "voltagem": "220V",
       "funcao": "quente/frio"
-    }},
-    "complementares": {{}}
-  }},
-  "queries": {{
+    },
+    "complementares": {}
+  },
+  "queries": {
     "principal": "ar condicionado split 12000 btus inverter 220v",
     "alternativas": [
       "split 12000 btus inverter quente frio",
       "ar condicionado 12000 btus 220v inverter"
     ],
     "com_marca": ""
-  }},
-  "busca": {{
+  },
+  "busca": {
     "palavras_chave": ["ar condicionado", "split", "12000", "btus", "inverter", "220v"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito", "instalacao"],
     "ordenacao": "relevancia"
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.92,
     "completude_dados": "alta",
     "dados_faltantes": [],
     "observacoes": "Especificações técnicas completas."
-  }}
-}}
+  }
+}
 ```
 
 ### Exemplo 11: Guarda-roupa (Mobiliário Doméstico - Exceção à regra)
 **Entrada:** `"Guarda-roupa 6 portas MDF branco com espelho"`
 
 ```json
-{{
+{
   "tipo_processamento": "GOOGLE_SHOPPING",
-  "bem_patrimonial": {{
+  "bem_patrimonial": {
     "nome_canonico": "Guarda-roupa 6 Portas MDF com Espelho",
     "marca": null,
     "modelo": null,
     "categoria": "Mobiliário",
     "natureza": "mobiliario",
     "contexto_uso": "domestico"
-  }},
-  "especificacoes": {{
-    "essenciais": {{
+  },
+  "especificacoes": {
+    "essenciais": {
       "tipo": "guarda-roupa",
       "portas": "6",
       "material": "MDF"
-    }},
-    "complementares": {{
+    },
+    "complementares": {
       "cor": "branco",
       "acessorios": "espelho"
-    }}
-  }},
-  "queries": {{
+    }
+  },
+  "queries": {
     "principal": "guarda-roupa 6 portas MDF espelho",
     "alternativas": [
       "roupeiro 6 portas MDF branco",
       "armario guarda roupa 6 portas espelho"
     ],
     "com_marca": ""
-  }},
-  "busca": {{
+  },
+  "busca": {
     "palavras_chave": ["guarda-roupa", "roupeiro", "6 portas", "MDF", "espelho"],
     "termos_excluir": ["usado", "seminovo", "recondicionado", "peças", "defeito"],
     "ordenacao": "relevancia"
-  }},
-  "classificacao_mobiliario": {{
+  },
+  "classificacao_mobiliario": {
     "regra_aplicada": "DOMESTICO_EXPLICITO",
     "justificativa": "Item 'guarda-roupa' consta na lista taxativa de indicadores de uso doméstico. Exceção à presunção de escritório."
-  }},
-  "avaliacao": {{
+  },
+  "avaliacao": {
     "confianca": 0.80,
     "completude_dados": "media",
     "dados_faltantes": ["dimensoes", "marca"],
     "observacoes": "Mobiliário doméstico identificado. Sem necessidade de adicionar 'escritório' à query."
-  }}
-}}
+  }
+}
 ```
 
 ---
@@ -1106,16 +1505,38 @@ usado, seminovo, recondicionado, refurbished, outlet, vitrine, peças, conserto,
 Analise a descrição do bem e:
 
 1. **Identifique se é veículo ou bem geral**
+
 2. **Se veículo**:
    - Identificar se é motocicleta → `motorcycles`
    - **Verificar PBT**: utilitários com PBT ≤ 3.500 kg → `cars`
    - Se PBT > 3.500 kg, verificar se marca está na lista autorizada para `trucks`
    - **Se marca é Fiat**: verificar se ano está entre 1981-1984
    - Gerar JSON com `"tipo_processamento": "FIPE"` e `vehicle_type` correto
-3. **Se bem geral**: JSON com `"tipo_processamento": "GOOGLE_SHOPPING"` e queries otimizadas
-4. **Se mobiliário**:
+
+3. **Se bem geral** (Google Shopping):
+   - **SEMPRE REMOVER** da query: **marca**, **modelo** e **cor**
+   - Gerar `query_principal` apenas com especificações funcionais
+   - `query_com_marca` somente para busca de ficha técnica (não para cotação)
+
+4. **Se eletrônico/TI**:
+   - **REMOVER** geração de processador (ex: "7ª ger", "10ª geração")
+   - **MANTER** classe do processador (i3, i5, i7, Ryzen)
+   - Registrar em `ajustes_ti` com justificativa
+
+5. **Se cadeira**:
+   - Se não mencionar "giratória" → adicionar **"fixa"** à query
+   - Se não mencionar "braço" → adicionar **"sem braço"** à query
+   - Se mencionar "braço" → adicionar **"com braço"** à query
+   - Registrar em `ajustes_mobiliario` os defaults aplicados
+
+6. **Se poltrona**:
+   - Se não mencionar "giratória" → adicionar **"fixa"** à query
+   - **SEMPRE** adicionar **"com braço"** à query (poltrona tem braço por definição)
+   - Registrar em `ajustes_mobiliario` os defaults aplicados
+
+7. **Se mobiliário genérico**:
    - **REGRA PADRÃO**: Classificar como **ESCRITÓRIO** e incluir termo na query
-   - **EXCEÇÃO**: Apenas se item constar na lista taxativa de uso doméstico (guarda-roupa, cama, sofá residencial, etc.)
+   - **EXCEÇÃO**: Apenas se item constar na lista taxativa de uso doméstico
    - Registrar classificação em `classificacao_mobiliario` com justificativa
 
 **Retorne APENAS o JSON**, sem texto adicional.

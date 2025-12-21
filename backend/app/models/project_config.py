@@ -62,6 +62,20 @@ class ProjectConfigVersion(Base):
     # Se desabilitado, não invalida o produto por diferença de preço, mas ainda registra no log
     enable_price_mismatch_validation = Column(Boolean, default=True)
 
+    # ========== VALIDAÇÃO DE ESPECIFICAÇÕES (v2.0) ==========
+    # Habilitar extração de especificações das páginas de produto
+    enable_spec_extraction = Column(Boolean, default=False)
+    # Habilitar validação query vs specs (tipo, material, dimensões)
+    enable_spec_validation = Column(Boolean, default=False)
+    # Tolerância para dimensões (0.20 = 20%)
+    spec_dimension_tolerance = Column(Numeric(5, 2), default=0.20)
+
+    # ========== CÁLCULO DE METRO LINEAR (v2.0) ==========
+    # Habilitar fluxo de metro linear para bens com dimensões especiais
+    enable_linear_meter = Column(Boolean, default=False)
+    # Mínimo de produtos para cálculo de metro linear
+    linear_meter_min_products = Column(Integer, default=2)
+
     # ========== BANCO DE PREÇOS ==========
     # JSON com lista de itens do banco de preços
     # Formato: [{"codigo": "X", "material": "Y", "caracteristicas": "Z", "vl_mercado": 1000.00, "update_mode": "MARKET"}]

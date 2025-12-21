@@ -20,6 +20,14 @@ class CaptureFailureReason(str, enum.Enum):
     FOREIGN_DOMAIN = "FOREIGN_DOMAIN"  # Dominio estrangeiro (nao .br)
     LISTING_URL = "LISTING_URL"  # URL de listagem/busca em vez de produto
     DUPLICATE_URL = "DUPLICATE_URL"  # URL ja usada nesta cotacao
+
+    # Novos: Validacao de especificacoes (v2.0)
+    SPEC_MISMATCH_TYPE = "SPEC_MISMATCH_TYPE"  # Tipo do bem nao corresponde
+    SPEC_MISMATCH_MATERIAL = "SPEC_MISMATCH_MATERIAL"  # Material nao corresponde
+    SPEC_MISMATCH_DIMENSION = "SPEC_MISMATCH_DIMENSION"  # Dimensoes fora da tolerancia
+    SPECS_NOT_FOUND = "SPECS_NOT_FOUND"  # Nao conseguiu extrair especificacoes
+    LINEAR_METER_FAILED = "LINEAR_METER_FAILED"  # Falha no calculo de metro linear
+
     OTHER = "OTHER"  # Outro erro
 
 

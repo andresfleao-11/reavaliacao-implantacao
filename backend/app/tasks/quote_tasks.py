@@ -12,6 +12,10 @@ from app.services.search_provider import SerpApiProvider, prices_match, PRICE_MI
 from app.services.price_extractor import PriceExtractor
 from app.services.pdf_generator import PDFGenerator
 from app.services.fipe_client import FipeClient, FipeSearchResult
+from app.services.spec_extractor import SpecExtractor
+from app.services.spec_validator import SpecValidator
+from app.services.linear_meter import LinearMeterCalculator
+from app.models.product_specs import ProductSpecs, LinearMeterResult
 from app.services.integration_logger import log_anthropic_call, log_serpapi_call
 from app.core.config import settings
 from sqlalchemy.orm import Session
@@ -255,7 +259,16 @@ def process_quote_request(self, quote_request_id: int):
         variacao_maxima = float(_get_parameter(db, "variacao_maxima_percent", 25, config_version_id)) / 100
         enable_price_mismatch = _get_parameter(db, "enable_price_mismatch_validation", True, config_version_id)
 
+        # Novos parâmetros v2.0: validação de specs e metro linear
+        enable_spec_extraction = _get_parameter(db, "enable_spec_extraction", False, config_version_id)
+        enable_spec_validation = _get_parameter(db, "enable_spec_validation", False, config_version_id)
+        spec_dimension_tolerance = float(_get_parameter(db, "spec_dimension_tolerance", 0.20, config_version_id))
+        enable_linear_meter = _get_parameter(db, "enable_linear_meter", False, config_version_id)
+        linear_meter_min_products = int(_get_parameter(db, "linear_meter_min_products", 2, config_version_id))
+
         logger.info(f"Quote {quote_request_id} using parameters: num_quotes={num_quotes}, variacao_maxima={variacao_maxima*100}%, enable_price_mismatch={enable_price_mismatch}, config_version_id={config_version_id}")
+        if enable_spec_extraction or enable_spec_validation or enable_linear_meter:
+            logger.info(f"  v2.0 features: spec_extraction={enable_spec_extraction}, spec_validation={enable_spec_validation}, linear_meter={enable_linear_meter}")
 
         # Validar se a query foi gerada
         if not analysis_result.query_principal or not analysis_result.query_principal.strip():
